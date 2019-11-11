@@ -5,7 +5,7 @@
 Twitter => <twitter: keywords="golang, software, #italy">;
 
 rulehash => @Twitter | hash() | echo();
-ruleurl => @Twitter | url() | echo();
+ruleurl => @Twitter | url() | http() | echo();
 
 #ruletext => @Twitter | text(regexp="android") | hash(md5="true",extract="true") | echo();
 
