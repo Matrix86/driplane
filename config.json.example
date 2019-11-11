@@ -1,0 +1,13 @@
+{
+    "log_path": "",
+    "log_level": "debug",
+
+    "twitter": {
+        "consumerKey": "",
+	    "consumerSecret": "",
+	    "accessToken": "",
+	    "accessSecret": "",
+        "keywords": "#italy #coding #malware something",
+        "stallWarnings": "true"
+    }
+}
