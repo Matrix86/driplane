@@ -3,6 +3,7 @@ package feeder
 import (
 	"fmt"
 	"github.com/Matrix86/driplane/com"
+	"github.com/asaskevich/EventBus"
 
 	"github.com/evilsocket/islazy/log"
 )
@@ -17,11 +18,14 @@ type FeederCallback func(msg com.DataMessage)
 
 type Feeder interface {
 	setName(name string)
+	setBus(bus EventBus.Bus)
+	setId(id int32)
 
-	Name() string
+	Name()          string
 	Start()
 	Stop()
-	IsRunning() bool
+	IsRunning()     bool
+	GetIdentifier() string
 }
 
 type FeederBase struct {
@@ -29,27 +33,30 @@ type FeederBase struct {
 	com.Subscriber
 
 	name        string
+	id 			int32
 	isRunning   bool
-	subscribers []com.DataCallback
+	bus         EventBus.Bus
 }
 
-
-func (f *FeederBase) SetEventMessageClb(clb com.DataCallback) {
-	f.subscribers = append(f.subscribers, clb)
-}
-
-func (f *FeederBase) Propagate(data com.DataMessage){
+func (f *FeederBase) Propagate(data com.DataMessage) {
 	log.Debug("feeder '%s' received: []", f.Name(), data)
-	log.Debug("feeder '%s' propagating to %d subscribers", f.Name(), len(f.subscribers))
-	if f.subscribers != nil && len(f.subscribers) > 0 {
-		for _, cb := range f.subscribers {
-			cb(data)
-		}
-	}
+	f.bus.Publish(f.GetIdentifier(), data)
+}
+
+func (f *FeederBase) setId(id int32) {
+	f.id = id
+}
+
+func (f *FeederBase) setBus(bus EventBus.Bus) {
+	f.bus = bus
 }
 
 func (f *FeederBase) setName(name string) {
 	f.name = name
+}
+
+func (f *FeederBase) GetIdentifier() string {
+	return fmt.Sprintf("%s:%d", f.name, f.id)
 }
 
 func (f *FeederBase) Name() string {
@@ -78,11 +85,13 @@ func register(name string, f FeederFactory) {
 func init() {
 }
 
-func NewFeeder(name string, conf map[string]string) (Feeder, error) {
+func NewFeeder(name string, conf map[string]string, bus EventBus.Bus, id int32) (Feeder, error) {
 	if _, ok := feederFactories[name]; ok {
 		f, err := feederFactories[name](conf)
 		if err == nil && f != nil {
 			f.setName(name)
+			f.setBus(bus)
+			f.setId(id)
 		}
 
 		return f, err

@@ -2,18 +2,6 @@
 
 
 [[projects]]
-  branch = "master"
-  digest = "1:368abc9f8b4a0c0b81cece07731d9321ed2e5e0d795c13ac2f859a3a14c2cf3e"
-  name = "github.com/Matrix86/ProjectFilter"
-  packages = [
-    "com",
-    "feeder",
-    "filter",
-  ]
-  pruneopts = "UT"
-  revision = "9b3c1839d135492ca2c5f8a5dbc89c51c800522e"
-
-[[projects]]
   digest = "1:bcefcf763fa7290658a39a361619db4e8bb88004474074df85a74c5d2f1433d6"
   name = "github.com/alecthomas/participle"
   packages = [
@@ -23,6 +11,14 @@
   pruneopts = "UT"
   revision = "98cb121381c371cf1542c7ae145e485d703aec0b"
   version = "v0.2.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:e2a1ff1174d564ed4b75a62757f4a9081ed3b8c99ed17e47eb252b048b4ff018"
+  name = "github.com/asaskevich/EventBus"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d46933a94f05c6657d7b923fcf5ac563ee37ec79"
 
 [[projects]]
   digest = "1:166438587ed45ac211dab8a3ecebf4fa0c186d0db63430fb9127bbc2e5fcdc67"
@@ -119,11 +115,9 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/Matrix86/ProjectFilter/com",
-    "github.com/Matrix86/ProjectFilter/feeder",
-    "github.com/Matrix86/ProjectFilter/filter",
     "github.com/alecthomas/participle",
     "github.com/alecthomas/participle/lexer",
+    "github.com/asaskevich/EventBus",
     "github.com/dghubble/go-twitter/twitter",
     "github.com/dghubble/oauth1",
     "github.com/evilsocket/islazy/fs",

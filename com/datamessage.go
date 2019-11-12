@@ -29,6 +29,6 @@ func (d *DataMessage) GetExtra() map[string]string {
 }
 
 type Subscriber interface {
-	SetEventMessageClb(clb DataCallback)
 	Propagate(data DataMessage)
+	//Filtering(data DataMessage)
 }

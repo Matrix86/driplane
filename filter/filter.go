@@ -3,6 +3,7 @@ package filter
 import (
 	"fmt"
 	"github.com/Matrix86/driplane/com"
+	"github.com/asaskevich/EventBus"
 
 	"github.com/evilsocket/islazy/log"
 )
@@ -13,9 +14,12 @@ var filterFactories = make(map[string]FilterFactory)
 
 type Filter interface {
 	setName(name string)
+	setBus(bus EventBus.Bus)
+	setId(id int32)
 
 	Name() string
 	DoFilter(msg *com.DataMessage) (bool, error)
+	GetIdentifier() string
 }
 
 type FilterBase struct {
@@ -23,29 +27,33 @@ type FilterBase struct {
 	com.Subscriber
 
 	name string
-	subscribers []com.DataCallback
+	id   int32
+	bus  EventBus.Bus
 }
 
 func (f *FilterBase) Name() string {
 	return f.name
 }
 
+func (f *FilterBase) setId(id int32) {
+	f.id = id
+}
+
+func (f *FilterBase) setBus(bus EventBus.Bus) {
+	f.bus = bus
+}
+
 func (f *FilterBase) setName(name string) {
 	f.name = name
 }
 
-func (f *FilterBase) SetEventMessageClb(clb com.DataCallback) {
-	f.subscribers = append(f.subscribers, clb)
+func (f *FilterBase) GetIdentifier() string {
+	return fmt.Sprintf("%s:%d", f.name, f.id)
 }
 
 func (f *FilterBase) Propagate(data com.DataMessage){
 	log.Debug("filter '%s' received: [%v]", f.Name(), data)
-	log.Debug("filter '%s' propagating to %d subscribers", f.Name(), len(f.subscribers))
-	if f.subscribers != nil && len(f.subscribers) > 0 {
-		for _, cb := range f.subscribers {
-			cb(data)
-		}
-	}
+	f.bus.Publish(f.GetIdentifier(), data)
 }
 
 func register(name string, f FilterFactory) {
@@ -62,11 +70,13 @@ func register(name string, f FilterFactory) {
 func init() {
 }
 
-func NewFilter(name string, conf map[string]string) (Filter, error) {
+func NewFilter(name string, conf map[string]string, bus EventBus.Bus, id int32) (Filter, error) {
 	if _, ok := filterFactories[name]; ok {
 		f, err := filterFactories[name](conf)
 		if err == nil && f != nil {
 			f.setName(name)
+			f.setBus(bus)
+			f.setId(id)
 		}
 		return f, err
 	}

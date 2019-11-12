@@ -9,6 +9,7 @@ import (
 	"github.com/Matrix86/driplane/feeder"
 	"github.com/Matrix86/driplane/filter"
 
+	bus "github.com/asaskevich/EventBus"
 	"github.com/evilsocket/islazy/log"
 )
 
@@ -21,12 +22,16 @@ type Ruleset struct {
 	rules map[string]*PipeRule
 
 	feedRules []string
+	bus       bus.Bus
+	lastId    int32
 }
 
 func RuleSetInstance() *Ruleset {
 	once.Do(func() {
 		instance = &Ruleset{
 			rules: make(map[string]*PipeRule),
+			bus: bus.New(),
+			lastId: 0,
 		}
 	})
 	return instance
@@ -88,12 +93,14 @@ func (p *PipeRule) newFilter(fn *FilterNode) (filter.Filter, error) {
 		params[par.Name] = value
 	}
 
-	filter, err := filter.NewFilter(fn.Name+"filter", params)
+	rs := RuleSetInstance()
+	f, err := filter.NewFilter(fn.Name+"filter", params, rs.bus, rs.lastId+1)
 	if err != nil {
 		return nil, err
 	}
+	rs.lastId++
 
-	return filter, nil
+	return f, nil
 }
 
 func (p *PipeRule) getRuleCall(node *RuleCall) (*PipeRule, error) {
@@ -103,11 +110,12 @@ func (p *PipeRule) getRuleCall(node *RuleCall) (*PipeRule, error) {
 	return nil, fmt.Errorf("rule '%s' not found...you need to define it", node.Name)
 }
 
-func (p *PipeRule) addNode(node *Node, prev com.Subscriber) error {
+func (p *PipeRule) addNode(node *Node, prev string) error {
 	if node == nil {
 		return nil
 	}
 
+	rs := RuleSetInstance()
 	if node.Filter != nil {
 		log.Info("['%s'] new filter found '%s'", p.Name, node.Filter.Name)
 
@@ -116,18 +124,22 @@ func (p *PipeRule) addNode(node *Node, prev com.Subscriber) error {
 			return err
 		}
 
-		if prev != nil {
-			prev.SetEventMessageClb(func(msg com.DataMessage) {
+		if prev != "" {
+			//err := rs.bus.Subscribe(prev, f.(com.Subscriber).Filtering)
+			err := rs.bus.SubscribeAsync(prev, func(msg com.DataMessage) {
 				if b, _ := f.DoFilter(&msg); b {
 					log.Debug("[%s] filter %s match", p.Name, node.Filter.Name)
 					f.(com.Subscriber).Propagate(msg)
 				}
-			})
+			}, false)
+			if err != nil {
+				return err
+			}
 		}
 
 		p.nodes = append(p.nodes, f.(com.Subscriber))
 
-		return p.addNode(node.Filter.Next, f.(com.Subscriber))
+		return p.addNode(node.Filter.Next, f.GetIdentifier())
 	} else if node.RuleCall != nil {
 		log.Info("['%s'] new rulecall found '%s'", p.Name, node.RuleCall.Name)
 		var last com.Subscriber
@@ -138,23 +150,35 @@ func (p *PipeRule) addNode(node *Node, prev com.Subscriber) error {
 			return err
 		}
 
-		if prev != nil {
+		if prev != "" {
 			if r.HasFeeder {
 				return fmt.Errorf("rule '%s' contains a feeder and cannot be here", node.RuleCall.Name)
 			}
 
 			first := *r.getFirstNode()
-			prev.SetEventMessageClb(func(msg com.DataMessage) {
+			log.Debug("adding filter -> %s", prev)
+			//err := rs.bus.Subscribe(prev, first.Filtering)
+			err := rs.bus.SubscribeAsync(prev, func(msg com.DataMessage) {
 				if b, _ := first.(filter.Filter).DoFilter(&msg); b {
 					log.Debug("[%s] filter %s match", p.Name, node.RuleCall.Name)
 					first.Propagate(msg)
 				}
-			})
+			}, false)
+			if err != nil {
+				return err
+			}
 		}
 
+		// This is a filter for sure!
 		last = *r.getLastNode()
 
-		return p.addNode(node.RuleCall.Next, last)
+		if _, ok := last.(filter.Filter); ok {
+			return p.addNode(node.RuleCall.Next, last.(filter.Filter).GetIdentifier())
+		} else if _, ok := last.(feeder.Feeder); ok {
+			return p.addNode(node.RuleCall.Next, last.(feeder.Feeder).GetIdentifier())
+		} else {
+			return fmt.Errorf("found an unknown node type")
+		}
 	}
 
 	return nil
@@ -183,21 +207,23 @@ func NewPipeRule(node *RuleNode, config Configuration) (*PipeRule, error) {
 			config[node.Feeder.Name + "." + par.Name] = value
 		}
 
-		f, err := feeder.NewFeeder(node.Feeder.Name+"feeder", config)
+		rs := RuleSetInstance()
+		f, err := feeder.NewFeeder(node.Feeder.Name+"feeder", config, rs.bus, rs.lastId+1)
 		if err != nil {
 			log.Error("piperule.NewRule: %s", err)
 			return nil, err
 		}
+		rs.lastId++
 
 		rule.HasFeeder = true
 		rule.nodes = append(rule.nodes, f.(com.Subscriber))
 		next = node.Feeder.Next
 
-		if err := rule.addNode(next, f.(com.Subscriber)); err != nil {
+		if err := rule.addNode(next, f.GetIdentifier()); err != nil {
 			return nil, err
 		}
 	} else { // It doesn't start with a feeder
-		if err := rule.addNode(node.First, nil); err != nil {
+		if err := rule.addNode(node.First, ""); err != nil {
 			return nil, err
 		}
 	}
