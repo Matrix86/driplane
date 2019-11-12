@@ -1,31 +1,35 @@
 package com
 
+import "sync"
+
 type DataCallback func(msg DataMessage)
 
 type DataMessage struct {
 	message string
-	extra   map[string]string
+	extra   sync.Map
+	mutex   sync.Mutex
 }
 
 func (d *DataMessage) SetMessage(msg string) {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
 	d.message = msg
 }
 
 func (d *DataMessage) GetMessage() string {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
 	return d.message
 }
 
 func (d *DataMessage) SetExtra(k string, v string) {
-	// First Initialization
-	if d.extra == nil {
-		d.extra = make(map[string]string)
-	}
-
-	d.extra[k] = v
+	d.extra.Store(k, v)
 }
 
-func (d *DataMessage) GetExtra() map[string]string {
-	return d.extra
+func (d *DataMessage) GetExtra() *sync.Map {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+	return &d.extra
 }
 
 type Subscriber interface {

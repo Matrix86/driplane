@@ -33,9 +33,10 @@ func (f *EchoFilter) DoFilter(msg *com.DataMessage) (bool, error) {
 	text := msg.GetMessage()
 
 	if f.printExtra {
-		for n, s := range msg.GetExtra() {
+		msg.GetExtra().Range(func(n interface{}, s interface{}) bool {
 			text = fmt.Sprintf("%s [%s: %s] ", text, n, s)
-		}
+			return true
+		})
 	}
 	log.Info("%s", text)
 
