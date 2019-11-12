@@ -39,7 +39,6 @@ type FeederBase struct {
 }
 
 func (f *FeederBase) Propagate(data com.DataMessage) {
-	log.Debug("feeder '%s' received: []", f.Name(), data)
 	f.bus.Publish(f.GetIdentifier(), data)
 }
 

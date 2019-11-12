@@ -52,7 +52,6 @@ func (f *FilterBase) GetIdentifier() string {
 }
 
 func (f *FilterBase) Propagate(data com.DataMessage){
-	log.Debug("filter '%s' received: [%v]", f.Name(), data)
 	f.bus.Publish(f.GetIdentifier(), data)
 }
 

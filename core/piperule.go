@@ -127,8 +127,9 @@ func (p *PipeRule) addNode(node *Node, prev string) error {
 		if prev != "" {
 			//err := rs.bus.Subscribe(prev, f.(com.Subscriber).Filtering)
 			err := rs.bus.SubscribeAsync(prev, func(msg com.DataMessage) {
+				log.Debug("[%s::%s] received: %v", p.Name, node.Filter.Name, msg)
 				if b, _ := f.DoFilter(&msg); b {
-					log.Debug("[%s] filter %s match", p.Name, node.Filter.Name)
+					log.Debug("[%s::%s] filter matched", p.Name, node.Filter.Name)
 					f.(com.Subscriber).Propagate(msg)
 				}
 			}, false)
@@ -156,11 +157,11 @@ func (p *PipeRule) addNode(node *Node, prev string) error {
 			}
 
 			first := *r.getFirstNode()
-			log.Debug("adding filter -> %s", prev)
 			//err := rs.bus.Subscribe(prev, first.Filtering)
 			err := rs.bus.SubscribeAsync(prev, func(msg com.DataMessage) {
+				log.Debug("[%s::%s] received: %v", p.Name, node.RuleCall.Name, msg)
 				if b, _ := first.(filter.Filter).DoFilter(&msg); b {
-					log.Debug("[%s] filter %s match", p.Name, node.RuleCall.Name)
+					log.Debug("[%s::%s] filter matched", p.Name, node.RuleCall.Name)
 					first.Propagate(msg)
 				}
 			}, false)
