@@ -2,14 +2,12 @@ package feeders
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
-
-	"github.com/Matrix86/driplane/com"
-
+	"github.com/Matrix86/driplane/data"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/evilsocket/islazy/log"
+	"strconv"
+	"strings"
 )
 
 type Twitter struct {
@@ -24,7 +22,7 @@ type Twitter struct {
 	languages     string
 	stallWarnings bool
 
-	stream      *twitter.Stream
+	stream *twitter.Stream
 }
 
 func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
@@ -82,7 +80,7 @@ func (t *Twitter) Start() {
 		}
 		if strings.HasPrefix(text, "RT ") == false {
 
-			var msg com.DataMessage
+			var msg data.Message
 			msg.SetMessage(text)
 			msg.SetExtra("link", fmt.Sprintf("https://twitter.com/statuses/%d", tweet.ID))
 			msg.SetExtra("language", tweet.Lang)

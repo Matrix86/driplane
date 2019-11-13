@@ -2,9 +2,7 @@ package filters
 
 import (
 	"fmt"
-
-	"github.com/Matrix86/driplane/com"
-
+	"github.com/Matrix86/driplane/data"
 	"github.com/evilsocket/islazy/log"
 )
 
@@ -18,7 +16,7 @@ type Echo struct {
 
 func NewEchoFilter(p map[string]string) (Filter, error) {
 	f := &Echo{
-		params: p,
+		params:     p,
 		printExtra: false,
 	}
 	f.cbFilter = f.DoFilter
@@ -30,7 +28,7 @@ func NewEchoFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
-func (f *Echo) DoFilter(msg *com.DataMessage) (bool, error) {
+func (f *Echo) DoFilter(msg *data.Message) (bool, error) {
 	text := msg.GetMessage()
 
 	if f.printExtra {

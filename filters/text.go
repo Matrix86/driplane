@@ -2,17 +2,16 @@ package filters
 
 import (
 	"fmt"
+	"github.com/Matrix86/driplane/data"
 	"regexp"
 	"strings"
-
-	"github.com/Matrix86/driplane/com"
 )
 
 type Text struct {
 	Base
 
 	regexp *regexp.Regexp
- 	text   string
+	text   string
 
 	extractText bool
 
@@ -21,10 +20,10 @@ type Text struct {
 
 func NewTextFilter(p map[string]string) (Filter, error) {
 	f := &Text{
-		params: p,
-		regexp: nil,
+		params:      p,
+		regexp:      nil,
 		extractText: false,
-		text: "",
+		text:        "",
 	}
 	f.cbFilter = f.DoFilter
 
@@ -46,7 +45,7 @@ func NewTextFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
-func (f *Text) DoFilter(msg *com.DataMessage) (bool, error) {
+func (f *Text) DoFilter(msg *data.Message) (bool, error) {
 	text := msg.GetMessage()
 
 	found := false

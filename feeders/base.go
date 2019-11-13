@@ -2,9 +2,8 @@ package feeders
 
 import (
 	"fmt"
-	"github.com/Matrix86/driplane/com"
+	"github.com/Matrix86/driplane/data"
 	"github.com/asaskevich/EventBus"
-
 	"github.com/evilsocket/islazy/log"
 )
 
@@ -14,31 +13,28 @@ var feederFactories = make(map[string]FeederFactory)
 
 // TODO: change the callback logic with publish/subscribe channels
 // something like https://gist.github.com/AmirSoleimani/97298c6a94d83d3672765fb31c23194a
-type FeederCallback func(msg com.DataMessage)
+type FeederCallback func(msg data.Message)
 
 type Feeder interface {
 	setName(name string)
 	setBus(bus EventBus.Bus)
 	setId(id int32)
 
-	Name()          string
+	Name() string
 	Start()
 	Stop()
-	IsRunning()     bool
+	IsRunning() bool
 	GetIdentifier() string
 }
 
 type Base struct {
-	Feeder
-	com.Subscriber
-
-	name        string
-	id 			int32
-	isRunning   bool
-	bus         EventBus.Bus
+	name      string
+	id        int32
+	isRunning bool
+	bus       EventBus.Bus
 }
 
-func (f *Base) Propagate(data com.DataMessage) {
+func (f *Base) Propagate(data data.Message) {
 	f.bus.Publish(f.GetIdentifier(), &data)
 }
 
@@ -70,7 +66,7 @@ func (f *Base) IsRunning() bool {
 }
 
 func register(name string, f FeederFactory) {
-	feederName := name+"feeder"
+	feederName := name + "feeder"
 	if f == nil {
 		log.Fatal("Factory method doesn't exists")
 	}

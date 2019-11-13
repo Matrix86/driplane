@@ -3,12 +3,11 @@ package filters
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/Matrix86/driplane/data"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
-
-	"github.com/Matrix86/driplane/com"
 )
 
 type HTTP struct {
@@ -69,7 +68,7 @@ func NewHttpFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
-func (f *HTTP) DoFilter(msg *com.DataMessage) (bool, error) {
+func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 	var req *http.Request
 	var err error
 

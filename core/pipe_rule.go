@@ -4,13 +4,10 @@ import (
 	"fmt"
 	"github.com/Matrix86/driplane/feeders"
 	"github.com/Matrix86/driplane/filters"
-	"strconv"
-	"sync"
-
-	"github.com/Matrix86/driplane/com"
-
 	bus "github.com/asaskevich/EventBus"
 	"github.com/evilsocket/islazy/log"
+	"strconv"
+	"sync"
 )
 
 var (
@@ -203,7 +200,7 @@ func NewPipeRule(node *RuleNode, config Configuration) (*PipeRule, error) {
 		rs.lastId++
 
 		rule.HasFeeder = true
-		rule.nodes = append(rule.nodes, f.(com.Subscriber))
+		rule.nodes = append(rule.nodes, f)
 		next = node.Feeder.Next
 
 		if err := rule.addNode(next, f.GetIdentifier()); err != nil {

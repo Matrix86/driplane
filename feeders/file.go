@@ -2,13 +2,11 @@ package feeders
 
 import (
 	"fmt"
-	"io"
-	"os"
-
-	"github.com/Matrix86/driplane/com"
-
+	"github.com/Matrix86/driplane/data"
 	"github.com/evilsocket/islazy/log"
 	"github.com/hpcloud/tail"
+	"io"
+	"os"
 )
 
 type File struct {
@@ -22,7 +20,7 @@ type File struct {
 
 func NewFileFeeder(conf map[string]string) (Feeder, error) {
 	f := &File{
-		lastLines:false,
+		lastLines: false,
 	}
 
 	if val, ok := conf["file.filename"]; ok {
@@ -46,8 +44,8 @@ func NewFileFeeder(conf map[string]string) (Feeder, error) {
 	}
 
 	f.fp, err = tail.TailFile(f.filename, tail.Config{
-		Logger: tail.DiscardingLogger,
-		Follow: true,
+		Logger:   tail.DiscardingLogger,
+		Follow:   true,
 		Location: &seek,
 	})
 	if err != nil {
@@ -60,7 +58,7 @@ func NewFileFeeder(conf map[string]string) (Feeder, error) {
 func (f *File) Start() {
 	go func() {
 		for line := range f.fp.Lines {
-			var msg com.DataMessage
+			var msg data.Message
 			msg.SetMessage(line.Text)
 			f.Propagate(msg)
 		}

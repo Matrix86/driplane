@@ -1,7 +1,7 @@
 package filters
 
 import (
-	"github.com/Matrix86/driplane/com"
+	"github.com/Matrix86/driplane/data"
 	"regexp"
 )
 
@@ -53,7 +53,7 @@ func NewHashFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
-func (f *Hash) DoFilter(msg *com.DataMessage) (bool, error) {
+func (f *Hash) DoFilter(msg *data.Message) (bool, error) {
 	text := msg.GetMessage()
 
 	if f.extractHash {

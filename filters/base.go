@@ -2,9 +2,8 @@ package filters
 
 import (
 	"fmt"
-	"github.com/Matrix86/driplane/com"
+	"github.com/Matrix86/driplane/data"
 	"github.com/asaskevich/EventBus"
-
 	"github.com/evilsocket/islazy/log"
 )
 
@@ -18,8 +17,8 @@ type Filter interface {
 	setId(id int32)
 
 	Name() string
-	DoFilter(msg *com.DataMessage) (bool, error)
-	Pipe(msg *com.DataMessage)
+	DoFilter(msg *data.Message) (bool, error)
+	Pipe(msg *data.Message)
 	GetIdentifier() string
 }
 
@@ -27,7 +26,7 @@ type Base struct {
 	name     string
 	id       int32
 	bus      EventBus.Bus
-	cbFilter func(msg *com.DataMessage) (bool, error)
+	cbFilter func(msg *data.Message) (bool, error)
 }
 
 func (f *Base) Name() string {
@@ -50,7 +49,7 @@ func (f *Base) GetIdentifier() string {
 	return fmt.Sprintf("%s:%d", f.name, f.id)
 }
 
-func (f *Base) Pipe(msg *com.DataMessage) {
+func (f *Base) Pipe(msg *data.Message) {
 	log.Debug("[%s] received: %v", f.Name, msg)
 	if b, _ := f.cbFilter(msg); b {
 		log.Debug("[%s] filter matched", f.Name)
@@ -58,7 +57,7 @@ func (f *Base) Pipe(msg *com.DataMessage) {
 	}
 }
 
-func (f *Base) Propagate(data *com.DataMessage) {
+func (f *Base) Propagate(data *data.Message) {
 	f.bus.Publish(f.GetIdentifier(), data)
 }
 
