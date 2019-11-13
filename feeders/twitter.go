@@ -79,13 +79,11 @@ func (t *Twitter) Start() {
 			text = tweet.ExtendedTweet.FullText
 		}
 		if strings.HasPrefix(text, "RT ") == false {
-
-			var msg data.Message
-			msg.SetMessage(text)
-			msg.SetExtra("link", fmt.Sprintf("https://twitter.com/statuses/%d", tweet.ID))
-			msg.SetExtra("language", tweet.Lang)
-			msg.SetExtra("username", tweet.User.ScreenName)
-			t.Propagate(msg)
+			t.Propagate(data.NewMessageWithExtra(text, map[string]string{
+				"link":     fmt.Sprintf("https://twitter.com/statuses/%d", tweet.ID),
+				"language": tweet.Lang,
+				"username": tweet.User.ScreenName,
+			}))
 		}
 	}
 

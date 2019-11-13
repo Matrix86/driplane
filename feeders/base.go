@@ -34,8 +34,8 @@ type Base struct {
 	bus       EventBus.Bus
 }
 
-func (f *Base) Propagate(data data.Message) {
-	f.bus.Publish(f.GetIdentifier(), &data)
+func (f *Base) Propagate(data *data.Message) {
+	f.bus.Publish(f.GetIdentifier(), data)
 }
 
 func (f *Base) setId(id int32) {

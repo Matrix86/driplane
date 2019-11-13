@@ -58,9 +58,7 @@ func NewFileFeeder(conf map[string]string) (Feeder, error) {
 func (f *File) Start() {
 	go func() {
 		for line := range f.fp.Lines {
-			var msg data.Message
-			msg.SetMessage(line.Text)
-			f.Propagate(msg)
+			f.Propagate(data.NewMessage(line.Text))
 		}
 	}()
 
