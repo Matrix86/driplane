@@ -67,18 +67,18 @@ type PipeRule struct {
 	nodes []com.Subscriber
 }
 
-func (p *PipeRule) getLastNode() *com.Subscriber {
+func (p *PipeRule) getLastNode() com.Subscriber {
 	if len(p.nodes) == 0 {
 		return nil
 	}
-	return &p.nodes[len(p.nodes)-1]
+	return p.nodes[len(p.nodes)-1]
 }
 
-func (p *PipeRule) getFirstNode() *com.Subscriber {
+func (p *PipeRule) getFirstNode() com.Subscriber {
 	if len(p.nodes) == 0 {
 		return nil
 	}
-	return &p.nodes[0]
+	return p.nodes[0]
 }
 
 func (p *PipeRule) newFilter(fn *FilterNode) (filter.Filter, error) {
@@ -156,7 +156,7 @@ func (p *PipeRule) addNode(node *Node, prev string) error {
 				return fmt.Errorf("rule '%s' contains a feeder and cannot be here", node.RuleCall.Name)
 			}
 
-			first := *r.getFirstNode()
+			first := r.getFirstNode()
 			//err := rs.bus.Subscribe(prev, first.Filtering)
 			err := rs.bus.SubscribeAsync(prev, func(msg com.DataMessage) {
 				log.Debug("[%s::%s] received: %v", p.Name, node.RuleCall.Name, msg)
@@ -171,8 +171,7 @@ func (p *PipeRule) addNode(node *Node, prev string) error {
 		}
 
 		// This is a filter for sure!
-		last = *r.getLastNode()
-
+		last = r.getLastNode()
 		if _, ok := last.(filter.Filter); ok {
 			return p.addNode(node.RuleCall.Next, last.(filter.Filter).GetIdentifier())
 		} else if _, ok := last.(feeder.Feeder); ok {

@@ -42,7 +42,7 @@ func (o *Orchestrator) StartFeeders() {
 	defer o.Unlock()
 	rs := RuleSetInstance()
 	for _, rulename := range rs.feedRules {
-		f := (*rs.rules[rulename].getFirstNode()).(feeder.Feeder)
+		f := rs.rules[rulename].getFirstNode().(feeder.Feeder)
 		if f.IsRunning() == false {
 			log.Debug("[%s] Starting %s", rulename, f.Name())
 			o.waitFeeder.Add(1)
@@ -54,7 +54,7 @@ func (o *Orchestrator) StartFeeders() {
 func (o *Orchestrator) HasRunningFeeder() bool {
 	rs := RuleSetInstance()
 	for _, rulename := range rs.feedRules {
-		f := (*rs.rules[rulename].getFirstNode()).(feeder.Feeder)
+		f := rs.rules[rulename].getFirstNode().(feeder.Feeder)
 		if f.IsRunning()  {
 			return true
 		}
@@ -74,7 +74,7 @@ func (o *Orchestrator) StopFeeders() {
 
 	rs := RuleSetInstance()
 	for _, rulename := range rs.feedRules {
-		f := (*rs.rules[rulename].getFirstNode()).(feeder.Feeder)
+		f := rs.rules[rulename].getFirstNode().(feeder.Feeder)
 		if f.IsRunning() {
 			log.Debug("[%s] Stopping %s", rulename, f.Name())
 			f.Stop()

@@ -14,7 +14,6 @@ require (
 	github.com/google/go-querystring v1.0.0
 	github.com/hpcloud/tail v1.0.0
 	golang.org/x/sys v0.0.0-20190508100423-12bbe5a7a520
+	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7
 )
-
-replace gopkg.in/fsnotify.v1 v1.4.7 => github.com/fsnotify/fsnotify v1.4.7
