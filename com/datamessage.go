@@ -34,5 +34,4 @@ func (d *DataMessage) GetExtra() *sync.Map {
 
 type Subscriber interface {
 	Propagate(data DataMessage)
-	//Filtering(data DataMessage)
 }

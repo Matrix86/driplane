@@ -1,4 +1,4 @@
-package feeder
+package feeders
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ type Feeder interface {
 	GetIdentifier() string
 }
 
-type FeederBase struct {
+type Base struct {
 	Feeder
 	com.Subscriber
 
@@ -38,34 +38,34 @@ type FeederBase struct {
 	bus         EventBus.Bus
 }
 
-func (f *FeederBase) Propagate(data com.DataMessage) {
-	f.bus.Publish(f.GetIdentifier(), data)
+func (f *Base) Propagate(data com.DataMessage) {
+	f.bus.Publish(f.GetIdentifier(), &data)
 }
 
-func (f *FeederBase) setId(id int32) {
+func (f *Base) setId(id int32) {
 	f.id = id
 }
 
-func (f *FeederBase) setBus(bus EventBus.Bus) {
+func (f *Base) setBus(bus EventBus.Bus) {
 	f.bus = bus
 }
 
-func (f *FeederBase) setName(name string) {
+func (f *Base) setName(name string) {
 	f.name = name
 }
 
-func (f *FeederBase) GetIdentifier() string {
+func (f *Base) GetIdentifier() string {
 	return fmt.Sprintf("%s:%d", f.name, f.id)
 }
 
-func (f *FeederBase) Name() string {
+func (f *Base) Name() string {
 	return f.name
 }
 
-func (f *FeederBase) Start() {}
-func (f *FeederBase) Stop() {}
+func (f *Base) Start() {}
+func (f *Base) Stop()  {}
 
-func (f *FeederBase) IsRunning() bool {
+func (f *Base) IsRunning() bool {
 	return f.isRunning
 }
 

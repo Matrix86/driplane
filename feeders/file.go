@@ -1,4 +1,4 @@
-package feeder
+package feeders
 
 import (
 	"fmt"
@@ -11,8 +11,8 @@ import (
 	"github.com/hpcloud/tail"
 )
 
-type FileFeeder struct {
-	FeederBase
+type File struct {
+	Base
 
 	filename  string
 	lastLines bool
@@ -21,7 +21,7 @@ type FileFeeder struct {
 }
 
 func NewFileFeeder(conf map[string]string) (Feeder, error) {
-	f := &FileFeeder{
+	f := &File{
 		lastLines:false,
 	}
 
@@ -57,7 +57,7 @@ func NewFileFeeder(conf map[string]string) (Feeder, error) {
 	return f, nil
 }
 
-func (f *FileFeeder) Start() {
+func (f *File) Start() {
 	go func() {
 		for line := range f.fp.Lines {
 			var msg com.DataMessage
@@ -69,7 +69,7 @@ func (f *FileFeeder) Start() {
 	f.isRunning = true
 }
 
-func (f *FileFeeder) Stop() {
+func (f *File) Stop() {
 	log.Debug("feeder '%s' stream stop", f.Name())
 	f.fp.Stop()
 	f.fp.Cleanup()

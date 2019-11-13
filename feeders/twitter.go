@@ -1,4 +1,4 @@
-package feeder
+package feeders
 
 import (
 	"fmt"
@@ -12,8 +12,8 @@ import (
 	"github.com/evilsocket/islazy/log"
 )
 
-type TwitterFeeder struct {
-	FeederBase
+type Twitter struct {
+	Base
 
 	consumerKey    string
 	consumerSecret string
@@ -28,7 +28,7 @@ type TwitterFeeder struct {
 }
 
 func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
-	t := &TwitterFeeder{
+	t := &Twitter{
 		stallWarnings: false,
 	}
 
@@ -62,10 +62,10 @@ func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
 	return t, nil
 }
 
-func (t *TwitterFeeder) Start() {
+func (t *Twitter) Start() {
 	var err error
 
-	log.Debug("Initialization of TwitterFeeder")
+	log.Debug("Initialization of Twitter")
 	config := oauth1.NewConfig(t.consumerKey, t.consumerSecret)
 	token := oauth1.NewToken(t.accessToken, t.accessSecret)
 	httpClient := config.Client(oauth1.NoContext, token)
@@ -118,7 +118,7 @@ func (t *TwitterFeeder) Start() {
 	t.isRunning = true
 }
 
-func (t *TwitterFeeder) Stop() {
+func (t *Twitter) Stop() {
 	log.Debug("feeder '%s' stream stop", t.Name())
 	t.stream.Stop()
 	t.isRunning = false

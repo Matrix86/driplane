@@ -1,12 +1,12 @@
-package filter
+package filters
 
 import (
 	"github.com/Matrix86/driplane/com"
 	"regexp"
 )
 
-type HashFilter struct {
-	FilterBase
+type Hash struct {
+	Base
 
 	rMd5    *regexp.Regexp
 	rSha1   *regexp.Regexp
@@ -23,13 +23,14 @@ type HashFilter struct {
 }
 
 func NewHashFilter(p map[string]string) (Filter, error) {
-	f := &HashFilter{
+	f := &Hash{
 		params: p,
 		useMd5: true,
 		useSha1: true,
 		useSha256: true,
 		extractHash: true,
 	}
+	f.cbFilter = f.DoFilter
 
 	f.rMd5    = regexp.MustCompile(`(?i)[a-f0-9]{32}`)
 	f.rSha1   = regexp.MustCompile(`(?i)[a-f0-9]{40}`)
@@ -52,7 +53,7 @@ func NewHashFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
-func (f *HashFilter) DoFilter(msg *com.DataMessage) (bool, error) {
+func (f *Hash) DoFilter(msg *com.DataMessage) (bool, error) {
 	text := msg.GetMessage()
 
 	if f.extractHash {

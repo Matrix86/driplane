@@ -1,4 +1,4 @@
-package filter
+package filters
 
 import (
 	"fmt"
@@ -19,44 +19,51 @@ type Filter interface {
 
 	Name() string
 	DoFilter(msg *com.DataMessage) (bool, error)
+	Pipe(msg *com.DataMessage)
 	GetIdentifier() string
 }
 
-type FilterBase struct {
-	Filter
-	com.Subscriber
-
-	name string
-	id   int32
-	bus  EventBus.Bus
+type Base struct {
+	name     string
+	id       int32
+	bus      EventBus.Bus
+	cbFilter func(msg *com.DataMessage) (bool, error)
 }
 
-func (f *FilterBase) Name() string {
+func (f *Base) Name() string {
 	return f.name
 }
 
-func (f *FilterBase) setId(id int32) {
+func (f *Base) setId(id int32) {
 	f.id = id
 }
 
-func (f *FilterBase) setBus(bus EventBus.Bus) {
+func (f *Base) setBus(bus EventBus.Bus) {
 	f.bus = bus
 }
 
-func (f *FilterBase) setName(name string) {
+func (f *Base) setName(name string) {
 	f.name = name
 }
 
-func (f *FilterBase) GetIdentifier() string {
+func (f *Base) GetIdentifier() string {
 	return fmt.Sprintf("%s:%d", f.name, f.id)
 }
 
-func (f *FilterBase) Propagate(data com.DataMessage){
+func (f *Base) Pipe(msg *com.DataMessage) {
+	log.Debug("[%s] received: %v", f.Name, msg)
+	if b, _ := f.cbFilter(msg); b {
+		log.Debug("[%s] filter matched", f.Name)
+		f.Propagate(msg)
+	}
+}
+
+func (f *Base) Propagate(data *com.DataMessage) {
 	f.bus.Publish(f.GetIdentifier(), data)
 }
 
 func register(name string, f FilterFactory) {
-	filterName := name+"filter"
+	filterName := name + "filter"
 	if f == nil {
 		log.Fatal("Filter method doesn't exists")
 	}

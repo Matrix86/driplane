@@ -1,4 +1,4 @@
-package filter
+package filters
 
 import (
 	"bytes"
@@ -11,8 +11,8 @@ import (
 	"github.com/Matrix86/driplane/com"
 )
 
-type HttpFilter struct {
-	FilterBase
+type HTTP struct {
+	Base
 
 	urlFromInput bool
 	getBody      bool
@@ -26,7 +26,7 @@ type HttpFilter struct {
 }
 
 func NewHttpFilter(p map[string]string) (Filter, error) {
-	f := &HttpFilter{
+	f := &HTTP{
 		params:       p,
 		urlFromInput: true,
 		getBody:      true,
@@ -35,6 +35,7 @@ func NewHttpFilter(p map[string]string) (Filter, error) {
 		dataPost:     make(map[string]string),
 		checkStatus:  200,
 	}
+	f.cbFilter = f.DoFilter
 
 	if v, ok := f.params["useinput"]; ok && v == "false" {
 		f.urlFromInput = false
@@ -68,7 +69,7 @@ func NewHttpFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
-func (f *HttpFilter) DoFilter(msg *com.DataMessage) (bool, error) {
+func (f *HTTP) DoFilter(msg *com.DataMessage) (bool, error) {
 	var req *http.Request
 	var err error
 

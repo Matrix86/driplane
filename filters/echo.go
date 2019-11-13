@@ -1,4 +1,4 @@
-package filter
+package filters
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 	"github.com/evilsocket/islazy/log"
 )
 
-type EchoFilter struct {
-	FilterBase
+type Echo struct {
+	Base
 
 	printExtra bool
 
@@ -17,10 +17,11 @@ type EchoFilter struct {
 }
 
 func NewEchoFilter(p map[string]string) (Filter, error) {
-	f := &EchoFilter{
+	f := &Echo{
 		params: p,
 		printExtra: false,
 	}
+	f.cbFilter = f.DoFilter
 
 	if v, ok := f.params["extra"]; ok && v == "true" {
 		f.printExtra = true
@@ -29,7 +30,7 @@ func NewEchoFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
-func (f *EchoFilter) DoFilter(msg *com.DataMessage) (bool, error) {
+func (f *Echo) DoFilter(msg *com.DataMessage) (bool, error) {
 	text := msg.GetMessage()
 
 	if f.printExtra {

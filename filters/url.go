@@ -1,4 +1,4 @@
-package filter
+package filters
 
 import (
 	"regexp"
@@ -7,8 +7,8 @@ import (
 	"github.com/Matrix86/driplane/com"
 )
 
-type UrlFilter struct {
-	FilterBase
+type URL struct {
+	Base
 
 	rUrl    *regexp.Regexp
 
@@ -22,13 +22,14 @@ type UrlFilter struct {
 }
 
 func NewUrlFilter(p map[string]string) (Filter, error) {
-	f := &UrlFilter{
+	f := &URL{
 		params: p,
 		getHttp: true,
 		getHttps: true,
 		getFtp: true,
 		extractUrl: true,
 	}
+	f.cbFilter = f.DoFilter
 
 	f.rUrl = regexp.MustCompile(`(?i)(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?`)
 
@@ -48,7 +49,7 @@ func NewUrlFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
-func (f *UrlFilter) DoFilter(msg *com.DataMessage) (bool, error) {
+func (f *URL) DoFilter(msg *com.DataMessage) (bool, error) {
 	text := msg.GetMessage()
 
 	foundUrl := ""

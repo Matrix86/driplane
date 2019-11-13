@@ -1,4 +1,4 @@
-package filter
+package filters
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 	"github.com/Matrix86/driplane/com"
 )
 
-type TextFilter struct {
-	FilterBase
+type Text struct {
+	Base
 
 	regexp *regexp.Regexp
  	text   string
@@ -20,12 +20,13 @@ type TextFilter struct {
 }
 
 func NewTextFilter(p map[string]string) (Filter, error) {
-	f := &TextFilter{
+	f := &Text{
 		params: p,
 		regexp: nil,
 		extractText: false,
 		text: "",
 	}
+	f.cbFilter = f.DoFilter
 
 	// Regexp initialization
 	if v, ok := p["regexp"]; ok {
@@ -45,7 +46,7 @@ func NewTextFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
-func (f *TextFilter) DoFilter(msg *com.DataMessage) (bool, error) {
+func (f *Text) DoFilter(msg *com.DataMessage) (bool, error) {
 	text := msg.GetMessage()
 
 	found := false

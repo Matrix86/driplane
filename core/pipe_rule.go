@@ -2,12 +2,12 @@ package core
 
 import (
 	"fmt"
+	"github.com/Matrix86/driplane/feeders"
+	"github.com/Matrix86/driplane/filters"
 	"strconv"
 	"sync"
 
 	"github.com/Matrix86/driplane/com"
-	"github.com/Matrix86/driplane/feeder"
-	"github.com/Matrix86/driplane/filter"
 
 	bus "github.com/asaskevich/EventBus"
 	"github.com/evilsocket/islazy/log"
@@ -29,8 +29,8 @@ type Ruleset struct {
 func RuleSetInstance() *Ruleset {
 	once.Do(func() {
 		instance = &Ruleset{
-			rules: make(map[string]*PipeRule),
-			bus: bus.New(),
+			rules:  make(map[string]*PipeRule),
+			bus:    bus.New(),
 			lastId: 0,
 		}
 	})
@@ -60,28 +60,30 @@ func (r *Ruleset) AddRule(node *RuleNode, config Configuration) error {
 	return nil
 }
 
+type INode interface{}
+
 type PipeRule struct {
 	Name      string
 	HasFeeder bool
 
-	nodes []com.Subscriber
+	nodes []INode
 }
 
-func (p *PipeRule) getLastNode() com.Subscriber {
+func (p *PipeRule) getLastNode() INode {
 	if len(p.nodes) == 0 {
 		return nil
 	}
 	return p.nodes[len(p.nodes)-1]
 }
 
-func (p *PipeRule) getFirstNode() com.Subscriber {
+func (p *PipeRule) getFirstNode() INode {
 	if len(p.nodes) == 0 {
 		return nil
 	}
 	return p.nodes[0]
 }
 
-func (p *PipeRule) newFilter(fn *FilterNode) (filter.Filter, error) {
+func (p *PipeRule) newFilter(fn *FilterNode) (filters.Filter, error) {
 	params := make(map[string]string)
 	for _, par := range fn.Params {
 		value := ""
@@ -94,7 +96,7 @@ func (p *PipeRule) newFilter(fn *FilterNode) (filter.Filter, error) {
 	}
 
 	rs := RuleSetInstance()
-	f, err := filter.NewFilter(fn.Name+"filter", params, rs.bus, rs.lastId+1)
+	f, err := filters.NewFilter(fn.Name+"filter", params, rs.bus, rs.lastId+1)
 	if err != nil {
 		return nil, err
 	}
@@ -125,25 +127,17 @@ func (p *PipeRule) addNode(node *Node, prev string) error {
 		}
 
 		if prev != "" {
-			//err := rs.bus.Subscribe(prev, f.(com.Subscriber).Filtering)
-			err := rs.bus.SubscribeAsync(prev, func(msg com.DataMessage) {
-				log.Debug("[%s::%s] received: %v", p.Name, node.Filter.Name, msg)
-				if b, _ := f.DoFilter(&msg); b {
-					log.Debug("[%s::%s] filter matched", p.Name, node.Filter.Name)
-					f.(com.Subscriber).Propagate(msg)
-				}
-			}, false)
+			err := rs.bus.SubscribeAsync(prev, f.Pipe, false)
 			if err != nil {
 				return err
 			}
 		}
 
-		p.nodes = append(p.nodes, f.(com.Subscriber))
+		p.nodes = append(p.nodes, f)
 
 		return p.addNode(node.Filter.Next, f.GetIdentifier())
 	} else if node.RuleCall != nil {
 		log.Info("['%s'] new rulecall found '%s'", p.Name, node.RuleCall.Name)
-		var last com.Subscriber
 		var err error
 
 		r, err := p.getRuleCall(node.RuleCall)
@@ -156,26 +150,19 @@ func (p *PipeRule) addNode(node *Node, prev string) error {
 				return fmt.Errorf("rule '%s' contains a feeder and cannot be here", node.RuleCall.Name)
 			}
 
-			first := r.getFirstNode()
-			//err := rs.bus.Subscribe(prev, first.Filtering)
-			err := rs.bus.SubscribeAsync(prev, func(msg com.DataMessage) {
-				log.Debug("[%s::%s] received: %v", p.Name, node.RuleCall.Name, msg)
-				if b, _ := first.(filter.Filter).DoFilter(&msg); b {
-					log.Debug("[%s::%s] filter matched", p.Name, node.RuleCall.Name)
-					first.Propagate(msg)
-				}
-			}, false)
+			node := r.getFirstNode()
+			err := rs.bus.SubscribeAsync(prev, node.(filters.Filter).Pipe, false)
 			if err != nil {
 				return err
 			}
 		}
 
 		// This is a filter for sure!
-		last = r.getLastNode()
-		if _, ok := last.(filter.Filter); ok {
-			return p.addNode(node.RuleCall.Next, last.(filter.Filter).GetIdentifier())
-		} else if _, ok := last.(feeder.Feeder); ok {
-			return p.addNode(node.RuleCall.Next, last.(feeder.Feeder).GetIdentifier())
+		last := r.getLastNode()
+		if _, ok := last.(filters.Filter); ok {
+			return p.addNode(node.RuleCall.Next, last.(filters.Filter).GetIdentifier())
+		} else if _, ok := last.(feeders.Feeder); ok {
+			return p.addNode(node.RuleCall.Next, last.(feeders.Feeder).GetIdentifier())
 		} else {
 			return fmt.Errorf("found an unknown node type")
 		}
@@ -204,11 +191,11 @@ func NewPipeRule(node *RuleNode, config Configuration) (*PipeRule, error) {
 			} else {
 				value = *par.Value.String
 			}
-			config[node.Feeder.Name + "." + par.Name] = value
+			config[node.Feeder.Name+"."+par.Name] = value
 		}
 
 		rs := RuleSetInstance()
-		f, err := feeder.NewFeeder(node.Feeder.Name+"feeder", config, rs.bus, rs.lastId+1)
+		f, err := feeders.NewFeeder(node.Feeder.Name+"feeder", config, rs.bus, rs.lastId+1)
 		if err != nil {
 			log.Error("piperule.NewRule: %s", err)
 			return nil, err
