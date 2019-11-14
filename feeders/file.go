@@ -32,7 +32,7 @@ func NewFileFeeder(conf map[string]string) (Feeder, error) {
 
 	info, err := os.Stat(f.filename)
 	if os.IsNotExist(err) || info.IsDir() {
-		return nil, fmt.Errorf("file '%s' does not exist")
+		return nil, fmt.Errorf("file '%s' does not exist", f.filename)
 	}
 
 	seek := tail.SeekInfo{

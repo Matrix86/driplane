@@ -3,9 +3,8 @@ package core
 import (
 	"fmt"
 	"github.com/Matrix86/driplane/feeders"
-	"sync"
-
 	"github.com/evilsocket/islazy/log"
+	"sync"
 )
 
 type Orchestrator struct {

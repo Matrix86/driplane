@@ -11,10 +11,6 @@ type FeederFactory func(conf map[string]string) (Feeder, error)
 
 var feederFactories = make(map[string]FeederFactory)
 
-// TODO: change the callback logic with publish/subscribe channels
-// something like https://gist.github.com/AmirSoleimani/97298c6a94d83d3672765fb31c23194a
-type FeederCallback func(msg data.Message)
-
 type Feeder interface {
 	setName(name string)
 	setBus(bus EventBus.Bus)
