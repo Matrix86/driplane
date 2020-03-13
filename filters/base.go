@@ -50,9 +50,9 @@ func (f *Base) GetIdentifier() string {
 }
 
 func (f *Base) Pipe(msg *data.Message) {
-	log.Debug("[%s] received: %v", f.Name, msg)
+	log.Debug("[%s] received: %v", f.name, msg)
 	if b, _ := f.cbFilter(msg); b {
-		log.Debug("[%s] filter matched", f.Name)
+		log.Debug("[%s] filter matched", f.name)
 		f.Propagate(msg)
 	}
 }

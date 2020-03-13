@@ -1,7 +1,7 @@
 test:
 	@go test ./...
 
-binary: clean
+build: clean
 	@mkdir build
 	go build -o build/driplane cmd/driplane/main.go
 
