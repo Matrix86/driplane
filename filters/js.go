@@ -3,6 +3,7 @@ package filters
 import (
 	"fmt"
 	"github.com/Matrix86/driplane/data"
+	"github.com/evilsocket/islazy/log"
 
 	"github.com/evilsocket/islazy/plugin"
 )
@@ -81,7 +82,7 @@ func init() {
 
 	plugin.Defines = map[string]interface{}{
 		"log": func(s string) interface{} {
-			fmt.Println(s)
+			log.Info("%s", s)
 			return nil
 		},
 	}

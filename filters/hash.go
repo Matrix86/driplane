@@ -55,6 +55,7 @@ func NewHashFilter(p map[string]string) (Filter, error) {
 
 func (f *Hash) DoFilter(msg *data.Message) (bool, error) {
 	text := msg.GetMessage()
+	msg.SetMessage(text)
 
 	if f.extractHash {
 		if f.useMd5 {

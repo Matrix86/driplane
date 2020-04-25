@@ -67,6 +67,8 @@ func (f *URL) DoFilter(msg *data.Message) (bool, error) {
 
 		if f.extractUrl {
 			msg.SetMessage(foundUrl)
+		} else {
+			msg.SetMessage(text)
 		}
 	}
 
