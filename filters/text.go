@@ -19,6 +19,7 @@ type Text struct {
 }
 
 func NewTextFilter(p map[string]string) (Filter, error) {
+	var err error
 	f := &Text{
 		params:      p,
 		regexp:      nil,
@@ -29,11 +30,10 @@ func NewTextFilter(p map[string]string) (Filter, error) {
 
 	// Regexp initialization
 	if v, ok := p["regexp"]; ok {
-		r, err := regexp.Compile(v)
+		f.regexp, err = regexp.Compile(v)
 		if err != nil {
 			return nil, fmt.Errorf("textfilter: cannot compile the regular expression in 'regexp' parameter")
 		}
-		f.regexp = r
 	}
 	if v, ok := f.params["extract"]; ok && v == "true" {
 		f.extractText = true
@@ -52,18 +52,15 @@ func (f *Text) DoFilter(msg *data.Message) (bool, error) {
 	if f.regexp != nil {
 		if f.extractText {
 			match := f.regexp.FindStringSubmatch(text)
+			// TODO: it should creates other pipelines on multiple match
 			if match != nil {
 				msg.SetMessage(match[0])
-			}
-			found = match != nil
-		} else {
-			if f.regexp.MatchString(text) {
 				found = true
 			}
+		} else if f.regexp.MatchString(text) {
+			found = true
 		}
-	}
-
-	if f.text != "" && strings.Contains(text, f.text) {
+	} else if f.text != "" && strings.Contains(text, f.text) {
 		found = true
 	}
 
