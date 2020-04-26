@@ -8,6 +8,7 @@ import (
 	"github.com/evilsocket/islazy/log"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Twitter struct {
@@ -19,12 +20,16 @@ type Twitter struct {
 	accessSecret   string
 
 	keywords      string
+	users         string
 	languages     string
 	stallWarnings bool
 
 	stream *twitter.Stream
+	client *twitter.Client
 }
 
+// Doc
+// https://developer.twitter.com/en/docs/tweets/filter-realtime/guides/basic-stream-parameters
 func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
 	t := &Twitter{
 		stallWarnings: false,
@@ -45,6 +50,9 @@ func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
 	if val, ok := conf["twitter.keywords"]; ok {
 		t.keywords = val
 	}
+	if val, ok := conf["twitter.users"]; ok {
+		t.users = val
+	}
 	if val, ok := conf["twitter.languages"]; ok {
 		t.languages = val
 	}
@@ -60,6 +68,32 @@ func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
 	return t, nil
 }
 
+func (t *Twitter) getIdsFromUsernames(usernames []string) (map[string]int64, error) {
+	ids := make(map[string]int64)
+	// This API supports max 100 ids per request and 300 requests/15min window
+	for start, end := 0, 100; start < len(usernames); start, end = start+100, end+100 {
+		if end > len(usernames) {
+			end = len(usernames)
+		}
+		params := &twitter.UserLookupParams{ScreenName: usernames[start:end]}
+		idsList, _, err := t.client.Users.Lookup(params)
+		if err != nil {
+			if err.Error() == "twitter: 88 Rate limit exceeded" {
+				log.Info("Twitter rate limit exceeded...waiting 15 minutes")
+				time.Sleep(15 * time.Minute)
+				continue
+			} else {
+				return nil, err
+			}
+		}
+
+		for _, u := range idsList {
+			ids[u.ScreenName] = u.ID
+		}
+	}
+	return ids, nil
+}
+
 func (t *Twitter) Start() {
 	var err error
 
@@ -68,7 +102,7 @@ func (t *Twitter) Start() {
 	token := oauth1.NewToken(t.accessToken, t.accessSecret)
 	httpClient := config.Client(oauth1.NoContext, token)
 
-	client := twitter.NewClient(httpClient)
+	t.client = twitter.NewClient(httpClient)
 
 	log.Debug("Setting demuxer")
 	// Convenience Demux demultiplexed stream messages
@@ -89,22 +123,46 @@ func (t *Twitter) Start() {
 
 	// we don't track Direct Messages or Events
 	demux.DM = func(dm *twitter.DirectMessage) {
+		log.Debug("[DIRECTMESSAGE] %s", dm.Text)
 	}
 	demux.Event = func(event *twitter.Event) {
+		log.Debug("[EVENT] %s", event.Event)
 	}
 
 	// FILTER
-	log.Debug("Setting keywords: '%s'", t.keywords)
-	keywords := strings.Split(t.keywords, ",")
 	filterParams := &twitter.StreamFilterParams{
-		Track:         keywords,
 		StallWarnings: twitter.Bool(true),
+	}
+	if t.users != "" {
+		users := strings.Split(t.users, ",")
+		for i, k := range users {
+			users[i] = strings.TrimSpace(k)
+		}
+		ids, err := t.getIdsFromUsernames(users)
+		if err != nil {
+			log.Error("getIdsFromUsernames: %s", err)
+		} else {
+			idss := []string{}
+			for _, v := range ids {
+				idss = append(idss, fmt.Sprintf("%d", v))
+			}
+			log.Debug("Setting users to follow: '%s' [ids: %s]", strings.Join(users, ","), strings.Join(idss, ","))
+			filterParams.Follow = idss
+		}
+	}
+	if t.keywords != "" {
+		keywords := strings.Split(t.keywords, ",")
+		for i, k := range keywords {
+			keywords[i] = strings.TrimSpace(k)
+		}
+		log.Debug("Setting keywords: '%s'", strings.Join(keywords, ","))
+		filterParams.Track = keywords
 	}
 	if t.languages != "" {
 		languages := strings.Split(t.languages, ",")
 		filterParams.Language = languages
 	}
-	t.stream, err = client.Streams.Filter(filterParams)
+	t.stream, err = t.client.Streams.Filter(filterParams)
 	if err != nil {
 		log.Fatal("twitter stream filter error: %s", err)
 	}
