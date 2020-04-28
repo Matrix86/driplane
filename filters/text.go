@@ -3,7 +3,6 @@ package filters
 import (
 	"fmt"
 	"github.com/Matrix86/driplane/data"
-	"github.com/evilsocket/islazy/log"
 	"regexp"
 	"strings"
 )
