@@ -51,27 +51,35 @@ func NewUrlFilter(p map[string]string) (Filter, error) {
 func (f *URL) DoFilter(msg *data.Message) (bool, error) {
 	text := msg.GetMessage()
 
-	foundUrl := ""
 	found := false
-	match := f.rUrl.FindStringSubmatch(text)
+	match := f.rUrl.FindAllStringSubmatch(text, -1)
 	if match != nil {
-		foundUrl = match[0]
+		for _, m := range match {
+			for i, mm := range m {
+				if i == 0 {
+					continue
+				}
+				if f.getHttp && strings.HasPrefix(strings.ToLower(mm), "http://") {
+					found = true
+				} else if f.getHttps && strings.HasPrefix(strings.ToLower(mm), "https://") {
+					found = true
+				} else if f.getFtp && strings.HasPrefix(strings.ToLower(mm), "ftp://") {
+					found = true
+				}
 
-		if f.getHttp && strings.HasPrefix(strings.ToLower(foundUrl), "http://") {
-			found = true
-		} else if f.getHttps && strings.HasPrefix(strings.ToLower(foundUrl), "https://") {
-			found = true
-		} else if f.getFtp && strings.HasPrefix(strings.ToLower(foundUrl), "ftp://") {
-			found = true
-		}
-
-		if f.extractUrl {
-			msg.SetMessage(foundUrl)
-		} else {
-			msg.SetMessage(text)
+				if f.extractUrl {
+					clone := *msg
+					clone.SetMessage(mm)
+					clone.SetExtra("fulltext", text)
+					f.Propagate(&clone)
+					// We need to stop the propagation of the first message
+					found = false
+				} else if found {
+					break
+				}
+			}
 		}
 	}
-
 	return found, nil
 }
 

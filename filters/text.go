@@ -3,6 +3,7 @@ package filters
 import (
 	"fmt"
 	"github.com/Matrix86/driplane/data"
+	"github.com/evilsocket/islazy/log"
 	"regexp"
 	"strings"
 )
@@ -51,11 +52,27 @@ func (f *Text) DoFilter(msg *data.Message) (bool, error) {
 	found := false
 	if f.regexp != nil {
 		if f.extractText {
-			match := f.regexp.FindStringSubmatch(text)
-			// TODO: it should creates other pipelines on multiple match
+			matched := make([]string, 0)
+			match := f.regexp.FindAllStringSubmatch(text, -1)
 			if match != nil {
-				msg.SetMessage(match[0])
-				found = true
+				for _, m := range match {
+					matched = append(matched, m[1:]...)
+				}
+			}
+			if len(matched) == 1 {
+				msg.SetMessage(matched[0])
+				msg.SetExtra("fulltext", text)
+				return true, nil
+			} else if len(matched) > 1 {
+				for _, m := range matched {
+					log.Info("cloning : %s", m)
+					clone := *msg
+					clone.SetMessage(m)
+					clone.SetExtra("fulltext", text)
+					f.Propagate(&clone)
+					log.Info("exit")
+				}
+				return false, nil
 			}
 		} else if f.regexp.MatchString(text) {
 			found = true

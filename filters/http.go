@@ -27,7 +27,7 @@ type HTTP struct {
 func NewHttpFilter(p map[string]string) (Filter, error) {
 	f := &HTTP{
 		params:       p,
-		urlFromInput: true,
+		urlFromInput: false,
 		getBody:      true,
 		method:       "GET",
 		headers:      make(map[string]string),
@@ -36,8 +36,8 @@ func NewHttpFilter(p map[string]string) (Filter, error) {
 	}
 	f.cbFilter = f.DoFilter
 
-	if v, ok := f.params["useinput"]; ok && v == "false" {
-		f.urlFromInput = false
+	if v, ok := f.params["url_from_input"]; ok && v == "true" {
+		f.urlFromInput = true
 	}
 	if v, ok := f.params["url"]; ok {
 		f.urlString = v
@@ -80,7 +80,7 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 	if f.urlFromInput {
 		urlString = text
 	} else {
-		urlString = f.urlString
+		urlString = msg.ReplacePlaceholders(f.urlString)
 	}
 
 	if len(f.dataPost) > 0 {

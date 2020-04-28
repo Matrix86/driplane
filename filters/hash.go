@@ -19,21 +19,23 @@ type Hash struct {
 	useSha512   bool
 	extractHash bool
 
+	//filter_extra string
+
 	params map[string]string
 }
 
 func NewHashFilter(p map[string]string) (Filter, error) {
 	f := &Hash{
-		params: p,
-		useMd5: true,
-		useSha1: true,
-		useSha256: true,
+		params:      p,
+		useMd5:      true,
+		useSha1:     true,
+		useSha256:   true,
 		extractHash: true,
 	}
 	f.cbFilter = f.DoFilter
 
-	f.rMd5    = regexp.MustCompile(`(?i)[a-f0-9]{32}`)
-	f.rSha1   = regexp.MustCompile(`(?i)[a-f0-9]{40}`)
+	f.rMd5 = regexp.MustCompile(`(?i)[a-f0-9]{32}`)
+	f.rSha1 = regexp.MustCompile(`(?i)[a-f0-9]{40}`)
 	f.rSha256 = regexp.MustCompile(`(?i)[a-f0-9]{64}`)
 	f.rSha512 = regexp.MustCompile(`(?i)[a-f0-9]{128}`)
 
@@ -49,6 +51,9 @@ func NewHashFilter(p map[string]string) (Filter, error) {
 	if v, ok := f.params["extract"]; ok && v == "false" {
 		f.extractHash = false
 	}
+	//if v, ok := f.params["filter_extra"]; ok {
+	//	f.filter_extra = v
+	//}
 
 	return f, nil
 }
@@ -58,30 +63,49 @@ func (f *Hash) DoFilter(msg *data.Message) (bool, error) {
 	msg.SetMessage(text)
 
 	if f.extractHash {
+		matched := make([]string, 0)
 		if f.useSha512 {
-			match := f.rSha512.FindStringSubmatch(text)
+			match := f.rSha512.FindAllStringSubmatch(text, -1)
 			if match != nil {
-				msg.SetMessage(match[0])
+				for _, m := range match {
+					matched = append(matched, m[1:]...)
+				}
 			}
-			return match != nil, nil
 		} else if f.useSha256 {
-			match := f.rSha256.FindStringSubmatch(text)
+			match := f.rSha256.FindAllStringSubmatch(text, -1)
 			if match != nil {
-				msg.SetMessage(match[0])
+				for _, m := range match {
+					matched = append(matched, m[1:]...)
+				}
 			}
-			return match != nil, nil
 		} else if f.useSha1 {
-			match := f.rSha1.FindStringSubmatch(text)
+			match := f.rSha1.FindAllStringSubmatch(text, -1)
 			if match != nil {
-				msg.SetMessage(match[0])
+				for _, m := range match {
+					matched = append(matched, m[1:]...)
+				}
 			}
-			return match != nil, nil
 		} else if f.useMd5 {
-			match := f.rMd5.FindStringSubmatch(text)
+			match := f.rMd5.FindAllStringSubmatch(text, -1)
 			if match != nil {
-				msg.SetMessage(match[0])
+				for _, m := range match {
+					matched = append(matched, m[1:]...)
+				}
 			}
-			return match != nil, nil
+		}
+
+		if len(matched) == 1 {
+			msg.SetMessage(matched[0])
+			msg.SetExtra("fulltext", text)
+			return true, nil
+		} else if len(matched) > 1 {
+			for _, m := range matched {
+				clone := *msg
+				clone.SetMessage(m)
+				clone.SetExtra("fulltext", text)
+				f.Propagate(&clone)
+			}
+			return false, nil
 		}
 	} else {
 		if f.useMd5 && f.rMd5.MatchString(text) {

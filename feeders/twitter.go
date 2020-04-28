@@ -114,7 +114,7 @@ func (t *Twitter) Start() {
 		}
 		if strings.HasPrefix(text, "RT ") == false {
 			t.Propagate(data.NewMessageWithExtra(text, map[string]string{
-				"link":     fmt.Sprintf("https://twitter.com/statuses/%d", tweet.ID),
+				"link":     fmt.Sprintf("https://twitter.com/%s/statuses/%d", tweet.User.ScreenName, tweet.ID),
 				"language": tweet.Lang,
 				"username": tweet.User.ScreenName,
 			}))

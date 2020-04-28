@@ -66,6 +66,7 @@ func (f *Js) DoFilter(msg *data.Message) (bool, error) {
 					if v, ok := result["data"]; ok {
 						if s, ok := v.(string); ok {
 							msg.SetMessage(s)
+							msg.SetExtra("fulltext", text)
 						}
 					}
 				}

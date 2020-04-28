@@ -1,6 +1,10 @@
 package data
 
-import "sync"
+import (
+	"fmt"
+	"strings"
+	"sync"
+)
 
 type Callback func(msg Message)
 
@@ -46,4 +50,16 @@ func (d *Message) Extra(cb func(k, v string)) {
 	for k, v := range d.extra {
 		cb(k, v)
 	}
+}
+
+func (d *Message) ReplacePlaceholders(text string) string {
+	new := strings.ReplaceAll(text, "%text%", d.message)
+	if strings.Contains(text, "%extra.") {
+		d.Extra(
+			func(k string, v string) {
+				placeholder := fmt.Sprintf("%%extra.%s%%", k)
+				new = strings.ReplaceAll(new, placeholder, v)
+			})
+	}
+	return new
 }

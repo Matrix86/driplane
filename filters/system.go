@@ -1,18 +1,18 @@
 package filters
 
 import (
-"fmt"
-"github.com/Matrix86/driplane/data"
-"github.com/evilsocket/islazy/log"
+	"github.com/Matrix86/driplane/data"
+	"github.com/evilsocket/islazy/log"
 	"github.com/evilsocket/islazy/plugin"
 	"os/exec"
-	"strings"
+	"regexp"
 )
 
 type System struct {
 	Base
 
-	command string
+	command   string
+	rExtraCmd *regexp.Regexp
 
 	params map[string]string
 }
@@ -27,20 +27,13 @@ func NewSystemFilter(p map[string]string) (Filter, error) {
 		f.command = v
 	}
 
+	f.rExtraCmd = regexp.MustCompile(`(%extra\.[a-z0-9]+%)`)
+
 	return f, nil
 }
 
 func (f *System) DoFilter(msg *data.Message) (bool, error) {
-	text := msg.GetMessage()
-
-	extra := []string{}
-	msg.Extra(
-		func(k string, v string){
-			extra = append(extra, fmt.Sprintf("%s:%s", k,v))
-		})
-
-	cmd := strings.Replace(f.command, "%text%", text, -1)
-	cmd = strings.Replace(cmd, "%extra%", strings.Join(extra,"|"), -1)
+	cmd := msg.ReplacePlaceholders(f.command)
 
 	log.Debug("[systemfilter] command: %s", cmd)
 	c := exec.Command("sh", "-c", cmd)
