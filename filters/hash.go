@@ -58,14 +58,8 @@ func (f *Hash) DoFilter(msg *data.Message) (bool, error) {
 	msg.SetMessage(text)
 
 	if f.extractHash {
-		if f.useMd5 {
-			match := f.rMd5.FindStringSubmatch(text)
-			if match != nil {
-				msg.SetMessage(match[0])
-			}
-			return match != nil, nil
-		} else if f.useSha1 {
-			match := f.rSha1.FindStringSubmatch(text)
+		if f.useSha512 {
+			match := f.rSha512.FindStringSubmatch(text)
 			if match != nil {
 				msg.SetMessage(match[0])
 			}
@@ -76,8 +70,14 @@ func (f *Hash) DoFilter(msg *data.Message) (bool, error) {
 				msg.SetMessage(match[0])
 			}
 			return match != nil, nil
-		} else if f.useSha512 {
-			match := f.rSha512.FindStringSubmatch(text)
+		} else if f.useSha1 {
+			match := f.rSha1.FindStringSubmatch(text)
+			if match != nil {
+				msg.SetMessage(match[0])
+			}
+			return match != nil, nil
+		} else if f.useMd5 {
+			match := f.rMd5.FindStringSubmatch(text)
 			if match != nil {
 				msg.SetMessage(match[0])
 			}
