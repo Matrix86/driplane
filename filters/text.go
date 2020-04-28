@@ -65,12 +65,10 @@ func (f *Text) DoFilter(msg *data.Message) (bool, error) {
 				return true, nil
 			} else if len(matched) > 1 {
 				for _, m := range matched {
-					log.Info("cloning : %s", m)
 					clone := *msg
 					clone.SetMessage(m)
 					clone.SetExtra("fulltext", text)
 					f.Propagate(&clone)
-					log.Info("exit")
 				}
 				return false, nil
 			}
