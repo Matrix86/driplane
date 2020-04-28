@@ -30,6 +30,7 @@ func NewHashFilter(p map[string]string) (Filter, error) {
 		useMd5:      true,
 		useSha1:     true,
 		useSha256:   true,
+		useSha512:   true,
 		extractHash: true,
 	}
 	f.cbFilter = f.DoFilter
@@ -46,6 +47,9 @@ func NewHashFilter(p map[string]string) (Filter, error) {
 		f.useSha1 = false
 	}
 	if v, ok := f.params["sha256"]; ok && v == "false" {
+		f.useSha256 = false
+	}
+	if v, ok := f.params["sha512"]; ok && v == "false" {
 		f.useSha256 = false
 	}
 	if v, ok := f.params["extract"]; ok && v == "false" {
@@ -68,28 +72,31 @@ func (f *Hash) DoFilter(msg *data.Message) (bool, error) {
 			match := f.rSha512.FindAllStringSubmatch(text, -1)
 			if match != nil {
 				for _, m := range match {
-					matched = append(matched, m[1:]...)
+					matched = append(matched, m[0])
 				}
 			}
-		} else if f.useSha256 {
+		}
+		if f.useSha256 {
 			match := f.rSha256.FindAllStringSubmatch(text, -1)
 			if match != nil {
 				for _, m := range match {
-					matched = append(matched, m[1:]...)
+					matched = append(matched, m[0])
 				}
 			}
-		} else if f.useSha1 {
+		}
+		if f.useSha1 {
 			match := f.rSha1.FindAllStringSubmatch(text, -1)
 			if match != nil {
 				for _, m := range match {
-					matched = append(matched, m[1:]...)
+					matched = append(matched, m[0])
 				}
 			}
-		} else if f.useMd5 {
+		}
+		if f.useMd5 {
 			match := f.rMd5.FindAllStringSubmatch(text, -1)
 			if match != nil {
 				for _, m := range match {
-					matched = append(matched, m[1:]...)
+					matched = append(matched, m[0])
 				}
 			}
 		}
