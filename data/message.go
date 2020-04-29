@@ -44,6 +44,17 @@ func (d *Message) SetExtra(k string, v string) {
 	d.extra[k] = v
 }
 
+func (d *Message) GetExtra() map[string]string{
+	d.Lock()
+	defer d.Unlock()
+
+	clone := make(map[string]string)
+	for key, value := range d.extra {
+		clone[key] = value
+	}
+	return clone
+}
+
 func (d *Message) Extra(cb func(k, v string)) {
 	d.Lock()
 	defer d.Unlock()
@@ -53,13 +64,14 @@ func (d *Message) Extra(cb func(k, v string)) {
 }
 
 func (d *Message) ReplacePlaceholders(text string) string {
+	d.Lock()
+	defer d.Unlock()
 	new := strings.ReplaceAll(text, "%text%", d.message)
 	if strings.Contains(text, "%extra.") {
-		d.Extra(
-			func(k string, v string) {
-				placeholder := fmt.Sprintf("%%extra.%s%%", k)
-				new = strings.ReplaceAll(new, placeholder, v)
-			})
+		for k, v := range d.extra {
+			placeholder := fmt.Sprintf("%%extra.%s%%", k)
+			new = strings.ReplaceAll(new, placeholder, v)
+		}
 	}
 	return new
 }
