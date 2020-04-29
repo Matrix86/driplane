@@ -43,6 +43,7 @@ type FeederNode struct {
 }
 
 type FilterNode struct {
+	Neg    bool     `@("!")?`
 	Name   string   `@Ident`
 	Params []*Param `"(" ( @@ ("," @@)* )? ")"`
 	Next   *Node    `("|" @@)?`
@@ -55,8 +56,8 @@ type FilterNode struct {
 //}
 
 type RuleCall struct {
-	Name   string `"@" @Ident`
-	Next   *Node  `("|" @@)?`
+	Name string `"@" @Ident`
+	Next *Node  `("|" @@)?`
 }
 
 type Param struct {

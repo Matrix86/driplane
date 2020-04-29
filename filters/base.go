@@ -15,6 +15,7 @@ type Filter interface {
 	setName(name string)
 	setBus(bus EventBus.Bus)
 	setId(id int32)
+	setIsNegative(b bool)
 
 	Name() string
 	DoFilter(msg *data.Message) (bool, error)
@@ -26,6 +27,7 @@ type Base struct {
 	name     string
 	id       int32
 	bus      EventBus.Bus
+	negative bool
 	cbFilter func(msg *data.Message) (bool, error)
 }
 
@@ -45,6 +47,10 @@ func (f *Base) setName(name string) {
 	f.name = name
 }
 
+func (f *Base) setIsNegative(b bool) {
+	f.negative = b
+}
+
 func (f *Base) GetIdentifier() string {
 	return fmt.Sprintf("%s:%d", f.name, f.id)
 }
@@ -55,7 +61,9 @@ func (f *Base) Pipe(msg *data.Message) {
 	if err != nil {
 		log.Error("[%s] %s", f.name, err)
 	}
-	if b {
+
+	// golang does not provide a logical XOR so we have to "implement" it manually
+	if f.negative != b {
 		log.Debug("[%s] filter matched", f.name)
 		f.Propagate(msg)
 	}
@@ -79,13 +87,14 @@ func register(name string, f FilterFactory) {
 func init() {
 }
 
-func NewFilter(name string, conf map[string]string, bus EventBus.Bus, id int32) (Filter, error) {
+func NewFilter(name string, conf map[string]string, bus EventBus.Bus, id int32, neg bool) (Filter, error) {
 	if _, ok := filterFactories[name]; ok {
 		f, err := filterFactories[name](conf)
 		if err == nil && f != nil {
 			f.setName(name)
 			f.setBus(bus)
 			f.setId(id)
+			f.setIsNegative(neg)
 		}
 		return f, err
 	}

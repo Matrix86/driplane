@@ -8,7 +8,7 @@ import (
 type Hash struct {
 	Base
 
-	regex   *regexp.Regexp
+	regex *regexp.Regexp
 
 	useMd5      bool
 	useSha1     bool
@@ -28,7 +28,7 @@ func NewHashFilter(p map[string]string) (Filter, error) {
 		useSha1:     true,
 		useSha256:   true,
 		useSha512:   true,
-		extractHash: true,
+		extractHash: false,
 	}
 	f.cbFilter = f.DoFilter
 
@@ -46,8 +46,8 @@ func NewHashFilter(p map[string]string) (Filter, error) {
 	if v, ok := f.params["sha512"]; ok && v == "false" {
 		f.useSha256 = false
 	}
-	if v, ok := f.params["extract"]; ok && v == "false" {
-		f.extractHash = false
+	if v, ok := f.params["extract"]; ok && v == "true" {
+		f.extractHash = true
 	}
 	//if v, ok := f.params["filter_extra"]; ok {
 	//	f.filter_extra = v
