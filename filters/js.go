@@ -1,18 +1,11 @@
 package filters
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/Matrix86/driplane/data"
+	"github.com/Matrix86/driplane/plugins"
 	"github.com/evilsocket/islazy/log"
 	"github.com/evilsocket/islazy/plugin"
-	"io"
-	"io/ioutil"
-	"mime/multipart"
-	"net/http"
-	"net/url"
-	"os"
-	"path/filepath"
 )
 
 type Js struct {
@@ -42,138 +35,15 @@ func NewJsFilter(p map[string]string) (Filter, error) {
 		f.function = v
 	}
 
+	// Thx @evilsocket for the hint =)
+	// https://github.com/evilsocket/shellz/blob/master/plugins/plugin.go#L18
 	plugin.Defines = map[string]interface{}{
 		"log": func(s string) interface{} {
 			log.Info("%s", s)
 			return nil
 		},
-		"httpSend": func(method string, urlString string, data map[string]string, headers map[string]string) interface{} {
-			client := &http.Client{}
-			if method == "" {
-				method = "GET"
-			}
-
-			dt := url.Values{}
-			for key, value := range data {
-				dt.Set(key, value)
-			}
-
-			req, err := http.NewRequest(method, urlString, bytes.NewBufferString(dt.Encode()))
-			if err != nil {
-				log.Error("%s", err)
-				return false
-			}
-
-			for key, value := range headers {
-				req.Header.Add(key, value)
-			}
-
-			r, err := client.Do(req)
-			if err != nil {
-				log.Error("%s", err)
-				return false
-			}
-			defer r.Body.Close()
-			body, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				log.Error("%s", err)
-				return false
-			}
-
-			return map[string]string{"status": r.Status, "body": string(body)}
-		},
-		"downloadFile": func(filepath string, method string, urlString string, data map[string]string, headers map[string]string) interface{} {
-			client := &http.Client{}
-			if method == "" {
-				method = "GET"
-			}
-
-			dt := url.Values{}
-			for key, value := range data {
-				dt.Set(key, value)
-			}
-
-			req, err := http.NewRequest(method, urlString, bytes.NewBufferString(dt.Encode()))
-			if err != nil {
-				log.Error("%s", err)
-				return false
-			}
-
-			for key, value := range headers {
-				req.Header.Add(key, value)
-			}
-
-			r, err := client.Do(req)
-			if err != nil {
-				log.Error("%s", err)
-				return false
-			}
-			defer r.Body.Close()
-
-			out, err := os.Create(filepath)
-			if err != nil {
-				log.Error("%s", err)
-				return false
-			}
-			defer out.Close()
-
-			_, err = io.Copy(out, r.Body)
-			if err != nil {
-				log.Error("%s", err)
-				return false
-			}
-			return true
-		},
-		"uploadFile": func(filename string, fieldname string, method string, urlString string, headers map[string]string) interface{} {
-			file, err := os.Open(filename)
-			if err != nil {
-				log.Error("%s", err)
-				return false
-			}
-			defer file.Close()
-
-			bodyfile := &bytes.Buffer{}
-			writer := multipart.NewWriter(bodyfile)
-			part, err := writer.CreateFormFile("file", filepath.Base(filename))
-
-			if err != nil {
-				log.Error("%s", err)
-				return false
-			}
-
-			io.Copy(part, file)
-			writer.Close()
-
-			client := &http.Client{}
-			if method == "" {
-				method = "GET"
-			}
-
-			req, err := http.NewRequest(method, urlString, bodyfile)
-			if err != nil {
-				log.Error("%s", err)
-				return false
-			}
-
-			for key, value := range headers {
-				req.Header.Add(key, value)
-			}
-			req.Header.Add("Content-Type", writer.FormDataContentType())
-
-			r, err := client.Do(req)
-			if err != nil {
-				log.Error("%s", err)
-				return false
-			}
-			defer r.Body.Close()
-			body, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				log.Error("%s", err)
-				return false
-			}
-
-			return map[string]string{"status": r.Status, "body": string(body)}
-		},
+		"http": plugins.GetHTTP(),
+		"file": plugins.GetFile(),
 	}
 
 	var err error
