@@ -14,7 +14,8 @@ var ruleLexer = lexer.Must(lexer.Regexp(
 		`|(^[#].*$)` +
 		`|(?P<Keyword>(?i)FEEDER|SET)` +
 		`|(?P<Ident>[a-zA-Z][a-zA-Z_\d]*)` +
-		`|(?P<String>"(?:[^"]*("")?)*")` +
+		//`|(?P<String>"(?:[^"]*("")?)*")` +
+		`|(?P<String>"(?:\\.|[^\"])*")` +
 		`|(?P<Float>\d+(?:\.\d+)?)` +
 		`|(?P<Punct>[]["|,:;()=<>@"])` +
 		`|(?P<Operators>!)`,
