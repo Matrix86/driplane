@@ -27,7 +27,7 @@ type httpResponse struct {
 	Body     string
 }
 
-func (c *httpPackage) createRequest(method string, uri string, headers map[string]string, data interface{}) (*http.Request, error) {
+func (c *httpPackage) createRequest(method string, uri string, headers interface{}, data interface{}) (*http.Request, error) {
 	var reader io.Reader
 
 	if data != nil {
@@ -55,14 +55,20 @@ func (c *httpPackage) createRequest(method string, uri string, headers map[strin
 		return nil, err
 	}
 
-	for name, value := range headers {
-		req.Header.Add(name, value)
+	if headers != nil {
+		if h, ok := headers.(map[string]interface{}); ok {
+			for name, value := range h {
+				if v, ok := value.(string); ok {
+					req.Header.Add(name, v)
+				}
+			}
+		}
 	}
 
 	return req, nil
 }
 
-func (c *httpPackage) Request(method string, uri string, headers map[string]string, data interface{}) httpResponse {
+func (c *httpPackage) Request(method string, uri string, headers interface{}, data interface{}) httpResponse {
 	client := &http.Client{}
 
 	req, err := c.createRequest(method, uri, headers, data)
@@ -98,7 +104,7 @@ func (c *httpPackage) Post(url string, headers map[string]string, data interface
 	return c.Request("POST", url, headers, data)
 }
 
-func (c *httpPackage) DownloadFile(filepath string, method string, uri string, headers map[string]string, data interface{}) httpResponse {
+func (c *httpPackage) DownloadFile(filepath string, method string, uri string, headers interface{}, data interface{}) httpResponse {
 	client := &http.Client{}
 
 	req, err := c.createRequest(method, uri, headers, data)
@@ -126,10 +132,13 @@ func (c *httpPackage) DownloadFile(filepath string, method string, uri string, h
 		return httpResponse{Error: err}
 	}
 
-	return httpResponse{}
+	return httpResponse{
+		Error:    nil,
+		Response: resp,
+	}
 }
 
-func (c *httpPackage) UploadFile(filename string, fieldname string, method string, uri string, headers map[string]string, data interface{}) httpResponse {
+func (c *httpPackage) UploadFile(filename string, fieldname string, method string, uri string, headers interface{}, data interface{}) httpResponse {
 	client := &http.Client{}
 
 	file, err := os.Open(filename)
@@ -139,32 +148,45 @@ func (c *httpPackage) UploadFile(filename string, fieldname string, method strin
 	}
 	defer file.Close()
 
-	bodyfile := &bytes.Buffer{}
-	writer := multipart.NewWriter(bodyfile)
+	bodyfile := bytes.Buffer{}
+	writer := multipart.NewWriter(&bodyfile)
+
 	part, err := writer.CreateFormFile(fieldname, filepath.Base(filename))
-
-	if v, ok := data.(map[string]string); ok {
-		for key, val := range v {
-			_ = writer.WriteField(key, val)
-		}
-	}
-
 	if err != nil {
 		log.Error("%s", err)
 		return httpResponse{Error: err}
 	}
+	_, err = io.Copy(part, file)
+	if err != nil {
+		log.Error("http.createRequest : io.Copy : %s", err)
+		return httpResponse{Error: err}
+	}
 
-	io.Copy(part, file)
-	writer.Close()
+	if v, ok := data.(map[string]interface{}); ok {
+		for key, val := range v {
+			if v, ok := val.(string); ok {
+				_ = writer.WriteField(key, v)
+			}
+		}
+	}
 
-	req, err := c.createRequest(method, uri, headers, bodyfile)
+	err = writer.Close()
+	if err != nil {
+		log.Error("http.UploadFile : writer.Close : %s", err)
+		return httpResponse{Error: err}
+	}
+
+	req, err := c.createRequest(method, uri, headers, &bodyfile)
 	if err != nil {
 		log.Error("http.createRequest : %s", err)
 		return httpResponse{Error: err}
 	}
 
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
 	resp, err := client.Do(req)
 	if err != nil {
+		log.Error("http.Upload client do : %s", err)
 		return httpResponse{Error: err}
 	}
 	defer resp.Body.Close()

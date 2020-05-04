@@ -72,12 +72,13 @@ func (f *Js) DoFilter(msg *data.Message) (bool, error) {
 
 				if triggered {
 					if v, ok := result["data"]; ok {
-						if s, ok := v.(string); ok {
-							msg.SetMessage(s)
+						switch t := v.(type) {
+						case string:
+							msg.SetMessage(t)
 							msg.SetExtra("fulltext", text)
-						}
-						if msi, ok := v.(map[string]interface{}); ok {
-							for key, vi := range msi {
+
+						case map[string]interface{}:
+							for key, vi := range t {
 								if value, ok := vi.(string); ok {
 									if key == "data" {
 										msg.SetMessage(value)
