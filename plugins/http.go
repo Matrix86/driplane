@@ -14,13 +14,10 @@ import (
 	"github.com/evilsocket/islazy/log"
 )
 
-type httpPackage struct {
-}
+type httpPackage struct {}
 
-var hp = httpPackage{}
-
-func GetHTTP() httpPackage {
-	return hp
+func GetHttp() *httpPackage {
+	return &httpPackage{}
 }
 
 type httpResponse struct {
@@ -132,7 +129,7 @@ func (c *httpPackage) DownloadFile(filepath string, method string, uri string, h
 	return httpResponse{}
 }
 
-func (c *httpPackage) UploadFile(method string, uri string, headers map[string]string, data interface{}, filename string, fieldname string) httpResponse {
+func (c *httpPackage) UploadFile(filename string, fieldname string, method string, uri string, headers map[string]string, data interface{}) httpResponse {
 	client := &http.Client{}
 
 	file, err := os.Open(filename)

@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/Matrix86/driplane/data"
+	"github.com/evilsocket/islazy/log"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
+	"text/template"
 )
 
 type HTTP struct {
@@ -16,12 +19,14 @@ type HTTP struct {
 	urlFromInput bool
 	getBody      bool
 	checkStatus  int
-	urlString    string
 	method       string
+	rawData      *template.Template
 	headers      map[string]string
-	dataPost     map[string]string
+	dataPost     map[string]*template.Template
 
 	params map[string]string
+
+	urlTemplate *template.Template
 }
 
 func NewHttpFilter(p map[string]string) (Filter, error) {
@@ -31,7 +36,7 @@ func NewHttpFilter(p map[string]string) (Filter, error) {
 		getBody:      true,
 		method:       "GET",
 		headers:      make(map[string]string),
-		dataPost:     make(map[string]string),
+		dataPost:     make(map[string]*template.Template),
 		checkStatus:  200,
 	}
 	f.cbFilter = f.DoFilter
@@ -40,7 +45,11 @@ func NewHttpFilter(p map[string]string) (Filter, error) {
 		f.urlFromInput = true
 	}
 	if v, ok := f.params["url"]; ok {
-		f.urlString = v
+		t, err := template.New("httpFilterUrlString").Parse(v)
+		if err != nil {
+			return nil, err
+		}
+		f.urlTemplate = t
 	}
 	if v, ok := f.params["method"]; ok {
 		f.method = v
@@ -52,10 +61,25 @@ func NewHttpFilter(p map[string]string) (Filter, error) {
 		}
 	}
 	if v, ok := f.params["data"]; ok {
-		err := json.Unmarshal([]byte(v), &f.dataPost)
+		tmpMap := make(map[string]string)
+		err := json.Unmarshal([]byte(v), &tmpMap)
 		if err != nil {
 			return nil, err
 		}
+		for i, v := range tmpMap {
+			t, err := template.New("httpFilterdataPost"+i).Parse(v)
+			if err != nil {
+				return nil, err
+			}
+			f.dataPost[i] = t
+		}
+	}
+	if v, ok := f.params["rawData"]; ok {
+		t, err := template.New("httpFilterRawData").Parse(v)
+		if err != nil {
+			return nil, err
+		}
+		f.rawData = t
 	}
 	if v, ok := f.params["status"]; ok {
 		i, err := strconv.Atoi(v)
@@ -80,24 +104,34 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 	if f.urlFromInput {
 		urlString = text
 	} else {
-		urlString = msg.ReplacePlaceholders(f.urlString)
+		urlString, err = msg.ApplyPlaceholder(f.urlTemplate)
+		if err != nil {
+			return false, err
+		}
 	}
 
+	var reader io.Reader
 	if len(f.dataPost) > 0 {
-		data := url.Values{}
+		values := url.Values{}
 		for key, value := range f.dataPost {
-			data.Set(key, value)
+			v, err := msg.ApplyPlaceholder(value)
+			if err != nil {
+				return false, err
+			}
+			values.Set(key, v)
 		}
+		reader = bytes.NewBufferString(values.Encode())
+	} else if f.rawData != nil {
+		body, err := msg.ApplyPlaceholder(f.rawData)
+		if err != nil {
+			return false, err
+		}
+		reader = bytes.NewBufferString(body)
+	}
 
-		req, err = http.NewRequest(f.method, urlString, bytes.NewBufferString(data.Encode()))
-		if err != nil {
-			return false, err
-		}
-	} else {
-		req, err = http.NewRequest(f.method, urlString, nil)
-		if err != nil {
-			return false, err
-		}
+	req, err = http.NewRequest(f.method, urlString, reader)
+	if err != nil {
+		return false, err
 	}
 
 	if len(f.headers) > 0 {
@@ -113,6 +147,7 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 	defer r.Body.Close()
 
 	ret := false
+	log.Debug("[httpFilter] status %s", r.Status)
 	if f.checkStatus == r.StatusCode {
 		ret = true
 		body, err := ioutil.ReadAll(r.Body)

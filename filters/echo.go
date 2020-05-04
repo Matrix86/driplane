@@ -31,9 +31,9 @@ func NewEchoFilter(p map[string]string) (Filter, error) {
 func (f *Echo) DoFilter(msg *data.Message) (bool, error) {
 	text := msg.GetMessage()
 	if f.printExtra {
-		msg.Extra(func(k, v string) {
+		for k, v := range msg.GetExtra() {
 			text = fmt.Sprintf("%s [%s: %s] ", text, k, v)
-		})
+		}
 	}
 	log.Info("%s", text)
 	return true, nil

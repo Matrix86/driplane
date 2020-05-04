@@ -6,13 +6,10 @@ import (
 	"os"
 )
 
-type filePackage struct {
-}
+type filePackage struct {}
 
-var fp = filePackage{}
-
-func GetFile() filePackage {
-	return fp
+func GetFile() *filePackage {
+	return &filePackage{}
 }
 
 type fileResponse struct {

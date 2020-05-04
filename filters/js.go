@@ -3,9 +3,9 @@ package filters
 import (
 	"fmt"
 	"github.com/Matrix86/driplane/data"
-	"github.com/Matrix86/driplane/plugins"
-	"github.com/evilsocket/islazy/log"
 	"github.com/evilsocket/islazy/plugin"
+
+	_ "github.com/Matrix86/driplane/plugins"
 )
 
 type Js struct {
@@ -14,7 +14,7 @@ type Js struct {
 	filepath string
 	function string
 
-	plugin *plugin.Plugin
+	p *plugin.Plugin
 
 	params map[string]string
 }
@@ -35,26 +35,15 @@ func NewJsFilter(p map[string]string) (Filter, error) {
 		f.function = v
 	}
 
-	// Thx @evilsocket for the hint =)
-	// https://github.com/evilsocket/shellz/blob/master/plugins/plugin.go#L18
-	plugin.Defines = map[string]interface{}{
-		"log": func(s string) interface{} {
-			log.Info("%s", s)
-			return nil
-		},
-		"http": plugins.GetHTTP(),
-		"file": plugins.GetFile(),
-	}
-
 	var err error
 	// load the plugin
-	f.plugin, err = plugin.Load(f.filepath)
+	f.p, err = plugin.Load(f.filepath)
 	if err != nil {
 		return nil, fmt.Errorf("JsFilter '%s': %s", f.filepath, err)
 	}
 
 	// Check if the JS plugin contains the DoFilter method
-	if !f.plugin.HasFunc(f.function) {
+	if !f.p.HasFunc(f.function) {
 		return nil, fmt.Errorf("NewJsFilter: %s doesn't contain the %s function", f.filepath, f.function)
 	}
 
@@ -66,9 +55,9 @@ func (f *Js) DoFilter(msg *data.Message) (bool, error) {
 	text := msg.GetMessage()
 	extra := msg.GetExtra()
 
-	res, err := f.plugin.Call(f.function, text, extra, f.params)
+	res, err := f.p.Call(f.function, text, extra, f.params)
 	if err != nil {
-		return false, fmt.Errorf("js: DoFilter function returned '%s'", err)
+		return false, fmt.Errorf("DoFilter: file '%s': '%s'", f.p.Path, err.Error())
 	}
 
 	if res != nil {

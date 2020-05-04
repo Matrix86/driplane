@@ -3,8 +3,10 @@ package filters
 import (
 	"fmt"
 	"github.com/Matrix86/driplane/data"
+	"github.com/Matrix86/driplane/plugins"
 	"github.com/asaskevich/EventBus"
 	"github.com/evilsocket/islazy/log"
+	"github.com/evilsocket/islazy/plugin"
 )
 
 type FilterFactory func(conf map[string]string) (Filter, error)
@@ -85,6 +87,16 @@ func register(name string, f FilterFactory) {
 }
 
 func init() {
+	// Thx @evilsocket for the hint =)
+	// https://github.com/evilsocket/shellz/blob/master/plugins/plugin.go#L18
+	plugin.Defines = map[string]interface{}{
+		"log": plugins.GetLog(),
+		"http": plugins.GetHttp(),
+		"file": plugins.GetFile(),
+		"dio": func(format string, a ...interface{}){
+			log.Info(format, a)
+		},
+	}
 }
 
 func NewFilter(name string, conf map[string]string, bus EventBus.Bus, id int32, neg bool) (Filter, error) {

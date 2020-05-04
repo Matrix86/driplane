@@ -1,9 +1,9 @@
 package data
 
 import (
-	"fmt"
-	"strings"
+	"bytes"
 	"sync"
+	"text/template"
 )
 
 type Callback func(msg Message)
@@ -11,8 +11,7 @@ type Callback func(msg Message)
 type Message struct {
 	sync.Mutex
 
-	message string
-	extra   map[string]string
+	fields   map[string]string
 }
 
 func NewMessage(msg string) *Message {
@@ -20,28 +19,31 @@ func NewMessage(msg string) *Message {
 }
 
 func NewMessageWithExtra(msg string, extra map[string]string) *Message {
+	extra["main"] = msg
 	return &Message{
-		message: msg,
-		extra:   extra,
+		fields:   extra,
 	}
 }
 
 func (d *Message) SetMessage(msg string) {
 	d.Lock()
 	defer d.Unlock()
-	d.message = msg
+	d.fields["main"] = msg
 }
 
 func (d *Message) GetMessage() string {
 	d.Lock()
 	defer d.Unlock()
-	return d.message
+	return d.fields["main"]
 }
 
 func (d *Message) SetExtra(k string, v string) {
 	d.Lock()
 	defer d.Unlock()
-	d.extra[k] = v
+	if k == "main" {
+		return
+	}
+	d.fields[k] = v
 }
 
 func (d *Message) GetExtra() map[string]string{
@@ -49,29 +51,32 @@ func (d *Message) GetExtra() map[string]string{
 	defer d.Unlock()
 
 	clone := make(map[string]string)
-	for key, value := range d.extra {
+	for key, value := range d.fields {
+		if key == "main" {
+			// Ignoring main content
+			continue
+		}
 		clone[key] = value
 	}
 	return clone
 }
 
-func (d *Message) Extra(cb func(k, v string)) {
-	d.Lock()
-	defer d.Unlock()
-	for k, v := range d.extra {
-		cb(k, v)
-	}
-}
+//func (d *Message) Extra(cb func(k, v string)) {
+//	d.Lock()
+//	defer d.Unlock()
+//	for k, v := range d.extra {
+//		cb(k, v)
+//	}
+//}
 
-func (d *Message) ReplacePlaceholders(text string) string {
+func (d *Message) ApplyPlaceholder(t *template.Template) (string, error) {
 	d.Lock()
 	defer d.Unlock()
-	new := strings.ReplaceAll(text, "%text%", d.message)
-	if strings.Contains(text, "%extra.") {
-		for k, v := range d.extra {
-			placeholder := fmt.Sprintf("%%extra.%s%%", k)
-			new = strings.ReplaceAll(new, placeholder, v)
-		}
+	var writer bytes.Buffer
+
+	err := t.Execute(&writer, d.fields)
+	if err != nil {
+		return "", err
 	}
-	return new
+	return writer.String(), nil
 }
