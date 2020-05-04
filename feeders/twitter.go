@@ -22,6 +22,7 @@ type Twitter struct {
 	keywords      string
 	users         string
 	languages     string
+	retweet       bool
 	stallWarnings bool
 
 	stream *twitter.Stream
@@ -33,6 +34,7 @@ type Twitter struct {
 func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
 	t := &Twitter{
 		stallWarnings: false,
+		retweet: true,
 	}
 
 	if val, ok := conf["twitter.consumerKey"]; ok {
@@ -55,6 +57,9 @@ func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
 	}
 	if val, ok := conf["twitter.languages"]; ok {
 		t.languages = val
+	}
+	if val, ok := conf["twitter.retweet"]; ok && val == "false" {
+		t.retweet = false
 	}
 	if val, ok := conf["twitter.stallWarnings"]; ok {
 		b, err := strconv.ParseBool(val)
@@ -112,7 +117,7 @@ func (t *Twitter) Start() {
 		if tweet.ExtendedTweet != nil {
 			text = tweet.ExtendedTweet.FullText
 		}
-		if strings.HasPrefix(text, "RT ") == false {
+		if t.retweet || ( t.retweet == false && strings.HasPrefix(text, "RT ") == false ){
 			t.Propagate(data.NewMessageWithExtra(text, map[string]string{
 				"link":     fmt.Sprintf("https://twitter.com/%s/statuses/%d", tweet.User.ScreenName, tweet.ID),
 				"language": tweet.Lang,
