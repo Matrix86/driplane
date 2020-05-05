@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"github.com/Matrix86/driplane/data"
 	"github.com/evilsocket/islazy/log"
+	"html/template"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
-	"text/template"
 )
 
 type HTTP struct {
@@ -67,7 +67,7 @@ func NewHttpFilter(p map[string]string) (Filter, error) {
 			return nil, err
 		}
 		for i, v := range tmpMap {
-			t, err := template.New("httpFilterdataPost"+i).Parse(v)
+			t, err := template.New("httpFilterdataPost" + i).Parse(v)
 			if err != nil {
 				return nil, err
 			}

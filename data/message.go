@@ -2,8 +2,8 @@ package data
 
 import (
 	"bytes"
+	"html/template"
 	"sync"
-	"text/template"
 )
 
 type Callback func(msg Message)
@@ -11,7 +11,7 @@ type Callback func(msg Message)
 type Message struct {
 	sync.Mutex
 
-	fields   map[string]string
+	fields map[string]string
 }
 
 func NewMessage(msg string) *Message {
@@ -21,7 +21,7 @@ func NewMessage(msg string) *Message {
 func NewMessageWithExtra(msg string, extra map[string]string) *Message {
 	extra["main"] = msg
 	return &Message{
-		fields:   extra,
+		fields: extra,
 	}
 }
 
@@ -46,7 +46,7 @@ func (d *Message) SetExtra(k string, v string) {
 	d.fields[k] = v
 }
 
-func (d *Message) GetExtra() map[string]string{
+func (d *Message) GetExtra() map[string]string {
 	d.Lock()
 	defer d.Unlock()
 

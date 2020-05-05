@@ -3,9 +3,9 @@ package filters
 import (
 	"github.com/Matrix86/driplane/data"
 	"github.com/evilsocket/islazy/log"
+	"html/template"
 	"os/exec"
 	"regexp"
-	"text/template"
 )
 
 type System struct {
