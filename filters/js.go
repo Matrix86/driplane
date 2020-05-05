@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Matrix86/driplane/data"
 	"github.com/evilsocket/islazy/plugin"
+	"github.com/robertkrimen/otto"
 
 	_ "github.com/Matrix86/driplane/plugins"
 )
@@ -57,7 +58,8 @@ func (f *Js) DoFilter(msg *data.Message) (bool, error) {
 
 	res, err := f.p.Call(f.function, text, extra, f.params)
 	if err != nil {
-		return false, fmt.Errorf("DoFilter: file '%s': '%s'", f.p.Path, err.Error())
+		err := err.(*otto.Error)
+		return false, fmt.Errorf("DoFilter: file '%s': '%s'", f.p.Path, err.String())
 	}
 
 	if res != nil {
