@@ -99,6 +99,14 @@ func (t *Twitter) getIdsFromUsernames(usernames []string) (map[string]int64, err
 	return ids, nil
 }
 
+func (t *Twitter) getTweetExtendedText(tweet *twitter.Tweet) string {
+	text := tweet.Text
+	if tweet.ExtendedTweet != nil {
+		text = tweet.ExtendedTweet.FullText
+	}
+	return text
+}
+
 func (t *Twitter) Start() {
 	var err error
 
@@ -113,15 +121,37 @@ func (t *Twitter) Start() {
 	// Convenience Demux demultiplexed stream messages
 	demux := twitter.NewSwitchDemux()
 	demux.Tweet = func(tweet *twitter.Tweet) {
-		text := tweet.Text
-		if tweet.ExtendedTweet != nil {
-			text = tweet.ExtendedTweet.FullText
-		}
-		if t.retweet || ( t.retweet == false && strings.HasPrefix(text, "RT ") == false ){
+		if t.retweet && (tweet.RetweetedStatus != nil || tweet.QuotedStatus != nil) {
+			if tweet.RetweetedStatus != nil {
+				retweet := tweet.RetweetedStatus
+				txt := t.getTweetExtendedText(retweet)
+				t.Propagate(data.NewMessageWithExtra(txt, map[string]string{
+					"link":     fmt.Sprintf("https://twitter.com/%s/statuses/%d", retweet.User.ScreenName, retweet.ID),
+					"language": retweet.Lang,
+					"username": retweet.User.ScreenName,
+					"quoted": "false",
+					"retweet": "true",
+				}))
+			}
+			if tweet.QuotedStatus != nil {
+				retweet := tweet.QuotedStatus
+				txt := t.getTweetExtendedText(retweet)
+				t.Propagate(data.NewMessageWithExtra(txt, map[string]string{
+					"link":     fmt.Sprintf("https://twitter.com/%s/statuses/%d", retweet.User.ScreenName, retweet.ID),
+					"language": retweet.Lang,
+					"username": retweet.User.ScreenName,
+					"quoted": "true",
+					"retweet": "false",
+				}))
+			}
+		} else {
+			text := t.getTweetExtendedText(tweet)
 			t.Propagate(data.NewMessageWithExtra(text, map[string]string{
 				"link":     fmt.Sprintf("https://twitter.com/%s/statuses/%d", tweet.User.ScreenName, tweet.ID),
 				"language": tweet.Lang,
 				"username": tweet.User.ScreenName,
+				"quoted": "false",
+				"retweet": "false",
 			}))
 		}
 	}
