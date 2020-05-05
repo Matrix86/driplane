@@ -13,9 +13,11 @@ require (
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/hpcloud/tail v1.0.0
-	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff // indirect
+	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	golang.org/x/sys v0.0.0-20190508100423-12bbe5a7a520 // indirect
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 )
