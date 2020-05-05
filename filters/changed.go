@@ -12,7 +12,6 @@ type Changed struct {
 	Base
 
 	target string
-
 	params map[string]string
 	cache  string
 }
