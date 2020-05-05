@@ -7,6 +7,7 @@ import (
 	bus "github.com/asaskevich/EventBus"
 	"github.com/evilsocket/islazy/log"
 	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -63,7 +64,8 @@ type PipeRule struct {
 	Name      string
 	HasFeeder bool
 
-	nodes []INode
+	config *Configuration
+	nodes  []INode
 }
 
 func (p *PipeRule) getLastNode() INode {
@@ -80,8 +82,31 @@ func (p *PipeRule) getFirstNode() INode {
 	return p.nodes[0]
 }
 
+/*
+// configuration override from the rule itself
+		config := config.GetConfig()
+		for _, par := range node.Feeder.Params {
+			value := ""
+			if par.Value.Number != nil {
+				value = strconv.FormatFloat(*par.Value.Number, 'E', -1, 64)
+			} else {
+				value = *par.Value.String
+			}
+			config[node.Feeder.Name+"."+par.Name] = value
+		}
+*/
+
 func (p *PipeRule) newFilter(fn *FilterNode) (filters.Filter, error) {
 	params := make(map[string]string)
+	config := p.config.GetConfig()
+	prefix := strings.ToLower(fn.Name+".")
+	for k, v := range config {
+		if strings.HasPrefix(k, prefix) {
+			params[strings.TrimPrefix(k, prefix)] = v
+		}
+	}
+
+	// configurations will be overrided by the parameters defined in the rule file
 	for _, par := range fn.Params {
 		value := ""
 		if par.Value.Number != nil {
@@ -171,6 +196,7 @@ func (p *PipeRule) addNode(node *Node, prev string) error {
 func NewPipeRule(node *RuleNode, config Configuration) (*PipeRule, error) {
 	rule := &PipeRule{}
 	rule.Name = node.Identifier
+	rule.config = &config
 
 	log.Info("Rule '%s' found", rule.Name)
 
