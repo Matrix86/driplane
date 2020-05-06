@@ -118,7 +118,7 @@ func (p *PipeRule) newFilter(fn *FilterNode) (filters.Filter, error) {
 	}
 
 	rs := RuleSetInstance()
-	f, err := filters.NewFilter(fn.Name+"filter", params, rs.bus, rs.lastId+1, fn.Neg)
+	f, err := filters.NewFilter(p.Name, fn.Name+"filter", params, rs.bus, rs.lastId+1, fn.Neg)
 	if err != nil {
 		return nil, err
 	}

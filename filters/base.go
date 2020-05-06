@@ -14,11 +14,13 @@ type FilterFactory func(conf map[string]string) (Filter, error)
 var filterFactories = make(map[string]FilterFactory)
 
 type Filter interface {
+	setRuleName(name string)
 	setName(name string)
 	setBus(bus EventBus.Bus)
 	setId(id int32)
 	setIsNegative(b bool)
 
+	Rule() string
 	Name() string
 	DoFilter(msg *data.Message) (bool, error)
 	Pipe(msg *data.Message)
@@ -26,11 +28,16 @@ type Filter interface {
 }
 
 type Base struct {
+	rule     string
 	name     string
 	id       int32
 	bus      EventBus.Bus
 	negative bool
 	cbFilter func(msg *data.Message) (bool, error)
+}
+
+func (f *Base) Rule() string {
+	return f.rule
 }
 
 func (f *Base) Name() string {
@@ -49,6 +56,10 @@ func (f *Base) setName(name string) {
 	f.name = name
 }
 
+func (f *Base) setRuleName(name string) {
+	f.rule = name
+}
+
 func (f *Base) setIsNegative(b bool) {
 	f.negative = b
 }
@@ -58,15 +69,15 @@ func (f *Base) GetIdentifier() string {
 }
 
 func (f *Base) Pipe(msg *data.Message) {
-	log.Debug("[%s] received: %#v", f.name, msg)
+	log.Debug("[%s::%s] received: %#v", f.rule, f.name, msg)
 	b, err := f.cbFilter(msg)
 	if err != nil {
-		log.Error("[%s] %s", f.name, err)
+		log.Error("[%s::%s] %s", f.rule, f.name, err)
 	}
 
 	// golang does not provide a logical XOR so we have to "implement" it manually
 	if f.negative != b {
-		log.Debug("[%s] filter matched", f.name)
+		log.Debug("[%s::%s] filter matched", f.rule, f.name)
 		f.Propagate(msg)
 	}
 }
@@ -90,19 +101,17 @@ func init() {
 	// Thx @evilsocket for the hint =)
 	// https://github.com/evilsocket/shellz/blob/master/plugins/plugin.go#L18
 	plugin.Defines = map[string]interface{}{
-		"log": plugins.GetLog(),
+		"log":  plugins.GetLog(),
 		"http": plugins.GetHttp(),
 		"file": plugins.GetFile(),
-		"dio": func(format string, a ...interface{}){
-			log.Info(format, a)
-		},
 	}
 }
 
-func NewFilter(name string, conf map[string]string, bus EventBus.Bus, id int32, neg bool) (Filter, error) {
+func NewFilter(rule string, name string, conf map[string]string, bus EventBus.Bus, id int32, neg bool) (Filter, error) {
 	if _, ok := filterFactories[name]; ok {
 		f, err := filterFactories[name](conf)
 		if err == nil && f != nil {
+			f.setRuleName(rule)
 			f.setName(name)
 			f.setBus(bus)
 			f.setId(id)
