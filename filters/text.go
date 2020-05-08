@@ -64,10 +64,10 @@ func (f *Text) DoFilter(msg *data.Message) (bool, error) {
 				return true, nil
 			} else if len(matched) > 1 {
 				for _, m := range matched {
-					clone := *msg
+					clone := msg.Clone()
 					clone.SetMessage(m)
 					clone.SetExtra("fulltext", text)
-					f.Propagate(&clone)
+					f.Propagate(clone)
 				}
 				return false, nil
 			}

@@ -65,10 +65,10 @@ func (f *URL) DoFilter(msg *data.Message) (bool, error) {
 			}
 
 			if f.extractUrl {
-				clone := *msg
+				clone := msg.Clone()
 				clone.SetMessage(mm)
 				clone.SetExtra("fulltext", text)
-				f.Propagate(&clone)
+				f.Propagate(clone)
 				// We need to stop the propagation of the first message
 				found = false
 			} else if found {

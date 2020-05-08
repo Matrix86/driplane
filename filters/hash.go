@@ -46,7 +46,7 @@ func NewHashFilter(p map[string]string) (Filter, error) {
 		f.useSha256 = false
 	}
 	if v, ok := f.params["sha512"]; ok && v == "false" {
-		f.useSha256 = false
+		f.useSha512 = false
 	}
 	if v, ok := f.params["extract"]; ok && v == "true" {
 		f.extractHash = true
@@ -77,10 +77,10 @@ func (f *Hash) DoFilter(msg *data.Message) (bool, error) {
 
 			if found {
 				if f.extractHash {
-					clone := *msg
+					clone := msg.Clone()
 					clone.SetMessage(m[0])
 					clone.SetExtra("fulltext", text)
-					f.Propagate(&clone)
+					f.Propagate(clone)
 				} else {
 					return true, nil
 				}
