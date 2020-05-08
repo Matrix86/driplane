@@ -70,6 +70,17 @@ func (d *Message) GetTarget(name string) string {
 	return ""
 }
 
+func (d *Message) Clone() *Message {
+	clone := &Message{
+		fields: make(map[string]string, 0),
+	}
+
+	for k, v := range d.fields {
+		clone.fields[k] = v
+	}
+	return clone
+}
+
 func (d *Message) ApplyPlaceholder(t *template.Template) (string, error) {
 	d.RLock()
 	defer d.RUnlock()
