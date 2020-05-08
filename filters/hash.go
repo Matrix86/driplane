@@ -15,6 +15,7 @@ type Hash struct {
 	useSha256   bool
 	useSha512   bool
 	extractHash bool
+	target      string
 
 	//filter_extra string
 
@@ -29,6 +30,7 @@ func NewHashFilter(p map[string]string) (Filter, error) {
 		useSha256:   true,
 		useSha512:   true,
 		extractHash: false,
+		target:      "main",
 	}
 	f.cbFilter = f.DoFilter
 
@@ -49,17 +51,15 @@ func NewHashFilter(p map[string]string) (Filter, error) {
 	if v, ok := f.params["extract"]; ok && v == "true" {
 		f.extractHash = true
 	}
-	//if v, ok := f.params["filter_extra"]; ok {
-	//	f.filter_extra = v
-	//}
+	if v, ok := f.params["target"]; ok {
+		f.target = v
+	}
 
 	return f, nil
 }
 
 func (f *Hash) DoFilter(msg *data.Message) (bool, error) {
-	text := msg.GetMessage()
-	msg.SetMessage(text)
-
+	text := msg.GetTarget(f.target)
 	match := f.regex.FindAllStringSubmatch(text, -1)
 	if match != nil {
 		for _, m := range match {

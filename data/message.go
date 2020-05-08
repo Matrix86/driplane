@@ -9,7 +9,7 @@ import (
 type Callback func(msg Message)
 
 type Message struct {
-	sync.Mutex
+	sync.RWMutex
 
 	fields map[string]string
 }
@@ -32,8 +32,8 @@ func (d *Message) SetMessage(msg string) {
 }
 
 func (d *Message) GetMessage() string {
-	d.Lock()
-	defer d.Unlock()
+	d.RLock()
+	defer d.RUnlock()
 	return d.fields["main"]
 }
 
@@ -61,17 +61,18 @@ func (d *Message) GetExtra() map[string]string {
 	return clone
 }
 
-//func (d *Message) Extra(cb func(k, v string)) {
-//	d.Lock()
-//	defer d.Unlock()
-//	for k, v := range d.extra {
-//		cb(k, v)
-//	}
-//}
+func (d *Message) GetTarget(name string) string {
+	d.RLock()
+	defer d.RUnlock()
+	if v, ok := d.fields[name]; ok {
+		return v
+	}
+	return ""
+}
 
 func (d *Message) ApplyPlaceholder(t *template.Template) (string, error) {
-	d.Lock()
-	defer d.Unlock()
+	d.RLock()
+	defer d.RUnlock()
 	var writer bytes.Buffer
 
 	err := t.Execute(&writer, d.fields)
