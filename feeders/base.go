@@ -31,6 +31,7 @@ type Base struct {
 }
 
 func (f *Base) Propagate(data *data.Message) {
+	data.SetExtra("source_feeder", f.Name())
 	f.bus.Publish(f.GetIdentifier(), data)
 }
 

@@ -83,6 +83,7 @@ func (f *Base) Pipe(msg *data.Message) {
 }
 
 func (f *Base) Propagate(data *data.Message) {
+	data.SetExtra("rule_name", f.Rule())
 	f.bus.Publish(f.GetIdentifier(), data)
 }
 
