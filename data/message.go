@@ -2,8 +2,10 @@ package data
 
 import (
 	"bytes"
-	"html/template"
+	"fmt"
+	html "html/template"
 	"sync"
+	text "text/template"
 )
 
 type Callback func(msg Message)
@@ -81,14 +83,24 @@ func (d *Message) Clone() *Message {
 	return clone
 }
 
-func (d *Message) ApplyPlaceholder(t *template.Template) (string, error) {
+func (d *Message) ApplyPlaceholder(template interface{}) (string, error) {
 	d.RLock()
 	defer d.RUnlock()
 	var writer bytes.Buffer
 
-	err := t.Execute(&writer, d.fields)
-	if err != nil {
-		return "", err
+	switch t := template.(type) {
+	case *html.Template:
+		err := t.Execute(&writer, d.fields)
+		if err != nil {
+			return "", err
+		}
+		return writer.String(), nil
+	case *text.Template:
+		err := t.Execute(&writer, d.fields)
+		if err != nil {
+			return "", err
+		}
+		return writer.String(), nil
 	}
-	return writer.String(), nil
+	return "", fmt.Errorf("template type not supported")
 }

@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"github.com/Matrix86/driplane/data"
 	"github.com/evilsocket/islazy/log"
-	"html/template"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
+	"text/template"
 )
 
 type HTTP struct {
