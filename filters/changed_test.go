@@ -112,3 +112,22 @@ func TestChangedDoFilterOnExtra(t *testing.T) {
 		t.Errorf("cannot cast to proper Filter...")
 	}
 }
+
+func TestChangedDoFilterIfExtraNotExist(t *testing.T) {
+	filter, err := NewChangedFilter(map[string]string{"target": "unknown"})
+	if err != nil {
+		t.Errorf("constructor returned '%s'", err)
+	}
+	if e, ok := filter.(*Changed); ok {
+		m := data.NewMessageWithExtra("main message", map[string]string{"test": "1"})
+		b, err := e.DoFilter(m)
+		if b != false {
+			t.Errorf("it should return false")
+		}
+		if err != nil {
+			t.Errorf("DoFilter cannot return an error '%s'", err)
+		}
+	} else {
+		t.Errorf("cannot cast to proper Filter...")
+	}
+}

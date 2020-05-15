@@ -12,6 +12,7 @@ type Changed struct {
 	Base
 
 	target string
+
 	params map[string]string
 	cache  string
 }
@@ -40,8 +41,10 @@ func (f *Changed) DoFilter(msg *data.Message) (bool, error) {
 
 	if f.target == "main" {
 		text = msg.GetMessage()
+	} else if v, ok := msg.GetExtra()[f.target]; ok {
+		text = v
 	} else {
-		text = msg.GetExtra()[f.target]
+		return false, nil
 	}
 
 	hash := f.getMD5Hash(text)
