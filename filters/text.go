@@ -14,6 +14,7 @@ type Text struct {
 	text   string
 
 	extractText bool
+	target      string
 
 	params map[string]string
 }
@@ -25,6 +26,7 @@ func NewTextFilter(p map[string]string) (Filter, error) {
 		regexp:      nil,
 		extractText: false,
 		text:        "",
+		target: "main",
 	}
 	f.cbFilter = f.DoFilter
 
@@ -41,12 +43,23 @@ func NewTextFilter(p map[string]string) (Filter, error) {
 	if v, ok := p["text"]; ok {
 		f.text = v
 	}
+	if v, ok := p["target"]; ok {
+		f.target = v
+	}
 
 	return f, nil
 }
 
 func (f *Text) DoFilter(msg *data.Message) (bool, error) {
-	text := msg.GetMessage()
+	var text string
+
+	if f.target == "main" {
+		text = msg.GetMessage()
+	} else if v, ok := msg.GetExtra()[f.target]; ok {
+		text = v
+	} else {
+		return false, nil
+	}
 
 	found := false
 	if f.regexp != nil {
