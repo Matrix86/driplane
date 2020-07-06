@@ -63,6 +63,12 @@ func (d *Message) GetExtra() map[string]string {
 	return clone
 }
 
+func (d *Message) SetTarget(name string, value string) {
+	d.Lock()
+	defer d.Unlock()
+	d.fields[name] = value
+}
+
 func (d *Message) GetTarget(name string) string {
 	d.RLock()
 	defer d.RUnlock()
