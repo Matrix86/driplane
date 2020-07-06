@@ -13,6 +13,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/hpcloud/tail v1.0.0
+	github.com/mmcdole/gofeed v1.0.0
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	golang.org/x/sys v0.0.0-20190508100423-12bbe5a7a520 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
