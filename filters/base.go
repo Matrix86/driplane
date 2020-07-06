@@ -105,6 +105,7 @@ func init() {
 		"log":  plugins.GetLog(),
 		"http": plugins.GetHttp(),
 		"file": plugins.GetFile(),
+		"util": plugins.GetUtil(),
 	}
 }
 
