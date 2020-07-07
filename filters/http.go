@@ -3,6 +3,7 @@ package filters
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/Matrix86/driplane/data"
 	"github.com/evilsocket/islazy/log"
 	"io"
@@ -10,13 +11,16 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"text/template"
+	"golang.org/x/net/html"
 )
 
 type HTTP struct {
 	Base
 
 	urlFromInput bool
+	textOnly     bool
 	getBody      bool
 	checkStatus  int
 	method       string
@@ -43,6 +47,9 @@ func NewHttpFilter(p map[string]string) (Filter, error) {
 
 	if v, ok := f.params["url_from_input"]; ok && v == "true" {
 		f.urlFromInput = true
+	}
+	if v, ok := f.params["text_only"]; ok && v == "true" {
+		f.textOnly = true
 	}
 	if v, ok := f.params["url"]; ok {
 		t, err := template.New("httpFilterUrlString").Parse(v)
@@ -156,11 +163,43 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 		}
 
 		if f.getBody {
-			msg.SetMessage(string(body))
+			txt := string(body)
+			if f.textOnly {
+				txt = f.TextExtraction(txt)
+			}
+			msg.SetMessage(txt)
 		}
 	}
 
 	return ret, nil
+}
+
+func (f *HTTP) TextExtraction(s string) string {
+	ret := ""
+	domDocTest := html.NewTokenizer(strings.NewReader(s))
+	previousStartTokenTest := domDocTest.Token()
+loopDomTest:
+	for {
+		tt := domDocTest.Next()
+		switch {
+		case tt == html.ErrorToken:
+			break loopDomTest // End of the document,  done
+		case tt == html.StartTagToken:
+			previousStartTokenTest = domDocTest.Token()
+		case tt == html.TextToken:
+			if previousStartTokenTest.Data == "script" ||
+				previousStartTokenTest.Data == "noscript" ||
+				previousStartTokenTest.Data == "style" {
+				continue
+			}
+			TxtContent := strings.TrimSpace(html.UnescapeString(string(domDocTest.Text())))
+			if len(TxtContent) > 0 {
+				ret = fmt.Sprintf("%s %s", ret, TxtContent)
+			}
+		}
+	}
+
+	return ret
 }
 
 // Set the name of the filter
