@@ -15,7 +15,7 @@ type stringsResponse struct {
 	Status   bool
 }
 
-func (c *stringsPackage) startsWith(str, substr string) stringsResponse {
+func (c *stringsPackage) StartsWith(str, substr string) stringsResponse {
 	ret := strings.HasPrefix(str, substr)
 	return stringsResponse{
 		Error: nil,
