@@ -102,10 +102,11 @@ func init() {
 	// Thx @evilsocket for the hint =)
 	// https://github.com/evilsocket/shellz/blob/master/plugins/plugin.go#L18
 	plugin.Defines = map[string]interface{}{
-		"log":  plugins.GetLog(),
-		"http": plugins.GetHttp(),
-		"file": plugins.GetFile(),
-		"util": plugins.GetUtil(),
+		"log":     plugins.GetLog(),
+		"http":    plugins.GetHttp(),
+		"file":    plugins.GetFile(),
+		"util":    plugins.GetUtil(),
+		"strings": plugins.GetStrings(),
 	}
 }
 
