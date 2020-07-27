@@ -6,15 +6,15 @@ import (
 	"os"
 )
 
-type filePackage struct {}
+type filePackage struct{}
 
 func GetFile() *filePackage {
 	return &filePackage{}
 }
 
 type fileResponse struct {
-	Error    error
-	Status   bool
+	Error  error
+	Status bool
 }
 
 func (c *filePackage) Copy(src, dst string) (fileResponse) {
@@ -104,4 +104,16 @@ func (c *filePackage) Exists(filename string) fileResponse {
 		return fileResponse{Status: false}
 	}
 	return fileResponse{Status: !sourceFileStat.IsDir()}
+}
+
+func (c *filePackage) AppendString(filename string, text string) fileResponse {
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return fileResponse{Error: err, Status: false}
+	}
+	defer f.Close()
+	if _, err := f.WriteString(text); err != nil {
+		return fileResponse{Error: err, Status: false}
+	}
+	return fileResponse{Status: true}
 }
