@@ -58,7 +58,7 @@ func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
 	if val, ok := conf["twitter.languages"]; ok {
 		t.languages = val
 	}
-	if val, ok := conf["twitter.retweet"]; ok && val == "false" {
+	if val, ok := conf["twitter.disable_retweet"]; ok && val == "true" {
 		t.retweet = false
 	}
 	if val, ok := conf["twitter.stallWarnings"]; ok {
