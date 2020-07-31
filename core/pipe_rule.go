@@ -35,7 +35,7 @@ func RuleSetInstance() *Ruleset {
 	return instance
 }
 
-func (r *Ruleset) AddRule(node *RuleNode, config Configuration) error {
+func (r *Ruleset) AddRule(node *RuleNode, config *Configuration) error {
 	if node == nil || node.Identifier == "" {
 		return fmt.Errorf("Ruleset.AddRule: rules without name are not supported")
 	}
@@ -193,10 +193,10 @@ func (p *PipeRule) addNode(node *Node, prev string) error {
 	return nil
 }
 
-func NewPipeRule(node *RuleNode, config Configuration) (*PipeRule, error) {
+func NewPipeRule(node *RuleNode, config *Configuration) (*PipeRule, error) {
 	rule := &PipeRule{}
 	rule.Name = node.Identifier
-	rule.config = &config
+	rule.config = config
 
 	log.Info("Rule '%s' found", rule.Name)
 

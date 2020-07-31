@@ -5,6 +5,7 @@ import (
 	"github.com/Matrix86/driplane/data"
 	"github.com/evilsocket/islazy/plugin"
 	"github.com/robertkrimen/otto"
+	"path/filepath"
 
 	_ "github.com/Matrix86/driplane/plugins"
 )
@@ -37,6 +38,16 @@ func NewJsFilter(p map[string]string) (Filter, error) {
 	}
 
 	var err error
+
+	// If the path specified is relative, we're resolving it with 'rules_path' config
+	if !filepath.IsAbs(f.filepath) {
+		if v, ok := p["general.rules_path"]; !ok {
+			return nil, fmt.Errorf("NewJsFilter: rules_path config not found")
+		} else {
+			f.filepath = filepath.Join(v, f.filepath)
+		}
+	}
+
 	// load the plugin
 	f.p, err = plugin.Load(f.filepath)
 	if err != nil {

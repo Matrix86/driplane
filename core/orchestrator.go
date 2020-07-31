@@ -9,13 +9,13 @@ import (
 
 type Orchestrator struct {
 	asts   map[string]*AST
-	config Configuration
+	config *Configuration
 
 	waitFeeder sync.WaitGroup
 	sync.Mutex
 }
 
-func NewOrchestrator(asts map[string]*AST, config Configuration) (Orchestrator, error) {
+func NewOrchestrator(asts map[string]*AST, config *Configuration) (Orchestrator, error) {
 	o := Orchestrator{}
 
 	o.asts = asts

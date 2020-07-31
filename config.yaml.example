@@ -1,0 +1,13 @@
+general:
+  rules_path: ""
+  js_path: "" # if empty rules_path is used as base
+  log_path: ""
+  debug: true
+
+twitter:
+  consumerKey: "",
+  consumerSecret: "",
+  accessToken: "",
+  accessSecret: "",
+  keywords: "#italy #coding #malware something",
+  stallWarnings: "true"

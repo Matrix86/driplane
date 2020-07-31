@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/Matrix86/driplane/utils"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,7 +15,9 @@ import (
 
 var (
 	helpFlag   bool
+	debugFlag  bool
 	rulePath   string
+	jsPath     string
 	configFile string
 )
 
@@ -35,9 +38,11 @@ func Signal(o *core.Orchestrator) {
 }
 
 func main() {
-	flag.StringVar(&configFile, "c", "", "Set configuration file.")
-	flag.StringVar(&rulePath, "r", "", "Path of the rules' directory.")
-	flag.BoolVar(&helpFlag, "h", false, "This help.")
+	flag.StringVar(&configFile, "config", "", "Set configuration file.")
+	flag.StringVar(&rulePath, "rules", "", "Path of the rules' directory.")
+	flag.StringVar(&jsPath, "js", "", "Path of the js plugins.")
+	flag.BoolVar(&helpFlag, "help", false, "This help.")
+	flag.BoolVar(&debugFlag, "debug", false, "Enable debug logs.")
 	flag.Parse()
 
 	if helpFlag {
@@ -51,12 +56,6 @@ func main() {
 		return
 	}
 
-	if rulePath == "" {
-		log.Error("you need to set up a directory containing the *.rule files")
-		flag.Usage()
-		return
-	}
-
 	log.Output = ""
 	log.Level = log.INFO
 	log.OnFatal = log.ExitOnFatal
@@ -64,24 +63,42 @@ func main() {
 
 	config, err := core.LoadConfiguration(configFile)
 	if err != nil {
-		log.Fatal("configuration file not found: %s", err)
+		log.Fatal("error loading file '%s': %v", configFile, err)
 	}
 
-	log.Level = config.GetLogLevel()
-	log.Output = config.LogPath
-	if err := log.Open(); err != nil {
-		panic(err)
+	if debugFlag || config.Get("general.debug") == "true" {
+		log.Level = log.DEBUG
+		config.Set("debug", "true")
 	}
-	defer log.Close()
 
-	if _, err := os.Stat(rulePath); os.IsNotExist(err) {
-		log.Fatal("rule directory '%s' doesn't exists", rulePath)
+	if rulePath != "" {
+		if utils.DirExists(rulePath) == false {
+			log.Fatal("rules directory not found: '%s'", rulePath)
+		}
+		config.Set("general.rules_path", rulePath)
+	}
+
+	if config.Get("general.rules_path") == "" {
+		log.Error("you need to set up a directory containing the *.rule files using -rules flag or 'rules_path' on the config file")
+		return
+	}
+
+	if config.Get("general.log_path") != "" {
+		log.Output = config.Get("general.log_path")
+		if err := log.Open(); err != nil {
+			log.Fatal("log file opening: %v", err)
+		}
+		defer log.Close()
+	}
+
+	if _, err := os.Stat(config.Get("general.rules_path")); os.IsNotExist(err) {
+		log.Fatal("rule directory '%s' doesn't exists", config.Get("general.rules_path"))
 	}
 
 	parser, _ := core.NewParser()
 
 	ruleAsts := make(map[string]*core.AST)
-	err = fs.Glob(rulePath, "*.rule", func(file string) error {
+	err = fs.Glob(config.Get("general.rules_path"), "*.rule", func(file string) error {
 		ast, err := parser.ParseFile(file)
 		if err != nil {
 			log.Fatal("rule parsing: %s", err)
