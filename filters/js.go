@@ -41,8 +41,12 @@ func NewJsFilter(p map[string]string) (Filter, error) {
 
 	// If the path specified is relative, we're resolving it with 'rules_path' config
 	if !filepath.IsAbs(f.filepath) {
-		if v, ok := p["general.rules_path"]; !ok {
-			return nil, fmt.Errorf("NewJsFilter: rules_path config not found")
+		if v, ok := p["general.js_path"]; !ok {
+			if r, ok := p["general.rules_path"]; !ok {
+				return nil, fmt.Errorf("NewJsFilter: rules_path or js_path configs not found")
+			} else {
+				f.filepath = filepath.Join(r, f.filepath)
+			}
 		} else {
 			f.filepath = filepath.Join(v, f.filepath)
 		}

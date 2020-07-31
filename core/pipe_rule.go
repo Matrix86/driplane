@@ -99,10 +99,13 @@ func (p *PipeRule) getFirstNode() INode {
 func (p *PipeRule) newFilter(fn *FilterNode) (filters.Filter, error) {
 	params := make(map[string]string)
 	config := p.config.GetConfig()
+	// The filter will receive only his configuration and general config in the parameters
 	prefix := strings.ToLower(fn.Name+".")
 	for k, v := range config {
 		if strings.HasPrefix(k, prefix) {
 			params[strings.TrimPrefix(k, prefix)] = v
+		} else if strings.HasPrefix(k, "general.") {
+			params[k] = v
 		}
 	}
 

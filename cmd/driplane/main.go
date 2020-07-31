@@ -95,6 +95,13 @@ func main() {
 		log.Fatal("rule directory '%s' doesn't exists", config.Get("general.rules_path"))
 	}
 
+	if config.Get("debug") == "true" {
+		log.Debug("Configurations:")
+		for k, v := range config.GetConfig() {
+			log.Debug(" %s -> %s", k, v)
+		}
+	}
+
 	parser, _ := core.NewParser()
 
 	ruleAsts := make(map[string]*core.AST)
