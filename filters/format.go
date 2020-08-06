@@ -78,11 +78,11 @@ func NewFormatFilter(p map[string]string) (Filter, error) {
 }
 
 func (f *Format) DoFilter(msg *data.Message) (bool, error) {
-	text, err := msg.ApplyPlaceholder(f.template)
+	txt, err := msg.ApplyPlaceholder(f.template)
 	if err != nil {
 		return false, err
 	}
-	msg.SetMessage(text)
+	msg.SetMessage(txt)
 	return true, nil
 }
 
