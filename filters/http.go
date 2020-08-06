@@ -169,6 +169,8 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 			}
 			msg.SetMessage(txt)
 		}
+	} else {
+		return false, fmt.Errorf("httpFilter received status: %s", r.Status)
 	}
 
 	return ret, nil
