@@ -1,9 +1,11 @@
 package filters
 
 import (
+	"fmt"
 	"github.com/Matrix86/driplane/data"
 	html "html/template"
 	"io/ioutil"
+	"path/filepath"
 	text "text/template"
 )
 
@@ -43,7 +45,17 @@ func NewFormatFilter(p map[string]string) (Filter, error) {
 		}
 	}
 	if v, ok := f.params["file"]; ok {
-		content, err := ioutil.ReadFile(v)
+		fpath := v
+		if v, ok := p["general.templates_path"]; !ok {
+			if r, ok := p["general.rules_path"]; !ok {
+				return nil, fmt.Errorf("NewJsFilter: rules_path or js_path configs not found")
+			} else {
+				fpath = filepath.Join(r, fpath)
+			}
+		} else {
+			fpath = filepath.Join(v, fpath)
+		}
+		content, err := ioutil.ReadFile(fpath)
 		if err != nil {
 			return nil, err
 		}
