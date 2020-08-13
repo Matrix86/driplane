@@ -23,6 +23,7 @@ type Twitter struct {
 	users         string
 	languages     string
 	retweet       bool
+	quoted        bool
 	stallWarnings bool
 
 	stream *twitter.Stream
@@ -34,7 +35,8 @@ type Twitter struct {
 func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
 	t := &Twitter{
 		stallWarnings: false,
-		retweet: true,
+		retweet:       true,
+		quoted:        true,
 	}
 
 	if val, ok := conf["twitter.consumerKey"]; ok {
@@ -60,6 +62,9 @@ func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
 	}
 	if val, ok := conf["twitter.disable_retweet"]; ok && val == "true" {
 		t.retweet = false
+	}
+	if val, ok := conf["twitter.disable_quoted"]; ok && val == "true" {
+		t.quoted = false
 	}
 	if val, ok := conf["twitter.stallWarnings"]; ok {
 		b, err := strconv.ParseBool(val)
@@ -121,27 +126,33 @@ func (t *Twitter) Start() {
 	// Convenience Demux demultiplexed stream messages
 	demux := twitter.NewSwitchDemux()
 	demux.Tweet = func(tweet *twitter.Tweet) {
-		if t.retweet && (tweet.RetweetedStatus != nil || tweet.QuotedStatus != nil) {
+		if t.retweet && tweet.RetweetedStatus != nil {
 			if tweet.RetweetedStatus != nil {
 				retweet := tweet.RetweetedStatus
 				txt := t.getTweetExtendedText(retweet)
 				t.Propagate(data.NewMessageWithExtra(txt, map[string]string{
-					"link":     fmt.Sprintf("https://twitter.com/%s/statuses/%d", retweet.User.ScreenName, retweet.ID),
-					"language": retweet.Lang,
-					"username": retweet.User.ScreenName,
-					"quoted": "false",
-					"retweet": "true",
+					"link":             fmt.Sprintf("https://twitter.com/%s/statuses/%d", retweet.User.ScreenName, retweet.ID),
+					"language":         retweet.Lang,
+					"username":         retweet.User.ScreenName,
+					"quoted":           "false",
+					"retweet":          "true",
+					"retweet_username": tweet.User.ScreenName,
+					"retweet_link": fmt.Sprintf("https://twitter.com/%s/statuses/%d", tweet.User.ScreenName, tweet.ID),
 				}))
 			}
+		} else if t.quoted && tweet.QuotedStatus != nil {
 			if tweet.QuotedStatus != nil {
 				retweet := tweet.QuotedStatus
 				txt := t.getTweetExtendedText(retweet)
 				t.Propagate(data.NewMessageWithExtra(txt, map[string]string{
-					"link":     fmt.Sprintf("https://twitter.com/%s/statuses/%d", retweet.User.ScreenName, retweet.ID),
-					"language": retweet.Lang,
-					"username": retweet.User.ScreenName,
-					"quoted": "true",
-					"retweet": "false",
+					"link":            fmt.Sprintf("https://twitter.com/%s/statuses/%d", retweet.User.ScreenName, retweet.ID),
+					"language":        retweet.Lang,
+					"username":        retweet.User.ScreenName,
+					"quoted":          "true",
+					"retweet":         "false",
+					"quoted_username": tweet.User.ScreenName,
+					"quoted_status":   t.getTweetExtendedText(tweet),
+					"quoted_link": fmt.Sprintf("https://twitter.com/%s/statuses/%d", tweet.User.ScreenName, tweet.ID),
 				}))
 			}
 		} else {
@@ -150,8 +161,8 @@ func (t *Twitter) Start() {
 				"link":     fmt.Sprintf("https://twitter.com/%s/statuses/%d", tweet.User.ScreenName, tweet.ID),
 				"language": tweet.Lang,
 				"username": tweet.User.ScreenName,
-				"quoted": "false",
-				"retweet": "false",
+				"quoted":   "false",
+				"retweet":  "false",
 			}))
 		}
 	}
