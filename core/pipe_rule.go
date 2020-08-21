@@ -209,7 +209,20 @@ func NewPipeRule(node *RuleNode, config *Configuration) (*PipeRule, error) {
 		log.Info("['%s'] new feeder found '%s'", rule.Name, node.Feeder.Name)
 
 		// configuration override from the rule itself
+		params := make(map[string]string)
+
 		config := config.GetConfig()
+		// The filter will receive only his configuration and general config in the parameters
+		prefix := strings.ToLower(node.Feeder.Name+".")
+		for k, v := range config {
+			if strings.HasPrefix(k, prefix) {
+				params[k] = v
+			} else if strings.HasPrefix(k, "general.") {
+				params[k] = v
+			}
+		}
+
+		// Feeder params in the rule will overwrite that ones specified in the config file
 		for _, par := range node.Feeder.Params {
 			value := ""
 			if par.Value.Number != nil {
@@ -217,11 +230,11 @@ func NewPipeRule(node *RuleNode, config *Configuration) (*PipeRule, error) {
 			} else {
 				value = *par.Value.String
 			}
-			config[node.Feeder.Name+"."+par.Name] = value
+			params[node.Feeder.Name+"."+par.Name] = value
 		}
 
 		rs := RuleSetInstance()
-		f, err := feeders.NewFeeder(node.Feeder.Name+"feeder", config, rs.bus, rs.lastId+1)
+		f, err := feeders.NewFeeder(node.Feeder.Name+"feeder", params, rs.bus, rs.lastId+1)
 		if err != nil {
 			log.Error("piperule.NewRule: %s", err)
 			return nil, err
