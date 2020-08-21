@@ -4,16 +4,18 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/Matrix86/driplane/data"
-	"github.com/evilsocket/islazy/log"
+	"golang.org/x/net/html"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strconv"
 	"strings"
 	"text/template"
-	"golang.org/x/net/html"
+
+	"github.com/Matrix86/driplane/data"
+	"github.com/evilsocket/islazy/log"
 )
 
 type HTTP struct {
@@ -147,6 +149,12 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 		}
 	}
 
+	//requestDump, err := httputil.DumpRequest(req, true)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//fmt.Println(string(requestDump))
+
 	r, err := client.Do(req)
 	if err != nil {
 		return false, err
@@ -157,13 +165,8 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 	log.Debug("[httpFilter] status %s", r.Status)
 	if f.checkStatus == r.StatusCode {
 		ret = true
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			return false, err
-		}
-
 		if f.getBody {
-			txt := string(body)
+			txt := f.getBodyAsString(r)
 			if f.textOnly {
 				txt = f.TextExtraction(txt)
 			}
@@ -174,6 +177,14 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 	}
 
 	return ret, nil
+}
+
+func (f *HTTP) getBodyAsString(r *http.Response) string {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return ""
+	}
+	return string(body)
 }
 
 func (f *HTTP) TextExtraction(s string) string {
