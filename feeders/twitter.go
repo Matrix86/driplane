@@ -132,12 +132,12 @@ func (t *Twitter) Start() {
 				txt := t.getTweetExtendedText(retweet)
 				t.Propagate(data.NewMessageWithExtra(txt, map[string]string{
 					"link":              fmt.Sprintf("https://twitter.com/%s/statuses/%d", tweet.User.ScreenName, tweet.ID),
-					"language":          retweet.Lang,
-					"username":          retweet.User.ScreenName,
+					"language":          tweet.Lang,
+					"username":          tweet.User.ScreenName,
 					"quoted":            "false",
 					"retweet":           "true",
-					"original_username": tweet.User.ScreenName,
-					"original_language": tweet.Lang,
+					"original_username": retweet.User.ScreenName,
+					"original_language": retweet.Lang,
 					"original_status":   txt,
 					"original_link":     fmt.Sprintf("https://twitter.com/%s/statuses/%d", retweet.User.ScreenName, retweet.ID),
 				}))
@@ -147,15 +147,16 @@ func (t *Twitter) Start() {
 				quoted := tweet.QuotedStatus
 				txt := t.getTweetExtendedText(tweet)
 				t.Propagate(data.NewMessageWithExtra(txt, map[string]string{
-					"link":            fmt.Sprintf("https://twitter.com/%s/statuses/%d", tweet.User.ScreenName, tweet.ID),
-					"language":        tweet.Lang,
-					"username":        tweet.User.ScreenName,
-					"quoted":          "true",
-					"retweet":         "false",
+					"link":              fmt.Sprintf("https://twitter.com/%s/statuses/%d", tweet.User.ScreenName, tweet.ID),
+					"language":          tweet.Lang,
+					"username":          tweet.User.ScreenName,
+					"status":            txt,
+					"quoted":            "true",
+					"retweet":           "false",
 					"original_username": quoted.User.ScreenName,
 					"original_status":   t.getTweetExtendedText(quoted),
 					"original_language": quoted.Lang,
-					"original_link": fmt.Sprintf("https://twitter.com/%s/statuses/%d", quoted.User.ScreenName, quoted.ID),
+					"original_link":     fmt.Sprintf("https://twitter.com/%s/statuses/%d", quoted.User.ScreenName, quoted.ID),
 				}))
 			}
 		} else {
@@ -164,6 +165,7 @@ func (t *Twitter) Start() {
 				"link":     fmt.Sprintf("https://twitter.com/%s/statuses/%d", tweet.User.ScreenName, tweet.ID),
 				"language": tweet.Lang,
 				"username": tweet.User.ScreenName,
+				"status":   text,
 				"quoted":   "false",
 				"retweet":  "false",
 			}))
