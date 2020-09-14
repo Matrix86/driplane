@@ -4,17 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/html"
 	"io"
 	"io/ioutil"
 	"net/http"
 	//"net/http/httputil"
 	"net/url"
 	"strconv"
-	"strings"
 	"text/template"
 
 	"github.com/Matrix86/driplane/data"
+	"github.com/Matrix86/driplane/utils"
 	"github.com/evilsocket/islazy/log"
 )
 
@@ -26,11 +25,13 @@ type HTTP struct {
 	getBody      bool
 	checkStatus  int
 	method       string
+	cookieFile   string
 	rawData      *template.Template
 	headers      map[string]string
 	dataPost     map[string]*template.Template
 
-	params map[string]string
+	params  map[string]string
+	cookies []*http.Cookie
 
 	urlTemplate *template.Template
 }
@@ -41,9 +42,11 @@ func NewHttpFilter(p map[string]string) (Filter, error) {
 		urlFromInput: false,
 		getBody:      true,
 		method:       "GET",
+		cookieFile:   "",
 		headers:      make(map[string]string),
-		dataPost:     make(map[string]*template.Template),
-		checkStatus:  200,
+
+		dataPost:    make(map[string]*template.Template),
+		checkStatus: 200,
 	}
 	f.cbFilter = f.DoFilter
 
@@ -97,6 +100,14 @@ func NewHttpFilter(p map[string]string) (Filter, error) {
 		}
 		f.checkStatus = i
 	}
+	if v, ok := f.params["cookies"]; ok {
+		f.cookieFile = v
+		cookies, err := utils.ParseCookieFile(v)
+		if err != nil {
+			return nil, err
+		}
+		f.cookies = cookies
+	}
 
 	return f, nil
 }
@@ -149,6 +160,12 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 		}
 	}
 
+	if len(f.cookies) > 0 {
+		for _, c := range f.cookies {
+			req.AddCookie(c)
+		}
+	}
+
 	//requestDump, err := httputil.DumpRequest(req, true)
 	//if err != nil {
 	//	fmt.Println(err)
@@ -168,7 +185,7 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 		if f.getBody {
 			txt := f.getBodyAsString(r)
 			if f.textOnly {
-				txt = f.TextExtraction(txt)
+				txt = utils.ExtractTextFromHtml(txt)
 			}
 			msg.SetMessage(txt)
 		}
@@ -185,34 +202,6 @@ func (f *HTTP) getBodyAsString(r *http.Response) string {
 		return ""
 	}
 	return string(body)
-}
-
-func (f *HTTP) TextExtraction(s string) string {
-	ret := ""
-	domDocTest := html.NewTokenizer(strings.NewReader(s))
-	previousStartTokenTest := domDocTest.Token()
-loopDomTest:
-	for {
-		tt := domDocTest.Next()
-		switch {
-		case tt == html.ErrorToken:
-			break loopDomTest // End of the document,  done
-		case tt == html.StartTagToken:
-			previousStartTokenTest = domDocTest.Token()
-		case tt == html.TextToken:
-			if previousStartTokenTest.Data == "script" ||
-				previousStartTokenTest.Data == "noscript" ||
-				previousStartTokenTest.Data == "style" {
-				continue
-			}
-			TxtContent := strings.TrimSpace(html.UnescapeString(string(domDocTest.Text())))
-			if len(TxtContent) > 0 {
-				ret = fmt.Sprintf("%s %s", ret, TxtContent)
-			}
-		}
-	}
-
-	return ret
 }
 
 // Set the name of the filter
