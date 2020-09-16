@@ -104,7 +104,7 @@ func (p *PipeRule) newFilter(fn *FilterNode) (filters.Filter, error) {
 	for k, v := range config {
 		if strings.HasPrefix(k, prefix) {
 			params[strings.TrimPrefix(k, prefix)] = v
-		} else if strings.HasPrefix(k, "general.") {
+		} else if strings.HasPrefix(k, "general.") || strings.HasPrefix(k, "custom.") {
 			params[k] = v
 		}
 	}
@@ -217,7 +217,7 @@ func NewPipeRule(node *RuleNode, config *Configuration) (*PipeRule, error) {
 		for k, v := range config {
 			if strings.HasPrefix(k, prefix) {
 				params[k] = v
-			} else if strings.HasPrefix(k, "general.") {
+			} else if strings.HasPrefix(k, "general.") || strings.HasPrefix(k, "custom."){
 				params[k] = v
 			}
 		}
