@@ -1,3 +1,9 @@
 [submodule "docs/themes/zdoc"]
 	path = docs/themes/zdoc
 	url = https://github.com/zzossig/hugo-theme-zdoc.git
+[submodule "themes/zdoc"]
+	path = themes/zdoc
+	url = https://github.com/zzossig/hugo-theme-zdoc.git
+[submodule "src_docs/themes/zdoc"]
+	path = src_docs/themes/zdoc
+	url = https://github.com/zzossig/hugo-theme-zdoc.git
