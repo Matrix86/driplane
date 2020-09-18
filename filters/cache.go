@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// Cache handles a cache usable in the rule
 type Cache struct {
 	sync.Mutex
 	Base
@@ -22,6 +23,7 @@ type Cache struct {
 	cache  *utils.TTLMap
 }
 
+// NewCacheFilter is the registered method to instantiate a CacheFilter
 func NewCacheFilter(p map[string]string) (Filter, error) {
 	f := &Cache{
 		params:       p,
@@ -61,6 +63,7 @@ func (f *Cache) getMD5Hash(text string) string {
 	return hex.EncodeToString(hash[:])
 }
 
+// DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Cache) DoFilter(msg *data.Message) (bool, error) {
 	var text string
 

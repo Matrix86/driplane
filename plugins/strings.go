@@ -4,20 +4,24 @@ import (
 	"strings"
 )
 
-type stringsPackage struct {}
+// StringsPackage contains string manipulation methods
+type StringsPackage struct {}
 
-func GetStrings() *stringsPackage {
-	return &stringsPackage{}
+// GetStrings returns a StringsPackage
+func GetStrings() *StringsPackage {
+	return &StringsPackage{}
 }
 
-type stringsResponse struct {
+// StringsResponse contains the return values
+type StringsResponse struct {
 	Error    error
 	Status   bool
 }
 
-func (c *stringsPackage) StartsWith(str, substr string) stringsResponse {
+// StartsWith returns true if a string start with a substring
+func (c *StringsPackage) StartsWith(str, substr string) StringsResponse {
 	ret := strings.HasPrefix(str, substr)
-	return stringsResponse{
+	return StringsResponse{
 		Error: nil,
 		Status: ret,
 	}

@@ -14,20 +14,24 @@ import (
 	"github.com/evilsocket/islazy/log"
 )
 
-type httpPackage struct {}
+// HTTPPackage contains all the methods to perform http requests
+type HTTPPackage struct{}
 
-func GetHttp() *httpPackage {
-	return &httpPackage{}
+// GetHTTP returns the HTTPPackage
+func GetHTTP() *HTTPPackage {
+	return &HTTPPackage{}
 }
 
-type httpResponse struct {
+// HTTPResponse contains the return values
+type HTTPResponse struct {
 	Error    error
 	Response *http.Response
 	Raw      []byte
 	Body     string
+	Status   bool
 }
 
-func (c *httpPackage) createRequest(method string, uri string, headers interface{}, data interface{}) (*http.Request, error) {
+func (c *HTTPPackage) createRequest(method string, uri string, headers interface{}, data interface{}) (*http.Request, error) {
 	var reader io.Reader
 
 	if data != nil {
@@ -68,83 +72,90 @@ func (c *httpPackage) createRequest(method string, uri string, headers interface
 	return req, nil
 }
 
-func (c *httpPackage) Request(method string, uri string, headers interface{}, data interface{}) httpResponse {
+// Request performs a HTTP request
+func (c *HTTPPackage) Request(method string, uri string, headers interface{}, data interface{}) HTTPResponse {
 	client := &http.Client{}
 
 	req, err := c.createRequest(method, uri, headers, data)
 	if err != nil {
 		log.Error("http.createRequest : %s", err)
-		return httpResponse{Error: err}
+		return HTTPResponse{Error: err, Status: false}
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return httpResponse{Error: err}
+		return HTTPResponse{Error: err, Status: false}
 	}
 	defer resp.Body.Close()
 
 	raw, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return httpResponse{Error: err}
+		return HTTPResponse{Error: err, Status: false}
 	}
 
-	return httpResponse{
+	return HTTPResponse{
 		Error:    nil,
 		Response: resp,
 		Raw:      raw,
 		Body:     string(raw),
+		Status:   true,
 	}
 }
 
-func (c *httpPackage) Get(url string, headers map[string]string) httpResponse {
+// Get performs a GET request
+func (c *HTTPPackage) Get(url string, headers map[string]string) HTTPResponse {
 	return c.Request("GET", url, headers, nil)
 }
 
-func (c *httpPackage) Post(url string, headers map[string]string, data interface{}) httpResponse {
+// Post performs a POST request
+func (c *HTTPPackage) Post(url string, headers map[string]string, data interface{}) HTTPResponse {
 	return c.Request("POST", url, headers, data)
 }
 
-func (c *httpPackage) DownloadFile(filepath string, method string, uri string, headers interface{}, data interface{}) httpResponse {
+// DownloadFile gets a file from an URL and store in on disk
+func (c *HTTPPackage) DownloadFile(filepath string, method string, uri string, headers interface{}, data interface{}) HTTPResponse {
 	client := &http.Client{}
 
 	req, err := c.createRequest(method, uri, headers, data)
 	if err != nil {
 		log.Error("http.createRequest : %s", err)
-		return httpResponse{Error: err}
+		return HTTPResponse{Error: err, Status: false}
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return httpResponse{Error: err}
+		return HTTPResponse{Error: err, Status: false}
 	}
 	defer resp.Body.Close()
 
 	out, err := os.Create(filepath)
 	if err != nil {
 		log.Error("http.DownloadFile: %s", err)
-		return httpResponse{Error: err}
+		return HTTPResponse{Error: err, Status: false}
 	}
 	defer out.Close()
 
 	_, err = io.Copy(out, resp.Body)
 	if err != nil {
 		log.Error("%s", err)
-		return httpResponse{Error: err}
+		return HTTPResponse{Error: err, Status: false}
 	}
 
-	return httpResponse{
+	return HTTPResponse{
 		Error:    nil,
 		Response: resp,
+		Status:   true,
 	}
 }
 
-func (c *httpPackage) UploadFile(filename string, fieldname string, method string, uri string, headers interface{}, data interface{}) httpResponse {
+// UploadFile sends a file to an URL
+func (c *HTTPPackage) UploadFile(filename string, fieldname string, method string, uri string, headers interface{}, data interface{}) HTTPResponse {
 	client := &http.Client{}
 
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Error("%s", err)
-		return httpResponse{Error: err}
+		return HTTPResponse{Error: err, Status: false}
 	}
 	defer file.Close()
 
@@ -154,12 +165,12 @@ func (c *httpPackage) UploadFile(filename string, fieldname string, method strin
 	part, err := writer.CreateFormFile(fieldname, filepath.Base(filename))
 	if err != nil {
 		log.Error("%s", err)
-		return httpResponse{Error: err}
+		return HTTPResponse{Error: err, Status: false}
 	}
 	_, err = io.Copy(part, file)
 	if err != nil {
 		log.Error("http.createRequest : io.Copy : %s", err)
-		return httpResponse{Error: err}
+		return HTTPResponse{Error: err, Status: false}
 	}
 
 	if v, ok := data.(map[string]interface{}); ok {
@@ -173,13 +184,13 @@ func (c *httpPackage) UploadFile(filename string, fieldname string, method strin
 	err = writer.Close()
 	if err != nil {
 		log.Error("http.UploadFile : writer.Close : %s", err)
-		return httpResponse{Error: err}
+		return HTTPResponse{Error: err, Status: false}
 	}
 
 	req, err := c.createRequest(method, uri, headers, &bodyfile)
 	if err != nil {
 		log.Error("http.createRequest : %s", err)
-		return httpResponse{Error: err}
+		return HTTPResponse{Error: err, Status: false}
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
@@ -187,19 +198,20 @@ func (c *httpPackage) UploadFile(filename string, fieldname string, method strin
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Error("http.Upload client do : %s", err)
-		return httpResponse{Error: err}
+		return HTTPResponse{Error: err, Status: false}
 	}
 	defer resp.Body.Close()
 
 	raw, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return httpResponse{Error: err}
+		return HTTPResponse{Error: err, Status: false}
 	}
 
-	return httpResponse{
+	return HTTPResponse{
 		Error:    nil,
 		Response: resp,
 		Raw:      raw,
 		Body:     string(raw),
+		Status:   true,
 	}
 }

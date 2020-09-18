@@ -1,8 +1,9 @@
 general:
-  rules_path: ""
-  js_path: "" # if empty rules_path is used as base
   log_path: ""
-  debug: true
+  rules_path: "rules"
+  js_path: "js"
+  templates_path: "templates"
+  debug: false
 
 twitter:
   consumerKey: "",

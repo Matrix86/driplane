@@ -2,14 +2,14 @@ package filters
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/Matrix86/driplane/data"
 	"github.com/evilsocket/islazy/plugin"
 	"github.com/robertkrimen/otto"
-	"path/filepath"
-
-	_ "github.com/Matrix86/driplane/plugins"
 )
 
+// Js is a Filter that load a plugin written in Javascript to create a custom Filter
 type Js struct {
 	Base
 
@@ -21,6 +21,7 @@ type Js struct {
 	params map[string]string
 }
 
+// NewJsFilter is the registered method to instantiate a JsFilter
 func NewJsFilter(p map[string]string) (Filter, error) {
 	f := &Js{
 		params:   p,
@@ -42,11 +43,12 @@ func NewJsFilter(p map[string]string) (Filter, error) {
 	// If the path specified is relative, we're resolving it with 'rules_path' config
 	if !filepath.IsAbs(f.filepath) {
 		if v, ok := p["general.js_path"]; !ok {
-			if r, ok := p["general.rules_path"]; !ok {
+			r := ""
+			if r, ok = p["general.rules_path"]; !ok {
 				return nil, fmt.Errorf("NewJsFilter: rules_path or js_path configs not found")
-			} else {
-				f.filepath = filepath.Join(r, f.filepath)
 			}
+			f.filepath = filepath.Join(r, f.filepath)
+
 		} else {
 			f.filepath = filepath.Join(v, f.filepath)
 		}
@@ -66,6 +68,7 @@ func NewJsFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
+// DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Js) DoFilter(msg *data.Message) (bool, error) {
 	triggered := false
 	text := msg.GetMessage()

@@ -5,6 +5,7 @@ import (
 	"regexp"
 )
 
+// Hash is a Filter that searches for hashes in the Message
 type Hash struct {
 	Base
 
@@ -22,6 +23,7 @@ type Hash struct {
 	params map[string]string
 }
 
+// NewHashFilter is the registered method to instantiate a HashFilter
 func NewHashFilter(p map[string]string) (Filter, error) {
 	f := &Hash{
 		params:      p,
@@ -58,6 +60,7 @@ func NewHashFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
+// DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Hash) DoFilter(msg *data.Message) (bool, error) {
 	text := msg.GetTarget(f.target)
 	match := f.regex.FindAllStringSubmatch(text, -1)

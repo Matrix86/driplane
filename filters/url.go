@@ -1,70 +1,79 @@
 package filters
 
 import (
-	"github.com/Matrix86/driplane/data"
 	"regexp"
 	"strings"
+
+	"github.com/Matrix86/driplane/data"
 )
 
+// URL is a Filter to search urls in the input Message
 type URL struct {
 	Base
 
-	rUrl *regexp.Regexp
+	rURL *regexp.Regexp
 
-	getHttp  bool
-	getHttps bool
-	getFtp   bool
+	getHTTP  bool
+	getHTTPS bool
+	getFTP   bool
+	target   string
 
-	extractUrl bool
+	extractURL bool
 
 	params map[string]string
 }
 
-func NewUrlFilter(p map[string]string) (Filter, error) {
+// NewURLFilter is the registered method to instantiate a UrlFilter
+func NewURLFilter(p map[string]string) (Filter, error) {
 	f := &URL{
 		params:     p,
-		getHttp:    true,
-		getHttps:   true,
-		getFtp:     true,
-		extractUrl: true,
+		getHTTP:    true,
+		getHTTPS:   true,
+		getFTP:     true,
+		extractURL: true,
+		target:     "main",
 	}
 	f.cbFilter = f.DoFilter
 
-	f.rUrl = regexp.MustCompile(`(?i)((http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?(([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5})|([0-9]{1,3}\.){3}[0-9]{1,3})(:[0-9]{1,5})?(\/[^\s]+)?)`)
+	f.rURL = regexp.MustCompile(`(?i)((http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?(([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5})|([0-9]{1,3}\.){3}[0-9]{1,3})(:[0-9]{1,5})?(\/[^\s]+)?)`)
 
 	if v, ok := f.params["http"]; ok && v == "false" {
-		f.getHttp = false
+		f.getHTTP = false
 	}
 	if v, ok := f.params["https"]; ok && v == "false" {
-		f.getHttps = false
+		f.getHTTPS = false
 	}
 	if v, ok := f.params["ftp"]; ok && v == "false" {
-		f.getFtp = false
+		f.getFTP = false
 	}
 	if v, ok := f.params["extract"]; ok && v == "false" {
-		f.extractUrl = false
+		f.extractURL = false
+	}
+	if v, ok := f.params["target"]; ok {
+		f.target = v
 	}
 
 	return f, nil
 }
 
+// DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *URL) DoFilter(msg *data.Message) (bool, error) {
-	text := msg.GetMessage()
+	text := msg.GetTarget(f.target)
 
 	found := false
-	match := f.rUrl.FindAllStringSubmatch(text, -1)
+	match := f.rURL.FindAllStringSubmatch(text, -1)
 	if match != nil {
 		for _, m := range match {
 			mm := m[0]
-			if f.getHttp && strings.HasPrefix(strings.ToLower(mm), "http://") {
+			if f.getHTTP && strings.HasPrefix(strings.ToLower(mm), "http://") {
 				found = true
-			} else if f.getHttps && strings.HasPrefix(strings.ToLower(mm), "https://") {
+			} else if f.getHTTPS && strings.HasPrefix(strings.ToLower(mm), "https://") {
 				found = true
-			} else if f.getFtp && strings.HasPrefix(strings.ToLower(mm), "ftp://") {
+			} else if f.getFTP && strings.HasPrefix(strings.ToLower(mm), "ftp://") {
 				found = true
 			}
 
-			if f.extractUrl {
+			if f.extractURL {
 				clone := msg.Clone()
 				clone.SetMessage(mm)
 				clone.SetExtra("fulltext", text)
@@ -81,5 +90,5 @@ func (f *URL) DoFilter(msg *data.Message) (bool, error) {
 
 // Set the name of the filter
 func init() {
-	register("url", NewUrlFilter)
+	register("url", NewURLFilter)
 }

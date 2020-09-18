@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// Cookies maps the json file exported from Chrome containing the cookies
 type Cookies []struct {
 	Domain         string  `json:"domain"`
 	ExpirationDate float64 `json:"expirationDate,omitempty"`
@@ -23,6 +24,7 @@ type Cookies []struct {
 	ID             int     `json:"id"`
 }
 
+// ParseCookieFile transforms JSON file in slice of http.Cookie
 func ParseCookieFile(filename string) ([]*http.Cookie, error) {
 	var cookies Cookies
 	jsonFile, err := os.Open(filename)

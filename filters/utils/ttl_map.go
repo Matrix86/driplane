@@ -14,6 +14,7 @@ func (i *item) expired() bool {
 	return i.expiration <= time.Now().Unix()
 }
 
+// TTLMap is a cache with ttl
 type TTLMap struct {
 	sync.RWMutex
 
@@ -21,6 +22,7 @@ type TTLMap struct {
 	gcdelay time.Duration
 }
 
+// NewTTLMap creates a TTLMap instance
 func NewTTLMap(gcdelay time.Duration) (m *TTLMap) {
 	m = &TTLMap{
 		dict:    make(map[interface{}]*item, 0),
@@ -30,7 +32,7 @@ func NewTTLMap(gcdelay time.Duration) (m *TTLMap) {
 	// Cleaning method is called every X seconds because we
 	// check if an item is expired in the Get method
 	go func() {
-		for _ = range time.Tick(gcdelay) {
+		for range time.Tick(gcdelay) {
 			m.Lock()
 			for k, v := range m.dict {
 				if v.expired() {
@@ -43,12 +45,14 @@ func NewTTLMap(gcdelay time.Duration) (m *TTLMap) {
 	return
 }
 
+// Len returns the number of cached keys
 func (m *TTLMap) Len() int {
 	m.RLock()
 	defer m.RUnlock()
 	return len(m.dict)
 }
 
+// Put inserts a key => value pair in the cache
 func (m *TTLMap) Put(k, v interface{}, ttl int64) {
 	m.Lock()
 	defer m.Unlock()
@@ -65,6 +69,7 @@ func (m *TTLMap) Put(k, v interface{}, ttl int64) {
 	}
 }
 
+// Get returns the value of the associated key from the cache
 func (m *TTLMap) Get(k string) (interface{}, bool) {
 	m.RLock()
 	defer m.RUnlock()

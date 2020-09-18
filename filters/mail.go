@@ -2,14 +2,16 @@ package filters
 
 import (
 	"crypto/tls"
-	"github.com/Matrix86/driplane/data"
-	"github.com/evilsocket/islazy/log"
-	gomail "gopkg.in/gomail.v2"
 	"html/template"
 	"strconv"
 	"strings"
+
+	"github.com/Matrix86/driplane/data"
+	"github.com/evilsocket/islazy/log"
+	gomail "gopkg.in/gomail.v2"
 )
 
+// Mail is a Filter to send e-mail using the input Message
 type Mail struct {
 	Base
 
@@ -26,6 +28,7 @@ type Mail struct {
 	params   map[string]string
 }
 
+// NewMailFilter is the registered method to instantiate a MailFilter
 func NewMailFilter(p map[string]string) (Filter, error) {
 	f := &Mail{
 		params:  p,
@@ -33,7 +36,7 @@ func NewMailFilter(p map[string]string) (Filter, error) {
 	}
 	f.cbFilter = f.DoFilter
 
-	if v, ok := f.params["template"]; ok {
+	if v, ok := f.params["body"]; ok {
 		t, err := template.New("MailFilterTemplate").Parse(v)
 		if err != nil {
 			return nil, err
@@ -74,6 +77,7 @@ func NewMailFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
+// DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Mail) DoFilter(msg *data.Message) (bool, error) {
 	var err error
 	text := msg.GetMessage()

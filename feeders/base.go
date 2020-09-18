@@ -2,19 +2,22 @@ package feeders
 
 import (
 	"fmt"
+
 	"github.com/Matrix86/driplane/data"
 	"github.com/asaskevich/EventBus"
 	"github.com/evilsocket/islazy/log"
 )
 
+// FeederFactory identifies a function to instantiate a Feeder using the Factory
 type FeederFactory func(conf map[string]string) (Feeder, error)
 
 var feederFactories = make(map[string]FeederFactory)
 
+// Feeder defines Base methods of the object
 type Feeder interface {
 	setName(name string)
 	setBus(bus EventBus.Bus)
-	setId(id int32)
+	setID(id int32)
 
 	Name() string
 	Start()
@@ -23,6 +26,7 @@ type Feeder interface {
 	GetIdentifier() string
 }
 
+// Base is inherited from the feeders
 type Base struct {
 	name      string
 	id        int32
@@ -30,12 +34,13 @@ type Base struct {
 	bus       EventBus.Bus
 }
 
+// Propagate sends the Message to the connected Filters
 func (f *Base) Propagate(data *data.Message) {
 	data.SetExtra("source_feeder", f.Name())
 	f.bus.Publish(f.GetIdentifier(), data)
 }
 
-func (f *Base) setId(id int32) {
+func (f *Base) setID(id int32) {
 	f.id = id
 }
 
@@ -47,17 +52,22 @@ func (f *Base) setName(name string) {
 	f.name = name
 }
 
+// GetIdentifier returns the Node identifier ID used in the bus
 func (f *Base) GetIdentifier() string {
 	return fmt.Sprintf("%s:%d", f.name, f.id)
 }
 
+// Name returns the name of the Node
 func (f *Base) Name() string {
 	return f.name
 }
 
+// Start initializes the Node
 func (f *Base) Start() {}
+// Stop stops the Node
 func (f *Base) Stop()  {}
 
+// IsRunning returns true if the Node is up and running
 func (f *Base) IsRunning() bool {
 	return f.isRunning
 }
@@ -77,13 +87,14 @@ func register(name string, f FeederFactory) {
 func init() {
 }
 
+// NewFeeder creates a new registered Feeder from it's name
 func NewFeeder(name string, conf map[string]string, bus EventBus.Bus, id int32) (Feeder, error) {
 	if _, ok := feederFactories[name]; ok {
 		f, err := feederFactories[name](conf)
 		if err == nil && f != nil {
 			f.setName(name)
 			f.setBus(bus)
-			f.setId(id)
+			f.setID(id)
 		}
 
 		return f, err

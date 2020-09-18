@@ -6,6 +6,7 @@ import (
 	"github.com/evilsocket/islazy/log"
 )
 
+// Echo is a filter that print the input Message on the logs.
 type Echo struct {
 	Base
 
@@ -14,6 +15,7 @@ type Echo struct {
 	params map[string]string
 }
 
+// NewEchoFilter is the registered method to instantiate a EchoFilter
 func NewEchoFilter(p map[string]string) (Filter, error) {
 	f := &Echo{
 		params:     p,
@@ -28,6 +30,7 @@ func NewEchoFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
+// DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Echo) DoFilter(msg *data.Message) (bool, error) {
 	text := msg.GetMessage()
 	if f.printExtra {

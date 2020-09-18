@@ -16,6 +16,7 @@ import (
 	"github.com/evilsocket/islazy/log"
 )
 
+// Web is a Feeder that creates a stream from an URL
 type Web struct {
 	Base
 
@@ -37,12 +38,14 @@ type Web struct {
 	lastParsing time.Time
 }
 
+// NewWebFeeder is the registered method to instantiate a WebFeeder
 func NewWebFeeder(conf map[string]string) (Feeder, error) {
 	f := &Web{
 		params:      conf,
 		checkStatus: 0,
 		stopChan:    make(chan bool),
 		frequency:   60 * time.Second,
+		method:      "GET",
 		lastParsing: time.Time{},
 	}
 
@@ -128,7 +131,6 @@ func (f *Web) prepareRequest() (*http.Request, error) {
 
 	if len(f.cookies) > 0 {
 		for _, c := range f.cookies {
-			log.Warning("%#v", c)
 			req.AddCookie(c)
 		}
 	}
@@ -143,7 +145,7 @@ func (f *Web) getBodyAsString(r *http.Response) string {
 	return string(body)
 }
 
-func (f *Web) ParseFeed() error {
+func (f *Web) parseURL() error {
 	var txt string
 	extra := make(map[string]string)
 
@@ -161,7 +163,7 @@ func (f *Web) ParseFeed() error {
 	defer r.Body.Close()
 
 	txt = f.getBodyAsString(r)
-	meta := utils.GetMetaFromHtml(txt)
+	meta := utils.GetMetaFromHTML(txt)
 	extra["url"] = f.url
 	extra["title"] = meta.Title
 	extra["description"] = meta.Description
@@ -171,7 +173,7 @@ func (f *Web) ParseFeed() error {
 	log.Debug("status -> %s", r.Status)
 	if f.checkStatus == 0 || f.checkStatus == r.StatusCode {
 		if f.textOnly {
-			txt = utils.ExtractTextFromHtml(txt)
+			txt = utils.ExtractTextFromHTML(txt)
 		}
 	} else {
 		return fmt.Errorf("unexpected status: %s", r.Status)
@@ -186,11 +188,12 @@ func (f *Web) ParseFeed() error {
 	return nil
 }
 
+// Start propagates a message every time the URL is read
 func (f *Web) Start() {
 	f.ticker = time.NewTicker(f.frequency)
 	go func() {
 		// first start!
-		_ = f.ParseFeed()
+		_ = f.parseURL()
 
 		for {
 			select {
@@ -198,7 +201,7 @@ func (f *Web) Start() {
 				log.Debug("%s: stop arrived on the channel", f.Name())
 				return
 			case <-f.ticker.C:
-				_ = f.ParseFeed()
+				_ = f.parseURL()
 			}
 		}
 	}()
@@ -206,6 +209,7 @@ func (f *Web) Start() {
 	f.isRunning = true
 }
 
+// Stop handles the Feeder shutdown
 func (f *Web) Stop() {
 	log.Debug("feeder '%s' stream stop", f.Name())
 	f.stopChan <- true

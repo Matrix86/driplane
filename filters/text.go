@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Text is a Filter to search and extract strings from the input Message
 type Text struct {
 	Base
 
@@ -19,6 +20,7 @@ type Text struct {
 	params map[string]string
 }
 
+// NewTextFilter is the registered method to instantiate a TextFilter
 func NewTextFilter(p map[string]string) (Filter, error) {
 	var err error
 	f := &Text{
@@ -50,6 +52,7 @@ func NewTextFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
+// DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Text) DoFilter(msg *data.Message) (bool, error) {
 	var text string
 

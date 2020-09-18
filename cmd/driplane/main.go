@@ -2,9 +2,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/Matrix86/driplane/utils"
+	"github.com/evilsocket/islazy/tui"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 
 	"github.com/Matrix86/driplane/core"
@@ -21,6 +24,7 @@ var (
 	configFile string
 )
 
+// Signal stops feeders on SIGINT or SIGTERM signal interception
 func Signal(o *core.Orchestrator) {
 
 	sChan := make(chan os.Signal, 1)
@@ -44,6 +48,12 @@ func main() {
 	flag.BoolVar(&helpFlag, "help", false, "This help.")
 	flag.BoolVar(&debugFlag, "debug", false, "Enable debug logs.")
 	flag.Parse()
+
+	appName := fmt.Sprintf("%s v%s", core.Name, core.Version)
+	appBuild := fmt.Sprintf("(built for %s %s with %s)", runtime.GOOS, runtime.GOARCH, runtime.Version())
+	appAuthor := fmt.Sprintf("Author: %s", core.Author)
+
+	fmt.Printf("%s %s\n%s\n", tui.Bold(appName), tui.Dim(appBuild), tui.Dim(appAuthor))
 
 	if helpFlag {
 		flag.Usage()

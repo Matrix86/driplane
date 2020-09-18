@@ -2,15 +2,18 @@ package feeders
 
 import (
 	"fmt"
-	"github.com/Matrix86/driplane/data"
-	"github.com/dghubble/go-twitter/twitter"
-	"github.com/dghubble/oauth1"
-	"github.com/evilsocket/islazy/log"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Matrix86/driplane/data"
+
+	"github.com/dghubble/go-twitter/twitter"
+	"github.com/dghubble/oauth1"
+	"github.com/evilsocket/islazy/log"
 )
 
+// Twitter is a Feeder that feeds a pipeline with tweets
 type Twitter struct {
 	Base
 
@@ -30,7 +33,7 @@ type Twitter struct {
 	client *twitter.Client
 }
 
-// Doc
+// NewTwitterFeeder is the registered method to instantiate a TwitterFeeder
 // https://developer.twitter.com/en/docs/tweets/filter-realtime/guides/basic-stream-parameters
 func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
 	t := &Twitter{
@@ -112,6 +115,7 @@ func (t *Twitter) getTweetExtendedText(tweet *twitter.Tweet) string {
 	return text
 }
 
+// Start propagates a message every time a new tweet is published
 func (t *Twitter) Start() {
 	var err error
 
@@ -223,6 +227,7 @@ func (t *Twitter) Start() {
 	t.isRunning = true
 }
 
+// Stop handles the Feeder shutdown
 func (t *Twitter) Stop() {
 	log.Debug("feeder '%s' stream stop", t.Name())
 	t.stream.Stop()

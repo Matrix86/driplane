@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// HTMLMeta contains information from the HTML page
 type HTMLMeta struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
@@ -13,7 +14,8 @@ type HTMLMeta struct {
 	SiteName    string `json:"site_name"`
 }
 
-func GetMetaFromHtml(s string) *HTMLMeta {
+// GetMetaFromHTML extracts info from an HTML page and store them on a HTMLMeta struct
+func GetMetaFromHTML(s string) *HTMLMeta {
 	z := html.NewTokenizer(strings.NewReader(s))
 	titleFound := false
 	hm := &HTMLMeta{}
@@ -82,7 +84,8 @@ func extractMetaProperty(t html.Token, prop string) (content string, ok bool) {
 	return
 }
 
-func ExtractTextFromHtml(s string) string {
+// ExtractTextFromHTML returns a string with only the text version of the web page
+func ExtractTextFromHTML(s string) string {
 	ret := ""
 	domDocTest := html.NewTokenizer(strings.NewReader(s))
 	previousStartTokenTest := domDocTest.Token()

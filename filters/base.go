@@ -9,15 +9,17 @@ import (
 	"github.com/evilsocket/islazy/plugin"
 )
 
+// FilterFactory identifies a function to instantiate a Filter using the Factory
 type FilterFactory func(conf map[string]string) (Filter, error)
 
 var filterFactories = make(map[string]FilterFactory)
 
+// Filter defines Base methods of the object
 type Filter interface {
 	setRuleName(name string)
 	setName(name string)
 	setBus(bus EventBus.Bus)
-	setId(id int32)
+	setID(id int32)
 	setIsNegative(b bool)
 
 	Rule() string
@@ -27,6 +29,7 @@ type Filter interface {
 	GetIdentifier() string
 }
 
+// Base is inherited from the feeders
 type Base struct {
 	rule     string
 	name     string
@@ -36,15 +39,17 @@ type Base struct {
 	cbFilter func(msg *data.Message) (bool, error)
 }
 
+// Rule returns the rule in which the Filter is found
 func (f *Base) Rule() string {
 	return f.rule
 }
 
+// Name returns the Filter's name
 func (f *Base) Name() string {
 	return f.name
 }
 
-func (f *Base) setId(id int32) {
+func (f *Base) setID(id int32) {
 	f.id = id
 }
 
@@ -64,10 +69,12 @@ func (f *Base) setIsNegative(b bool) {
 	f.negative = b
 }
 
+// GetIdentifier returns the Node identifier ID used in the bus
 func (f *Base) GetIdentifier() string {
 	return fmt.Sprintf("%s:%d", f.name, f.id)
 }
 
+// Pipe gets a Message from the previous Node and Propagate it to the next one if the Filter's callback will return true
 func (f *Base) Pipe(msg *data.Message) {
 	log.Debug("[%s::%s] received: %#v", f.rule, f.name, msg)
 	b, err := f.cbFilter(msg)
@@ -82,6 +89,7 @@ func (f *Base) Pipe(msg *data.Message) {
 	}
 }
 
+// Propagate sends the Message to the connected Filters
 func (f *Base) Propagate(data *data.Message) {
 	data.SetExtra("rule_name", f.Rule())
 	f.bus.Publish(f.GetIdentifier(), data)
@@ -103,13 +111,14 @@ func init() {
 	// https://github.com/evilsocket/shellz/blob/master/plugins/plugin.go#L18
 	plugin.Defines = map[string]interface{}{
 		"log":     plugins.GetLog(),
-		"http":    plugins.GetHttp(),
+		"http":    plugins.GetHTTP(),
 		"file":    plugins.GetFile(),
 		"util":    plugins.GetUtil(),
 		"strings": plugins.GetStrings(),
 	}
 }
 
+// NewFilter creates a new registered Filter from it's name
 func NewFilter(rule string, name string, conf map[string]string, bus EventBus.Bus, id int32, neg bool) (Filter, error) {
 	if _, ok := filterFactories[name]; ok {
 		f, err := filterFactories[name](conf)
@@ -117,7 +126,7 @@ func NewFilter(rule string, name string, conf map[string]string, bus EventBus.Bu
 			f.setRuleName(rule)
 			f.setName(name)
 			f.setBus(bus)
-			f.setId(id)
+			f.setID(id)
 			f.setIsNegative(neg)
 		}
 		return f, err

@@ -6,114 +6,123 @@ import (
 	"os"
 )
 
-type filePackage struct{}
+// FilePackage contains file manipulation methods
+type FilePackage struct{}
 
-func GetFile() *filePackage {
-	return &filePackage{}
+// GetFile returns the FilePackage struct
+func GetFile() *FilePackage {
+	return &FilePackage{}
 }
 
-type fileResponse struct {
+// FileResponse contains the return values
+type FileResponse struct {
 	Error  error
 	Status bool
 }
 
-func (c *filePackage) Copy(src, dst string) (fileResponse) {
+// Copy handles the copy of a file to another file
+func (c *FilePackage) Copy(src, dst string) FileResponse {
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
-		return fileResponse{Error: err}
+		return FileResponse{Error: err}
 	}
 
 	if !sourceFileStat.Mode().IsRegular() {
-		return fileResponse{Error: fmt.Errorf("%s is not a regular file", src)}
+		return FileResponse{Error: fmt.Errorf("%s is not a regular file", src)}
 	}
 
 	source, err := os.Open(src)
 	if err != nil {
-		return fileResponse{Error: err}
+		return FileResponse{Error: err}
 	}
 	defer source.Close()
 
 	destination, err := os.Create(dst)
 	if err != nil {
-		return fileResponse{Error: err}
+		return FileResponse{Error: err}
 	}
 	defer destination.Close()
 
 	_, err = io.Copy(destination, source)
 	if err != nil {
-		return fileResponse{Error: err}
+		return FileResponse{Error: err}
 	}
 
-	return fileResponse{Status: true}
+	return FileResponse{Status: true}
 }
 
-func (c *filePackage) Move(src, dst string) (fileResponse) {
+// Move renames a file
+func (c *FilePackage) Move(src, dst string) FileResponse {
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
-		return fileResponse{Error: err}
+		return FileResponse{Error: err}
 	}
 
 	if !sourceFileStat.Mode().IsRegular() {
-		return fileResponse{Error: fmt.Errorf("%s is not a regular file", src)}
+		return FileResponse{Error: fmt.Errorf("%s is not a regular file", src)}
 	}
 
 	err = os.Rename(src, dst)
 	if err != nil {
-		return fileResponse{Error: err}
+		return FileResponse{Error: err}
 	}
-	return fileResponse{Status: true}
+	return FileResponse{Status: true}
 }
 
-func (c *filePackage) Truncate(filename string, size int64) fileResponse {
+// Truncate set file length to size
+func (c *FilePackage) Truncate(filename string, size int64) FileResponse {
 	sourceFileStat, err := os.Stat(filename)
 	if err != nil {
-		return fileResponse{Error: err}
+		return FileResponse{Error: err}
 	}
 
 	if !sourceFileStat.Mode().IsRegular() {
-		return fileResponse{Error: fmt.Errorf("%s is not a regular file", filename)}
+		return FileResponse{Error: fmt.Errorf("%s is not a regular file", filename)}
 	}
 
 	err = os.Truncate(filename, size)
 	if err != nil {
-		return fileResponse{Error: err}
+		return FileResponse{Error: err}
 	}
-	return fileResponse{Status: true}
+	return FileResponse{Status: true}
 }
 
-func (c *filePackage) Delete(filename string) fileResponse {
+// Delete removes a file
+func (c *FilePackage) Delete(filename string) FileResponse {
 	sourceFileStat, err := os.Stat(filename)
 	if err != nil {
-		return fileResponse{Error: err}
+		return FileResponse{Error: err}
 	}
 
 	if !sourceFileStat.Mode().IsRegular() {
-		return fileResponse{Error: fmt.Errorf("%s is not a regular file", filename)}
+		return FileResponse{Error: fmt.Errorf("%s is not a regular file", filename)}
 	}
 
 	err = os.Remove(filename)
 	if err != nil {
-		return fileResponse{Error: err}
+		return FileResponse{Error: err}
 	}
-	return fileResponse{Status: true}
+	return FileResponse{Status: true}
 }
 
-func (c *filePackage) Exists(filename string) fileResponse {
+// Exists returns true if the file exists
+func (c *FilePackage) Exists(filename string) FileResponse {
 	sourceFileStat, err := os.Stat(filename)
 	if os.IsNotExist(err) {
-		return fileResponse{Status: false}
+		return FileResponse{Status: false}
 	}
-	return fileResponse{Status: !sourceFileStat.IsDir()}
+	return FileResponse{Status: !sourceFileStat.IsDir()}
 }
 
-func (c *filePackage) AppendString(filename string, text string) fileResponse {
+// AppendString opens the file in appending mode and write text on it
+func (c *FilePackage) AppendString(filename string, text string) FileResponse {
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return fileResponse{Error: err, Status: false}
+		return FileResponse{Error: err, Status: false}
 	}
 	defer f.Close()
 	if _, err := f.WriteString(text); err != nil {
-		return fileResponse{Error: err, Status: false}
+		return FileResponse{Error: err, Status: false}
 	}
-	return fileResponse{Status: true}
+	return FileResponse{Status: true}
 }

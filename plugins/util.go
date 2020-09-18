@@ -5,21 +5,35 @@ import (
 	"time"
 )
 
-type utilPackage struct {}
+// UtilPackage contains useful generic methods
+type UtilPackage struct {}
 
-func GetUtil() *utilPackage {
-	return &utilPackage{}
+// GetUtil returns an UtilPackage
+func GetUtil() *UtilPackage {
+	return &UtilPackage{}
 }
 
-type utilResponse struct {
+// UtilResponse contains the return values
+type UtilResponse struct {
 	Error    error
 	Status   bool
+	Value    string
 }
 
-func (c *utilPackage) Sleep(seconds int) {
+// Sleep call Sleep method for N seconds
+func (c *UtilPackage) Sleep(seconds int) UtilResponse {
 	time.Sleep(time.Duration(seconds) * time.Second)
+	return UtilResponse{
+		Error: nil,
+		Status: true,
+	}
 }
 
-func (c *utilPackage) Getenv(name string) string {
-	return os.Getenv(name)
+// Getenv returns an environment variable if it exists
+func (c *UtilPackage) Getenv(name string) UtilResponse {
+	return UtilResponse{
+		Error: nil,
+		Status: true,
+		Value: os.Getenv(name),
+	}
 }

@@ -17,6 +17,7 @@ import (
 	"github.com/evilsocket/islazy/log"
 )
 
+// HTTP is a filter to handle http requests using the input Message
 type HTTP struct {
 	Base
 
@@ -36,10 +37,10 @@ type HTTP struct {
 	urlTemplate *template.Template
 }
 
-func NewHttpFilter(p map[string]string) (Filter, error) {
+// NewHTTPFilter is the registered method to instantiate a HttpFilter
+func NewHTTPFilter(p map[string]string) (Filter, error) {
 	f := &HTTP{
 		params:       p,
-		urlFromInput: false,
 		getBody:      true,
 		method:       "GET",
 		cookieFile:   "",
@@ -50,9 +51,6 @@ func NewHttpFilter(p map[string]string) (Filter, error) {
 	}
 	f.cbFilter = f.DoFilter
 
-	if v, ok := f.params["url_from_input"]; ok && v == "true" {
-		f.urlFromInput = true
-	}
 	if v, ok := f.params["text_only"]; ok && v == "true" {
 		f.textOnly = true
 	}
@@ -112,22 +110,17 @@ func NewHttpFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
+// DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 	var req *http.Request
 	var err error
 
-	text := msg.GetMessage()
-
 	client := &http.Client{}
 
 	urlString := ""
-	if f.urlFromInput {
-		urlString = text
-	} else {
-		urlString, err = msg.ApplyPlaceholder(f.urlTemplate)
-		if err != nil {
-			return false, err
-		}
+	urlString, err = msg.ApplyPlaceholder(f.urlTemplate)
+	if err != nil {
+		return false, err
 	}
 
 	var reader io.Reader
@@ -185,7 +178,7 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 		if f.getBody {
 			txt := f.getBodyAsString(r)
 			if f.textOnly {
-				txt = utils.ExtractTextFromHtml(txt)
+				txt = utils.ExtractTextFromHTML(txt)
 			}
 			msg.SetMessage(txt)
 		}
@@ -206,5 +199,5 @@ func (f *HTTP) getBodyAsString(r *http.Response) string {
 
 // Set the name of the filter
 func init() {
-	register("http", NewHttpFilter)
+	register("http", NewHTTPFilter)
 }

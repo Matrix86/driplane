@@ -16,25 +16,28 @@ var (
 	once     sync.Once
 )
 
+// Ruleset identifies a set of rules
 type Ruleset struct {
 	rules map[string]*PipeRule
 
 	feedRules []string
 	bus       bus.Bus
-	lastId    int32
+	lastID    int32
 }
 
+// RuleSetInstance is the singleton for the Ruleset object
 func RuleSetInstance() *Ruleset {
 	once.Do(func() {
 		instance = &Ruleset{
 			rules:  make(map[string]*PipeRule),
 			bus:    bus.New(),
-			lastId: 0,
+			lastID: 0,
 		}
 	})
 	return instance
 }
 
+// AddRule appends a new rule to the set
 func (r *Ruleset) AddRule(node *RuleNode, config *Configuration) error {
 	if node == nil || node.Identifier == "" {
 		return fmt.Errorf("Ruleset.AddRule: rules without name are not supported")
@@ -58,8 +61,10 @@ func (r *Ruleset) AddRule(node *RuleNode, config *Configuration) error {
 	return nil
 }
 
+// INode for the nodes generalization
 type INode interface{}
 
+// PipeRule identifies a single rule
 type PipeRule struct {
 	Name      string
 	HasFeeder bool
@@ -121,11 +126,11 @@ func (p *PipeRule) newFilter(fn *FilterNode) (filters.Filter, error) {
 	}
 
 	rs := RuleSetInstance()
-	f, err := filters.NewFilter(p.Name, fn.Name+"filter", params, rs.bus, rs.lastId+1, fn.Neg)
+	f, err := filters.NewFilter(p.Name, fn.Name+"filter", params, rs.bus, rs.lastID+1, fn.Neg)
 	if err != nil {
 		return nil, err
 	}
-	rs.lastId++
+	rs.lastID++
 
 	return f, nil
 }
@@ -196,6 +201,7 @@ func (p *PipeRule) addNode(node *Node, prev string) error {
 	return nil
 }
 
+// NewPipeRule creates and returns a PipeRule struct
 func NewPipeRule(node *RuleNode, config *Configuration) (*PipeRule, error) {
 	rule := &PipeRule{}
 	rule.Name = node.Identifier
@@ -234,12 +240,12 @@ func NewPipeRule(node *RuleNode, config *Configuration) (*PipeRule, error) {
 		}
 
 		rs := RuleSetInstance()
-		f, err := feeders.NewFeeder(node.Feeder.Name+"feeder", params, rs.bus, rs.lastId+1)
+		f, err := feeders.NewFeeder(node.Feeder.Name+"feeder", params, rs.bus, rs.lastID+1)
 		if err != nil {
 			log.Error("piperule.NewRule: %s", err)
 			return nil, err
 		}
-		rs.lastId++
+		rs.lastID++
 
 		rule.HasFeeder = true
 		rule.nodes = append(rule.nodes, f)

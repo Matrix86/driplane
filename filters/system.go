@@ -1,22 +1,23 @@
 package filters
 
 import (
+	"os/exec"
+	"text/template"
+
 	"github.com/Matrix86/driplane/data"
 	"github.com/evilsocket/islazy/log"
-	"os/exec"
-	"regexp"
-	"text/template"
 )
 
+// System is a Filter to exec a command on the host machine using the input Message
 type System struct {
 	Base
 
 	command   *template.Template
-	rExtraCmd *regexp.Regexp
 
 	params map[string]string
 }
 
+// NewSystemFilter is the registered method to instantiate a SystemFilter
 func NewSystemFilter(p map[string]string) (Filter, error) {
 	f := &System{
 		params: p,
@@ -31,11 +32,10 @@ func NewSystemFilter(p map[string]string) (Filter, error) {
 		f.command = t
 	}
 
-	f.rExtraCmd = regexp.MustCompile(`(%extra\.[a-z0-9]+%)`)
-
 	return f, nil
 }
 
+// DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *System) DoFilter(msg *data.Message) (bool, error) {
 	cmd, err := msg.ApplyPlaceholder(f.command)
 	if err != nil {

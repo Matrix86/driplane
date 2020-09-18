@@ -7,6 +7,8 @@ import (
 	"sync"
 )
 
+// Changed is a Filter that call the propagation method only if
+// the input Message is different from the previous one
 type Changed struct {
 	sync.Mutex
 	Base
@@ -17,6 +19,7 @@ type Changed struct {
 	cache  string
 }
 
+// NewChangedFilter is the registered method to instantiate a ChangedFilter
 func NewChangedFilter(p map[string]string) (Filter, error) {
 	f := &Changed{
 		params: p,
@@ -36,6 +39,7 @@ func (f *Changed) getMD5Hash(text string) string {
 	return hex.EncodeToString(hash[:])
 }
 
+// DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Changed) DoFilter(msg *data.Message) (bool, error) {
 	var text string
 

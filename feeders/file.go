@@ -9,6 +9,7 @@ import (
 	"os"
 )
 
+// File is a Feeder that creates a stream from a file
 type File struct {
 	Base
 
@@ -18,6 +19,7 @@ type File struct {
 	fp *tail.Tail
 }
 
+// NewFileFeeder is the registered method to instantiate a FileFeeder
 func NewFileFeeder(conf map[string]string) (Feeder, error) {
 	f := &File{
 		lastLines: false,
@@ -55,16 +57,20 @@ func NewFileFeeder(conf map[string]string) (Feeder, error) {
 	return f, nil
 }
 
+// Start propagates a message every time a new line is read
 func (f *File) Start() {
 	go func() {
 		for line := range f.fp.Lines {
-			f.Propagate(data.NewMessage(line.Text))
+			msg := data.NewMessage(line.Text)
+			msg.SetExtra("file_name", f.filename)
+			f.Propagate(msg)
 		}
 	}()
 
 	f.isRunning = true
 }
 
+// Stop handles the Feeder shutdown
 func (f *File) Stop() {
 	log.Debug("feeder '%s' stream stop", f.Name())
 	f.fp.Stop()

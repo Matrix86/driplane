@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// Configuration contains all the configs read by yaml file
 type Configuration struct {
 	sync.RWMutex
 
@@ -17,6 +18,7 @@ type Configuration struct {
 	flat     map[string]string
 }
 
+// LoadConfiguration create a Configuration struct from a filename
 func LoadConfiguration(path string) (*Configuration, error) {
 	configuration := &Configuration{
 		FilePath: path,
@@ -66,6 +68,7 @@ func (c *Configuration) flatMap(m map[interface{}]interface{}) map[string]string
 	return flatten
 }
 
+// Get returns the config value with that name, if it exists
 func (c *Configuration) Get(name string) string {
 	c.RLock()
 	defer c.RUnlock()
@@ -76,6 +79,7 @@ func (c *Configuration) Get(name string) string {
 	return c.flat[name]
 }
 
+// Set insert a new config in the Configuration struct
 func (c *Configuration) Set(name string, value string) error {
 	c.Lock()
 	defer c.Unlock()
@@ -84,6 +88,7 @@ func (c *Configuration) Set(name string, value string) error {
 	return nil
 }
 
+// GetConfig returns the complete configuration in a flatten way
 func (c *Configuration) GetConfig() map[string]string {
 	c.RLock()
 	defer c.RUnlock()

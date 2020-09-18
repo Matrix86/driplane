@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// RSS is a Feeder that creates a stream from a RSS feed
 type RSS struct {
 	Base
 
@@ -22,6 +23,7 @@ type RSS struct {
 	lastParsing time.Time
 }
 
+// NewRSSFeeder is the registered method to instantiate a RSSFeeder
 func NewRSSFeeder(conf map[string]string) (Feeder, error) {
 	f := &RSS{
 		parser:     gofeed.NewParser(),
@@ -47,7 +49,7 @@ func NewRSSFeeder(conf map[string]string) (Feeder, error) {
 	return f, nil
 }
 
-func (f *RSS) ParseFeed() error {
+func (f *RSS) parseFeed() error {
 	var lastPubDate time.Time
 	log.Debug("Start RSS parsing: %s", f.url)
 	feed, err := f.parser.ParseURL(f.url)
@@ -110,11 +112,12 @@ func (f *RSS) ParseFeed() error {
 	return nil
 }
 
+// Start propagates a message every time a new row is published
 func (f *RSS) Start() {
 	f.ticker = time.NewTicker(f.frequency)
 	go func() {
 		// first start!
-		_ = f.ParseFeed()
+		_ = f.parseFeed()
 
 		for {
 			select {
@@ -122,7 +125,7 @@ func (f *RSS) Start() {
 				log.Debug("%s: stop arrived on the channel", f.Name())
 				return
 			case <-f.ticker.C:
-				_ = f.ParseFeed()
+				_ = f.parseFeed()
 			}
 		}
 	}()
@@ -130,6 +133,7 @@ func (f *RSS) Start() {
 	f.isRunning = true
 }
 
+// Stop handles the Feeder shutdown
 func (f *RSS) Stop() {
 	log.Debug("feeder '%s' stream stop", f.Name())
 	f.stopChan <- true

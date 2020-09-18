@@ -9,6 +9,8 @@ import (
 	text "text/template"
 )
 
+// Format is a Filter that apply a Golang Template to the input Message
+// and propagate it to the next Filter
 type Format struct {
 	Base
 
@@ -18,6 +20,7 @@ type Format struct {
 	params map[string]string
 }
 
+// NewFormatFilter is the registered method to instantiate a FormatFilter
 func NewFormatFilter(p map[string]string) (Filter, error) {
 	f := &Format{
 		params:       p,
@@ -47,11 +50,12 @@ func NewFormatFilter(p map[string]string) (Filter, error) {
 	if v, ok := f.params["file"]; ok {
 		fpath := v
 		if v, ok := p["general.templates_path"]; !ok {
-			if r, ok := p["general.rules_path"]; !ok {
+			r := ""
+			if r, ok = p["general.rules_path"]; !ok {
 				return nil, fmt.Errorf("NewJsFilter: rules_path or js_path configs not found")
-			} else {
-				fpath = filepath.Join(r, fpath)
 			}
+			fpath = filepath.Join(r, fpath)
+
 		} else {
 			fpath = filepath.Join(v, fpath)
 		}
@@ -77,6 +81,7 @@ func NewFormatFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
+// DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Format) DoFilter(msg *data.Message) (bool, error) {
 	txt, err := msg.ApplyPlaceholder(f.template)
 	if err != nil {

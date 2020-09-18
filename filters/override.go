@@ -6,6 +6,9 @@ import (
 	"text/template"
 )
 
+
+// Override is a Filter that allow to change the current Message
+// before to send it to the next Filter
 type Override struct {
 	Base
 
@@ -15,6 +18,7 @@ type Override struct {
 	params map[string]string
 }
 
+// NewOverrideFilter is the registered method to instantiate a OverrideFilter
 func NewOverrideFilter(p map[string]string) (Filter, error) {
 	f := &Override{
 		params: p,
@@ -40,6 +44,7 @@ func NewOverrideFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
+// DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Override) DoFilter(msg *data.Message) (bool, error) {
 	name, err := msg.ApplyPlaceholder(f.name)
 	if err != nil {
