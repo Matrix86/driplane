@@ -17,9 +17,10 @@ jobs:
         with:
           args: check
 
-      - name: Create release on GitHub
+      - env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        name: Create release on GitHub
         uses: docker://goreleaser/goreleaser:latest
         with:
           args: release
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
