@@ -8,7 +8,7 @@ It includes a mini language to define the filtering pipelines (the rules) and co
 
 With driplane you can create several rules starting from one or more streams, filter the content in the pipeline and launch task or send e-mail if some events occurred.
 
-The documentation can be found [HERE](https://matrix86.github.io/driplane/)
+The documentation can be found [HERE](https://matrix86.github.io/driplane/doc/)
 
 ## How it works
 
