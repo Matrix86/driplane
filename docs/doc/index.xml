@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Driplane Documentation on Dripline Documentation</title>
+    <link>https://matrix86.github.io/driplane/doc/</link>
+    <description>Recent content in Driplane Documentation on Dripline Documentation</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 11 Jan 2020 14:09:21 +0900</lastBuildDate>
+    
+        <atom:link href="https://matrix86.github.io/driplane/doc/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    
+      
+      <item>
+        <title>Installation</title>
+        <link>https://matrix86.github.io/driplane/doc/installation/</link>
+        <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
+        
+        <guid>https://matrix86.github.io/driplane/doc/installation/</guid>
+        <description></description>
+      </item>
+      
+    
+  </channel>
+</rss>

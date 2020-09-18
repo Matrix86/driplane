@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://matrix86.github.io/driplane/doc/installation/build/</loc>
+    <lastmod>2020-09-16T22:38:02+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://matrix86.github.io/driplane/doc/installation/</loc>
+    <lastmod>2020-09-16T22:38:02+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://matrix86.github.io/driplane/doc/installation/docker/</loc>
+    <lastmod>2020-09-16T22:38:02+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://matrix86.github.io/driplane/</loc>
+    <lastmod>2020-01-26T04:15:05+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://matrix86.github.io/driplane/doc/</loc>
+    <lastmod>2020-01-11T14:09:21+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://matrix86.github.io/driplane/docs/</loc>
+  </url>
+  
+  <url>
+    <loc>https://matrix86.github.io/driplane/tags/</loc>
+  </url>
+  
+</urlset>
