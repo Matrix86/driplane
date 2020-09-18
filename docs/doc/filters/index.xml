@@ -1,38 +1,17 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Driplane on Dripline Documentation</title>
-    <link>https://matrix86.github.io/driplane/</link>
-    <description>Recent content in Driplane on Dripline Documentation</description>
+    <title>Filters on Dripline Documentation</title>
+    <link>https://matrix86.github.io/driplane/doc/filters/</link>
+    <description>Recent content in Filters on Dripline Documentation</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 26 Jan 2020 04:15:05 +0900</lastBuildDate>
+    <lastBuildDate>Thu, 17 Sep 2020 11:30:11 +0200</lastBuildDate>
     
-        <atom:link href="https://matrix86.github.io/driplane/index.xml" rel="self" type="application/rss+xml" />
+        <atom:link href="https://matrix86.github.io/driplane/doc/filters/index.xml" rel="self" type="application/rss+xml" />
     
     
     
-      
-      <item>
-        <title>Basics</title>
-        <link>https://matrix86.github.io/driplane/doc/filters/js/basics/</link>
-        <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
-        
-        <guid>https://matrix86.github.io/driplane/doc/filters/js/basics/</guid>
-        <description>JS This filter allows to extend the basic driplane&amp;rsquo;s filter, defining Javascript scripts. It is based on islazy/plugin that is based on robertkrimen/otto.
-Defining a JS file with our custom logic, it is possible create a complex filter.
-Parameters    Parameter Type Default Description     path STRING empty path of the Javascript file (it can contains multiple functions)   function STRING empty name of the function in the JS file to call when a Message is received    .</description>
-      </item>
-      
-      <item>
-        <title>Build and install</title>
-        <link>https://matrix86.github.io/driplane/doc/installation/build/</link>
-        <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
-        
-        <guid>https://matrix86.github.io/driplane/doc/installation/build/</guid>
-        <description>Build and install Launching the follow command go will take care of the downloading, the dependency resolving, the building and finally of the installation of the binary in the $GOBIN directory.
-go get -u github.com/Matrix86/driplane/&amp;hellip; </description>
-      </item>
       
       <item>
         <title>Cache</title>
@@ -45,16 +24,6 @@ If the target of the Message as input has been cached before, and his TTL is not
       </item>
       
       <item>
-        <title>File</title>
-        <link>https://matrix86.github.io/driplane/doc/feeders/file/</link>
-        <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
-        
-        <guid>https://matrix86.github.io/driplane/doc/feeders/file/</guid>
-        <description>File feeder This feeder can create the stream starting from a file. Like the tail -f command it opens the specified file and propagates a data message if a line is being added to the file.
-Parameters    Parameter Type Default Description     filename STRING empty the path of the file that it has to keep track   toend BOOL &amp;ldquo;false&amp;rdquo; the feeder will start to create data messages only for new added lines    .</description>
-      </item>
-      
-      <item>
         <title>Changed</title>
         <link>https://matrix86.github.io/driplane/doc/filters/changed/</link>
         <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
@@ -62,48 +31,6 @@ Parameters    Parameter Type Default Description     filename STRING empty the p
         <guid>https://matrix86.github.io/driplane/doc/filters/changed/</guid>
         <description>Changed This filter is similar to the cache. It can only stop the propagation of the Message across the lane, but only if the target of the received Message is different from the previous one.
 Parameters    Parameter Type Default Description     target STRING &amp;ldquo;main&amp;rdquo; the field of the Message that should be used for the filter (it could be main or and extra field)    .</description>
-      </item>
-      
-      <item>
-        <title>Docker</title>
-        <link>https://matrix86.github.io/driplane/doc/installation/docker/</link>
-        <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
-        
-        <guid>https://matrix86.github.io/driplane/doc/installation/docker/</guid>
-        <description>Docker Soon&amp;hellip; </description>
-      </item>
-      
-      <item>
-        <title>Entrypoint</title>
-        <link>https://matrix86.github.io/driplane/doc/filters/js/entrypoint/</link>
-        <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
-        
-        <guid>https://matrix86.github.io/driplane/doc/filters/js/entrypoint/</guid>
-        <description>Entrypoint The JS file should consist of one or more functions, and they can be used in different filters or in combination between them.
-The function has to respect some constraints:
- the function&amp;rsquo;s name contained in the function parameter of the filter has to start with a capital letter; the function prototype should accept 3 variables; the function has to return a JS object with at least the filtered field;  Function&amp;rsquo;s prototype The function&amp;rsquo;s name specified in the function parameter of the filter, receives 3 input parameters:</description>
-      </item>
-      
-      <item>
-        <title>Plugin Packages</title>
-        <link>https://matrix86.github.io/driplane/doc/filters/js/packages/</link>
-        <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
-        
-        <guid>https://matrix86.github.io/driplane/doc/filters/js/packages/</guid>
-        <description>Packages Since the JS doesn&amp;rsquo;t have all the useful functions to perform operations like on file manipulation or http request (see otto docs for more info), driplane maps and export to the JS environment some Go functions as packages.
-These mapped functions are not definitive and they could change over time. File This package contains functions for manipulating files.
-Return The return value will be a JS object containing 2 fields:</description>
-      </item>
-      
-      <item>
-        <title>RSS</title>
-        <link>https://matrix86.github.io/driplane/doc/feeders/rss/</link>
-        <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
-        
-        <guid>https://matrix86.github.io/driplane/doc/feeders/rss/</guid>
-        <description>RSS This feeder create a stream starting from a feed RSS, ATOM or JSON.
-It is based on gofeed so you can refer to it for more info and supported formats.
-Parameters    Parameter Type Default Description     url STRING empty URL of the feed   freq DURATION 60s how often the feed should be parsed   start_from_beginning BOOL &amp;ldquo;false&amp;rdquo; start to parse from the beginning of the feed    .</description>
       </item>
       
       <item>
@@ -118,17 +45,6 @@ Examples Soon&amp;hellip; </description>
       </item>
       
       <item>
-        <title>Twitter</title>
-        <link>https://matrix86.github.io/driplane/doc/feeders/twitter/</link>
-        <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
-        
-        <guid>https://matrix86.github.io/driplane/doc/feeders/twitter/</guid>
-        <description>Twitter This feeder creates a stream from tweets. It is possible to define the keywords, or the users to follow.
-Based on go-twitter
-Parameters    Parameter Type Default Description     consumerKey STRING empty Twitter Auth   consumerSecret STRING empty Twitter Auth   accessToken STRING empty Twitter Auth   accessSecret STRING empty Twitter Auth   keywords STRING empty comma separated keywords that should match on the tweets   users STRING empty comma separated users list   languages STRING empty filter by language   disable_retweet BOOL &amp;ldquo;false&amp;rdquo; don&amp;rsquo;t include retweets in the stream   disable_quoted BOOL &amp;ldquo;false&amp;rdquo; don&amp;rsquo;t include quoted tweets in the stream    .</description>
-      </item>
-      
-      <item>
         <title>Format</title>
         <link>https://matrix86.github.io/driplane/doc/filters/format/</link>
         <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
@@ -136,17 +52,6 @@ Parameters    Parameter Type Default Description     consumerKey STRING empty Tw
         <guid>https://matrix86.github.io/driplane/doc/filters/format/</guid>
         <description>Format This filter is used to format the received Message. It is based on the Golang templates it can load templates from the template_path directory specified in the configuration file.
 Parameters    Parameter Type Default Description     type STRING &amp;ldquo;text&amp;rdquo; specify the type of template to use : &amp;quot;text&amp;quot; or &amp;quot;html&amp;quot;   template STRING empty a template could be specified directly here, instead of load it from file   file STRING empty load the template from file    In the template is allowed to use all the fields of the received Message: main or extra.</description>
-      </item>
-      
-      <item>
-        <title>Web</title>
-        <link>https://matrix86.github.io/driplane/doc/feeders/web/</link>
-        <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
-        
-        <guid>https://matrix86.github.io/driplane/doc/feeders/web/</guid>
-        <description>Web This feeder creates a stream starting from a web page. It is possible to define how often the page should be downloaded and parsed.
-Every time the page is parsed a Message is sent down the lane.
-Parameters    Parameter Type Default Description     url STRING empty URL of the web page   freq DURATION 60s how often the page should be parsed   text_only BOOL &amp;ldquo;false&amp;rdquo; if &amp;ldquo;true&amp;rdquo; it removes all the tags from the page   method STRING &amp;ldquo;GET&amp;rdquo; HTTP method to use on the requests   headers JSON empty Headers to use in the request   data JSON empty POST fields to send with the requests (it&amp;rsquo;s not possible to use in combination with rawData)   rawData STRING empty raw body of the requests (it&amp;rsquo;s not possible to use in combination with data)   status STRING empty the filter will propagate the Message only if the returned status is this   cookies STRING empty Path of the JSON file containing the cookies to use    .</description>
       </item>
       
       <item>
@@ -223,6 +128,15 @@ Parameters    Parameter Type Default Description     target STRING &amp;ldquo;ma
         <description>Url This filter is used to search or extract URLs from a Message.
 Currently supported types of URLs are:
  http/s ftp  Parameters    Parameter Type Default Description     target STRING &amp;ldquo;main&amp;rdquo; the field of the Message that should be used for the filter (it could be main or an extra field)   http BOOL &amp;ldquo;true&amp;rdquo; if &amp;ldquo;false&amp;rdquo;, http scheme urls are ignored   https BOOL &amp;ldquo;true&amp;rdquo; if &amp;ldquo;false&amp;rdquo;, https scheme urls are ignored   ftp BOOL &amp;ldquo;true&amp;rdquo; if &amp;ldquo;false&amp;rdquo;, ftp scheme urls are ignored   extract BOOL &amp;ldquo;true&amp;rdquo; if &amp;ldquo;true&amp;rdquo;, the main field of the propagated Message will contain the found URL    .</description>
+      </item>
+      
+      <item>
+        <title>JS</title>
+        <link>https://matrix86.github.io/driplane/doc/filters/js/</link>
+        <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
+        
+        <guid>https://matrix86.github.io/driplane/doc/filters/js/</guid>
+        <description></description>
       </item>
       
     
