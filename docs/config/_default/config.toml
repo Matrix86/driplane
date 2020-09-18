@@ -39,3 +39,5 @@ home = ["HTML", "RSS", "JSON"]
 
 [taxonomies]
 tag = "tags"
+
+publishDir = "docs"
