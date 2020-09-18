@@ -1,4 +1,9 @@
-# Introduction
+<p align="center">
+  <img alt="Logo" src="https://github.com/Matrix86/driplane/blob/master/docs/logo.png"/>
+  <p align="center">
+  Driplane
+  </p>
+</p>
 
 Driplane allows you to create an automatic alerting system or start automated tasks triggered by events.
 You can keep under control a source as Twitter, a file, a RSS feed or a website.
