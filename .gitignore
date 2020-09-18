@@ -14,4 +14,5 @@ build
 *.swp
 vendor/*
 .idea/
-config.json
+testing/*
+bin
