@@ -7,11 +7,18 @@ draft: false
 
 ## Docker
 
+`driplane` is containerized using a really lightweight Linux distribution called **Alpine Linux**.
+
+To pull the latest image version:
 
 {{< alert theme="success" >}}
-docker run --rm -v config.yaml.example:/app/config.yaml -it driplane:latest -config config.yam
+docker pull matrix86/driplane
 {{< /alert >}}
 
-{{< alert theme="warning" >}}
-Soon...
-{{< /alert >}} 
+To run it:
+
+{{< alert theme="success" >}}
+docker run --rm -v config:/app/config -it matrix86/driplane:latest -config config/config.yaml
+{{< /alert >}}
+
+where the `config` directory contains the `config.yaml` file, the `rule` directory, the `js` directory and the `templates` directory.
