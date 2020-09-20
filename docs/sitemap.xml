@@ -23,6 +23,11 @@
   </url>
   
   <url>
+    <loc>https://matrix86.github.io/driplane/doc/rules/definition/</loc>
+    <lastmod>2020-09-16T22:38:02+02:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://matrix86.github.io/driplane/doc/installation/</loc>
     <lastmod>2020-09-16T22:38:02+02:00</lastmod>
   </url>
@@ -55,6 +60,16 @@
   <url>
     <loc>https://matrix86.github.io/driplane/doc/feeders/rss/</loc>
     <lastmod>2020-09-16T22:38:02+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://matrix86.github.io/driplane/doc/rules/syntax/</loc>
+    <lastmod>2020-09-16T22:38:02+02:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://matrix86.github.io/driplane/doc/rules/</loc>
+    <lastmod>2020-09-17T11:29:50+02:00</lastmod>
   </url>
   
   <url>

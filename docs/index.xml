@@ -55,6 +55,18 @@ Parameters    Parameter Type Default Description     filename STRING empty the p
       </item>
       
       <item>
+        <title>First look</title>
+        <link>https://matrix86.github.io/driplane/doc/rules/definition/</link>
+        <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
+        
+        <guid>https://matrix86.github.io/driplane/doc/rules/definition/</guid>
+        <description>First look Driplane include a simple language to define where get the stream and what operation exec, or how to filter the data.
+In the rule could be defined 3 type of nodes:
+  FEEDER : it is the node responsible for creating of a stream of data (read every changes on a file, get tweets from Twitter, etc..)
+  FILTER : it receives data from a feeder or another filter and checks some conditions on them or makes some changes on them.</description>
+      </item>
+      
+      <item>
         <title>Changed</title>
         <link>https://matrix86.github.io/driplane/doc/filters/changed/</link>
         <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
@@ -104,6 +116,17 @@ Return The return value will be a JS object containing 2 fields:</description>
         <description>RSS This feeder create a stream starting from a feed RSS, ATOM or JSON.
 It is based on gofeed so you can refer to it for more info and supported formats.
 Parameters    Parameter Type Default Description     url STRING empty URL of the feed   freq DURATION 60s how often the feed should be parsed   start_from_beginning BOOL &amp;ldquo;false&amp;rdquo; start to parse from the beginning of the feed    .</description>
+      </item>
+      
+      <item>
+        <title>Syntax</title>
+        <link>https://matrix86.github.io/driplane/doc/rules/syntax/</link>
+        <pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate>
+        
+        <guid>https://matrix86.github.io/driplane/doc/rules/syntax/</guid>
+        <description>Syntax The syntax of the driplane&amp;rsquo;s rules is really simple. Like for the BASH every filter&amp;rsquo;s output is sended to the next filter&amp;rsquo;s input concatenating the two of them with the | character.
+All the rules have to start with a name and end with a ; char.
+Rule Name and Rule Call Each rule have to start with an identifier follow by =&amp;gt;. This identifier identifies rule name and it could be used in another rule to concatenate 2 rule together.</description>
       </item>
       
       <item>

@@ -1138,6 +1138,50 @@
   
   
   <span class="menu__title--collapse " data-depth="0">
+    Rules
+    <span class="menu__title--icon right">
+      
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M9.29 15.88L13.17 12 9.29 8.12c-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0l4.59 4.59c.39.39.39 1.02 0 1.41L10.7 17.3c-.39.39-1.02.39-1.41 0-.38-.39-.39-1.03 0-1.42z"/></svg>
+      
+    </span>
+  </span>
+  <ul class="menu__list " data-data=/rules/ data-link=https://matrix86.github.io/driplane/doc/>
+    
+      
+        
+        
+        <li>
+          <a href="https://matrix86.github.io/driplane/doc/rules/definition/" class="menu__title " data-depth="0">First look</a>
+        </li>
+      
+    
+      
+        
+        
+        <li>
+          <a href="https://matrix86.github.io/driplane/doc/rules/syntax/" class="menu__title " data-depth="0">Syntax</a>
+        </li>
+      
+    
+  </ul>
+  
+
+    
+      
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+  
+  
+  
+  <span class="menu__title--collapse " data-depth="0">
     Feeders
     <span class="menu__title--icon right">
       
@@ -1758,6 +1802,50 @@
   
   
   <span class="menu__title--collapse " data-depth="0">
+    Rules
+    <span class="menu__title--icon right">
+      
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M9.29 15.88L13.17 12 9.29 8.12c-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0l4.59 4.59c.39.39.39 1.02 0 1.41L10.7 17.3c-.39.39-1.02.39-1.41 0-.38-.39-.39-1.03 0-1.42z"/></svg>
+      
+    </span>
+  </span>
+  <ul class="menu__list " data-data=/rules/ data-link=https://matrix86.github.io/driplane/doc/>
+    
+      
+        
+        
+        <li>
+          <a href="https://matrix86.github.io/driplane/doc/rules/definition/" class="menu__title " data-depth="0">First look</a>
+        </li>
+      
+    
+      
+        
+        
+        <li>
+          <a href="https://matrix86.github.io/driplane/doc/rules/syntax/" class="menu__title " data-depth="0">Syntax</a>
+        </li>
+      
+    
+  </ul>
+  
+
+    
+      
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+  
+  
+  
+  <span class="menu__title--collapse " data-depth="0">
     Feeders
     <span class="menu__title--icon right">
       
@@ -2009,20 +2097,22 @@
 
   <article class="single__contents" data-dir="ltr">
     <h1 id="introduction">Introduction</h1>
-<p>Driplane allows you to create an automatic alerting system or start automated tasks triggered by events.<br />
-You can keep under control a source as Twitter, a file, a RSS feed or a website.<br />
-It includes a mini language to define the filtering pipelines (the rules) and contains a JS plugin system.</p>
-<p>With driplane you can create several rules starting from one or more streams, filter the content in the pipeline and launch task or send e-mail if some events occurred.</p>
+<p><code>Driplane</code> allows you to create an automatic alerting system or start automated tasks triggered by events.<br />
+You can keep under control a stream source as Twitter, a file, a RSS feed or a website.<br />
+It includes a mini language that allows you to define the filtering pipelines (the rules), and it is extensible thanks to an integrated JS plugin system.</p>
+<p>With <code>driplane</code> you can create several rules starting from one or more streams, filter the content in the pipeline and launch tasks or send alerts if some event occurred.</p>
+<p>The documentation can be found <a href="/driplane/doc/" target="_blank">HERE</a></p>
 <h2 id="how-it-works">How it works</h2>
-<p>The user can define one or more rules. Each rules contain a source (<code>feeder</code>), who cares of get the information and send updates (<code>Message</code>) through the pipeline, and several <code>filters</code>.<br />
-The task of the filters is to propagate or stop the <code>Message</code> to the next filter in the pipeline, or change the <code>Message</code> received before to propagate it. If the condition is verified, the <code>Message</code> will be propagated.</p>
+<p>The user can define one or more rules. Usually a rule contains a source (<code>feeder</code>), who cares of getting the information and sending updates (<code>Message</code>) through the pipeline, and one or more <code>filters</code>.<br />
+The filters&rsquo; job is to choose whether to propagate or not the <code>Message</code> to the next filter in the pipeline relying on a <em>condition</em>, or change the <code>Message</code> received before to propagate it. The <code>Message</code> will be propagated only if it verifies the condition.</p>
 <h2 id="use-cases">Use cases</h2>
-<p>Using driplane is it possible to:</p>
+<p>Using <code>driplane</code> is it possible to:</p>
 <ul>
-<li>keep track of keywords or users on Twitter, receive the new tweets or quoted tweet from them, search for URLs or particular strings and send it to a Telegram or Slack channel through a webhook.</li>
+<li>keep track of keywords or users on Twitter, receive the new tweets or quoted tweets from them, search for URLs or particular strings in them and send a Telegram or a Slack message through their webhooks.</li>
 <li>keep track of a RSS feed or a website, and download and store on file all the new changes to them.</li>
+<li>keep track of changes on a file, and launch alert if a particular condition is verified.</li>
 </ul>
-<p>The rules and the JS plugins allows you to create more complex custom logics.</p>
+<p>The rules and the JS plugins allows you to create very complex custom logics.</p>
 <h2 id="usage">Usage</h2>
 <pre><code>Usage of driplane:
   -config string
@@ -2055,6 +2145,15 @@ The task of the filters is to propagate or stop the <code>Message</code> to the 
     <div class="list-section__item">
       <a href="https://matrix86.github.io/driplane/doc/configuration/" class="list-section__item--link">
         Configuration
+      </a>
+      <div class="list-section__item--desc">
+        
+      </div>
+    </div>
+  
+    <div class="list-section__item">
+      <a href="https://matrix86.github.io/driplane/doc/rules/" class="list-section__item--link">
+        Rules
       </a>
       <div class="list-section__item--desc">
         

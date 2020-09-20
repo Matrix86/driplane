@@ -35,6 +35,15 @@ The configuration file could have several sections, but the mandatory one is the
       </item>
       
       <item>
+        <title>Rules</title>
+        <link>https://matrix86.github.io/driplane/doc/rules/</link>
+        <pubDate>Thu, 17 Sep 2020 11:29:50 +0200</pubDate>
+        
+        <guid>https://matrix86.github.io/driplane/doc/rules/</guid>
+        <description></description>
+      </item>
+      
+      <item>
         <title>Feeders</title>
         <link>https://matrix86.github.io/driplane/doc/feeders/</link>
         <pubDate>Thu, 17 Sep 2020 11:30:07 +0200</pubDate>
