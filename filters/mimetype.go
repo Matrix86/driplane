@@ -2,6 +2,7 @@ package filters
 
 import (
 	"github.com/Matrix86/driplane/data"
+	"text/template"
 
 	"github.com/gabriel-vasile/mimetype"
 )
@@ -10,7 +11,7 @@ import (
 type Mimetype struct {
 	Base
 
-	filename string
+	filename *template.Template
 
 	params map[string]string
 }
@@ -19,12 +20,15 @@ type Mimetype struct {
 func NewMimetypeFilter(p map[string]string) (Filter, error) {
 	f := &Mimetype{
 		params:   p,
-		filename: "",
 	}
 	f.cbFilter = f.DoFilter
 
 	if v, ok := p["filename"]; ok {
-		f.filename = v
+		t, err := template.New("mimeFilterFilename").Parse(v)
+		if err != nil {
+			return nil, err
+		}
+		f.filename = t
 	}
 
 	return f, nil
@@ -32,14 +36,9 @@ func NewMimetypeFilter(p map[string]string) (Filter, error) {
 
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Mimetype) DoFilter(msg *data.Message) (bool, error) {
-	var text string
-
-	if f.filename == "main" {
-		text = msg.GetMessage()
-	} else if v, ok := msg.GetExtra()[f.filename]; ok {
-		text = v
-	} else {
-		return false, nil
+	text, err := msg.ApplyPlaceholder(f.filename)
+	if err != nil {
+		return false, err
 	}
 
 	mime, err := mimetype.DetectFile(text)
