@@ -7,7 +7,7 @@ PKG_LIST := $(shell go list ./... | grep -v /vendor/)
 all: build
 
 test:
-	@go test -short ./...
+	@go test -short ${PKG_LIST}
 
 test-coverage:
 	@go test -short -coverprofile cover.out -covermode=atomic ${PKG_LIST}
@@ -24,4 +24,4 @@ install: build
 	go install -ldflags=${LDFLAGS} ./cmd/driplane
 
 clean:
-	@rm -rf build
+	@rm -rf bin
