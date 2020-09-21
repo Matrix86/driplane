@@ -134,7 +134,7 @@ func (t *Twitter) Start() {
 			if tweet.RetweetedStatus != nil {
 				retweet := tweet.RetweetedStatus
 				txt := t.getTweetExtendedText(retweet)
-				t.Propagate(data.NewMessageWithExtra(txt, map[string]string{
+				t.Propagate(data.NewMessageWithExtra(txt, map[string]interface{}{
 					"link":              fmt.Sprintf("https://twitter.com/%s/statuses/%d", tweet.User.ScreenName, tweet.ID),
 					"language":          tweet.Lang,
 					"username":          tweet.User.ScreenName,
@@ -150,7 +150,7 @@ func (t *Twitter) Start() {
 			if tweet.QuotedStatus != nil {
 				quoted := tweet.QuotedStatus
 				txt := t.getTweetExtendedText(tweet)
-				t.Propagate(data.NewMessageWithExtra(txt, map[string]string{
+				t.Propagate(data.NewMessageWithExtra(txt, map[string]interface{}{
 					"link":              fmt.Sprintf("https://twitter.com/%s/statuses/%d", tweet.User.ScreenName, tweet.ID),
 					"language":          tweet.Lang,
 					"username":          tweet.User.ScreenName,
@@ -165,7 +165,7 @@ func (t *Twitter) Start() {
 			}
 		} else {
 			text := t.getTweetExtendedText(tweet)
-			t.Propagate(data.NewMessageWithExtra(text, map[string]string{
+			t.Propagate(data.NewMessageWithExtra(text, map[string]interface{}{
 				"link":     fmt.Sprintf("https://twitter.com/%s/statuses/%d", tweet.User.ScreenName, tweet.ID),
 				"language": tweet.Lang,
 				"username": tweet.User.ScreenName,

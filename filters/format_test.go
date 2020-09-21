@@ -25,7 +25,7 @@ func TestFormatDoFilter(t *testing.T) {
 		t.Errorf("constructor returned '%s'", err)
 	}
 	if e, ok := filter.(*Format); ok {
-		m := data.NewMessageWithExtra("message", map[string]string{"test": "1"})
+		m := data.NewMessageWithExtra("message", map[string]interface{}{"test": "1"})
 		b, err := e.DoFilter(m)
 		if err != nil {
 			t.Errorf("DoFilter returned an error '%s'", err)

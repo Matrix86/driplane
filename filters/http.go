@@ -204,9 +204,9 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 				return false, err
 			}
 		} else if f.getBody {
-			txt := f.getBodyAsString(r)
+			txt := f.readBody(r)
 			if f.textOnly {
-				txt = utils.ExtractTextFromHTML(txt)
+				txt = utils.ExtractTextFromHTML(txt.(string))
 			}
 			msg.SetMessage(txt)
 		}
@@ -217,12 +217,12 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 	return ret, nil
 }
 
-func (f *HTTP) getBodyAsString(r *http.Response) string {
+func (f *HTTP) readBody(r *http.Response) interface{} {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return ""
 	}
-	return string(body)
+	return body
 }
 
 // Set the name of the filter

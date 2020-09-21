@@ -81,7 +81,7 @@ func NewMailFilter(p map[string]string) (Filter, error) {
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Mail) DoFilter(msg *data.Message) (bool, error) {
 	var err error
-	text := msg.GetMessage()
+	text := msg.GetMessage().(string)
 	if f.template != nil {
 		text, err = msg.ApplyPlaceholder(f.template)
 		if err != nil {

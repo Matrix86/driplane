@@ -61,7 +61,7 @@ func (f *RSS) parseFeed() error {
 
 	log.Debug("Found %d items", len(feed.Items))
 	for _, item := range feed.Items {
-		extra := make(map[string]string)
+		extra := make(map[string]interface{})
 
 		log.Debug("time : %s", item.PublishedParsed.Format("2006-01-02 15:04:05"))
 

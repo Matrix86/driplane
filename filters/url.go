@@ -35,7 +35,7 @@ func NewURLFilter(p map[string]string) (Filter, error) {
 	}
 	f.cbFilter = f.DoFilter
 
-	f.rURL = regexp.MustCompile(`(?i)((http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?(([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5})|([0-9]{1,3}\.){3}[0-9]{1,3})(:[0-9]{1,5})?(\/[^\s]+)?)`)
+	f.rURL = regexp.MustCompile(`(?i)((http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/|ftp:\/\/)?(([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5})|([0-9]{1,3}\.){3}[0-9]{1,3})(:[0-9]{1,5})?(\/[^\s]+)?)`)
 
 	if v, ok := f.params["http"]; ok && v == "false" {
 		f.getHTTP = false
@@ -58,7 +58,7 @@ func NewURLFilter(p map[string]string) (Filter, error) {
 
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *URL) DoFilter(msg *data.Message) (bool, error) {
-	text := msg.GetTarget(f.target)
+	text := msg.GetTarget(f.target).(string)
 
 	found := false
 	match := f.rURL.FindAllStringSubmatch(text, -1)
@@ -73,7 +73,7 @@ func (f *URL) DoFilter(msg *data.Message) (bool, error) {
 				found = true
 			}
 
-			if f.extractURL {
+			if f.extractURL && found {
 				clone := msg.Clone()
 				clone.SetMessage(mm)
 				clone.SetExtra("fulltext", text)

@@ -35,14 +35,19 @@ func NewChangedFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
-func (f *Changed) getMD5Hash(text string) string {
-	hash := md5.Sum([]byte(text))
+func (f *Changed) getMD5Hash(text interface{}) string {
+	var hash [16]byte
+	if v, ok := text.([]byte); ok {
+		hash = md5.Sum(v)
+	} else if v, ok := text.(string); ok {
+		hash = md5.Sum([]byte(v))
+	}
 	return hex.EncodeToString(hash[:])
 }
 
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Changed) DoFilter(msg *data.Message) (bool, error) {
-	var text string
+	var text interface{}
 
 	if f.target == "main" {
 		text = msg.GetMessage()

@@ -25,7 +25,7 @@ func TestEchoDoFilter(t *testing.T) {
 		t.Errorf("constructor returned '%s'", err)
 	}
 	if e, ok := filter.(*Echo); ok {
-		m := data.NewMessageWithExtra("main message", map[string]string{"extra": "1"})
+		m := data.NewMessageWithExtra("main message", map[string]interface{}{"extra": "1"})
 		b, err := e.DoFilter(m)
 		if b != true {
 			t.Errorf("DoFilter cannot return false")

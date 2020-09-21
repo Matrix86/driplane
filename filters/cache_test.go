@@ -26,7 +26,7 @@ func TestCacheDoFilterOnMain(t *testing.T) {
 		t.Errorf("constructor returned '%s'", err)
 	}
 	if e, ok := filter.(*Cache); ok {
-		m := data.NewMessageWithExtra("main message", map[string]string{"test": "1"})
+		m := data.NewMessageWithExtra("main message", map[string]interface{}{"test": "1"})
 		// First time it should return true
 		b, err := e.DoFilter(m)
 		if b == false {
@@ -67,7 +67,7 @@ func TestCacheDoFilterOnExtra(t *testing.T) {
 		t.Errorf("constructor returned '%s'", err)
 	}
 	if e, ok := filter.(*Cache); ok {
-		m := data.NewMessageWithExtra("main message", map[string]string{"extra": "boooo"})
+		m := data.NewMessageWithExtra("main message", map[string]interface{}{"extra": "boooo"})
 		// First time it should return true
 		b, err := e.DoFilter(m)
 		if b == false {
@@ -108,7 +108,7 @@ func TestCacheDoFilterIfExtraNotExist(t *testing.T) {
 		t.Errorf("constructor returned '%s'", err)
 	}
 	if e, ok := filter.(*Cache); ok {
-		m := data.NewMessageWithExtra("main message", map[string]string{"test": "1"})
+		m := data.NewMessageWithExtra("main message", map[string]interface{}{"test": "1"})
 		b, err := e.DoFilter(m)
 		if b != false {
 			t.Errorf("it should return false")
@@ -133,7 +133,7 @@ func TestCacheDoFilterWithGlobal(t *testing.T) {
 	f1, ok1 := filter1.(*Cache)
 	f2, ok2 := filter2.(*Cache)
 	if ok1 && ok2 {
-		m := data.NewMessageWithExtra("main message", map[string]string{"test": "1"})
+		m := data.NewMessageWithExtra("main message", map[string]interface{}{"test": "1"})
 		b1, err := f1.DoFilter(m)
 		if b1 != true {
 			t.Errorf("first time the filter should return TRUE")
