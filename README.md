@@ -1,4 +1,4 @@
-![Logo](https://github.com/Matrix86/driplane/blob/master/docs/logo.png)
+![Logo](https://github.com/Matrix86/driplane/blob/gh-pages/logo.png)
 ![License](https://img.shields.io/github/license/Matrix86/driplane)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/Matrix86/driplane)
 ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Matrix86/driplane/Build%20and%20Test/master)
