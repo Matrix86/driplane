@@ -7,6 +7,8 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
+
 	//"net/http/httputil"
 	"net/url"
 	"strconv"
@@ -36,19 +38,20 @@ type HTTP struct {
 	cookies []*http.Cookie
 
 	urlTemplate *template.Template
+	downloadTo  *template.Template
 }
 
 // NewHTTPFilter is the registered method to instantiate a HttpFilter
 func NewHTTPFilter(p map[string]string) (Filter, error) {
 	f := &HTTP{
-		params:       p,
-		getBody:      true,
-		method:       "GET",
-		cookieFile:   "",
-		headers:      make(map[string]string),
+		params:     p,
+		getBody:    true,
+		method:     "GET",
+		cookieFile: "",
+		headers:    make(map[string]string),
 
 		dataPost:    make(map[string]*template.Template),
-		checkStatus: 200,
+		checkStatus: 0,
 	}
 	f.cbFilter = f.DoFilter
 
@@ -61,6 +64,13 @@ func NewHTTPFilter(p map[string]string) (Filter, error) {
 			return nil, err
 		}
 		f.urlTemplate = t
+	}
+	if v, ok := f.params["download_to"]; ok {
+		t, err := template.New("httpFilterDownloadToString").Parse(v)
+		if err != nil {
+			return nil, err
+		}
+		f.downloadTo = t
 	}
 	if v, ok := f.params["method"]; ok {
 		f.method = v
@@ -124,6 +134,8 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 		return false, err
 	}
 
+	log.Debug("[%s::%s] URL : '%s'", f.Rule(), f.Name(), urlString)
+
 	var reader io.Reader
 	if len(f.dataPost) > 0 {
 		values := url.Values{}
@@ -173,10 +185,26 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 	defer r.Body.Close()
 
 	ret := false
-	log.Debug("[httpFilter] status %s", r.Status)
-	if f.checkStatus == r.StatusCode {
+	log.Debug("[%s::%s] status %s", f.Rule(), f.Name(), r.Status)
+	if f.checkStatus == 0 || f.checkStatus == r.StatusCode {
 		ret = true
-		if f.getBody {
+		if f.downloadTo != nil {
+			filepath, err := msg.ApplyPlaceholder(f.downloadTo)
+			if err != nil {
+				return false, err
+			}
+			out, err := os.Create(filepath)
+			if err != nil {
+				return false, err
+			}
+			defer out.Close()
+
+			// Write the body to file
+			_, err = io.Copy(out, r.Body)
+			if err != nil {
+				return false, err
+			}
+		} else if f.getBody {
 			txt := f.getBodyAsString(r)
 			if f.textOnly {
 				txt = utils.ExtractTextFromHTML(txt)
