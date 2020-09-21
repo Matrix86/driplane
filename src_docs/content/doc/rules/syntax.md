@@ -64,11 +64,11 @@ JSON requires **double quotes** to encode strings, so in order to define a JSON 
 
 ### Data message and Extra
 
-The data stream in driplane is based on text and the basic object that is part of it is the _Message_. 
+The data stream in `driplane` is based on text and the basic object that is part of it is the _Message_. 
 The _Message_ is an object that contains the text that need to be filtered and extra.
 The main string is identified as `text` in the filters, whereas the extra data are identified by a key.
 
-There are fixed extra, created from driplane itself and other extra relative to a feeder or filter.
+There are fixed extra, created from `driplane` itself and other extra relative to a feeder or filter.
 
 | Name | Description |
 | --- | --- |
