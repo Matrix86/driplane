@@ -1,6 +1,7 @@
 name: Update website
 
-on: [push]
+on:
+  push
 
 jobs:
   deploy:
