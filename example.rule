@@ -1,0 +1,13 @@
+# this is a comment
+# "name of the rule" => *rule pipe*
+
+# define a rule with only a feeder to be used from other rules
+# Twitter => <twitter: keywords="golang, software, #italy">;
+
+#rulehash => @Twitter | hash() | echo();
+#ruleurl => @Twitter | url() | http() | echo();
+
+#ruletext => @Twitter | text(regexp="android") | hash(md5="true",extract="true") | echo();
+
+# "tail -f" on a file and filtering urls
+RuleFile => <file: filename="/var/log/system.log"> | echo();
