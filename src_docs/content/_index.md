@@ -9,7 +9,7 @@ landing:
   title:
     - Driplane
   text:
-    - Create automated tasks and keep an eye on interesting things!
+    - Create automated tasks and keep an eye on what's going on around you!
   titleColor: 
   textColor: 
   spaceBetweenTitleText: 30
