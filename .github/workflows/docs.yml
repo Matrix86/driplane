@@ -32,5 +32,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           destination_dir: ./docs
           commit_message: ${{ github.event.head_commit.message }}
-          publish_branch: master
-          keep_files: true
+          publish_branch: gh-pages
