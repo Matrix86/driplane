@@ -29,6 +29,7 @@ type Filter interface {
 	DoFilter(msg *data.Message) (bool, error)
 	Pipe(msg *data.Message)
 	GetIdentifier() string
+	Log(format string, args ...interface{})
 }
 
 // Base is inherited from the feeders
@@ -75,6 +76,12 @@ func (f *Base) setIsNegative(b bool) {
 func (f *Base) GetIdentifier() string {
 	return fmt.Sprintf("%s:%d", f.name, f.id)
 }
+
+func (f *Base) Log(format string, args ...interface{}) {
+	str := fmt.Sprintf("[%s::%s] %s", f.Rule, f.Name(), format)
+	log.Debug(str, args...)
+}
+
 
 // Pipe gets a Message from the previous Node and Propagate it to the next one if the Filter's callback will return true
 func (f *Base) Pipe(msg *data.Message) {
