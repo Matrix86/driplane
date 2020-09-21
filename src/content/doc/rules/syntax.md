@@ -7,7 +7,7 @@ draft: false
 
 ## Syntax
 
-The syntax of the driplane's rules is really simple. Like for the BASH every filter's output is sended to the next filter's input concatenating the two of them with the `|` character.
+The syntax of the `driplane`'s rules is really simple. Like for the BASH every filter's output is sended to the next filter's input concatenating the two of them with the `|` character.
 All the rules have to start with a name and end with a `;` char.
 
 ### Rule Name and Rule Call
