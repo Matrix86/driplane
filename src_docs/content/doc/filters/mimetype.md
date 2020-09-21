@@ -8,16 +8,16 @@ draft: false
 ## MIME type
 
 This filter allows you to detect the MIME type of a file and its extension. 
-###### Based on the [gabriel-vasile/mimetype](https://github.com/gabriel-vasile/mimetype) library. 
+_Based on the [gabriel-vasile/mimetype](https://github.com/gabriel-vasile/mimetype) library._ 
 
 ### Parameters
 
  | Parameter | Type | Default | Description 
  | --- | --- | --- | --- |
- | **target** | _STRING_ | "main" | the field of the Message that should be used for the filter (it could be main or and extra field) |
+ | **filename** | _STRING_ | "main" | the filename of the file to detect (supports [Golang templates](https://golang.org/pkg/text/template/)) |
  
 {{< notice info "Example" >}} 
-`... | mime(target="main") | ...`
+`... | mime(filename="{{ .main }}") | ...`
 {{< /notice >}}
 
 ### Output

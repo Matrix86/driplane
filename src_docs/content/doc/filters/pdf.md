@@ -8,21 +8,21 @@ draft: false
 ## Pdf
 
 This filter allows you to extract plain text from a PDF file. 
-###### Based on the [ledongthuc/pdf](https://github.com/ledongthuc/pdf) library. 
+_Based on the [ledongthuc/pdf](https://github.com/ledongthuc/pdf) library._
 
 ### Parameters
 
  | Parameter | Type | Default | Description 
  | --- | --- | --- | --- |
- | **target** | _STRING_ | "main" | the field of the Message that should be used for the filter (it could be main or and extra field) |
+ | **filename** | _STRING_ | empty | the filename of the PDF file to parse (supports [Golang templates](https://golang.org/pkg/text/template/)) |
  
 {{< notice info "Example" >}} 
-`... | pdf(target="main") | ...`
+`... | pdf(filename="{{ .main }}") | ...`
 {{< /notice >}}
 
 ### Output
 
-The propagated Message contains the plain text of the input PDF file (`fulltext` will also set to the file name received as input). 
+The propagated Message contains the plain text of the input PDF file (`fulltext` will be set to the file name received as input). 
 
 ### Examples
 

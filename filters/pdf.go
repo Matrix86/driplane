@@ -2,6 +2,7 @@ package filters
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/Matrix86/driplane/data"
 
@@ -12,7 +13,7 @@ import (
 type PDF struct {
 	Base
 
-	target string
+	filename string
 
 	params map[string]string
 }
@@ -20,13 +21,15 @@ type PDF struct {
 // NewPDFFilter is the registered method to instantiate a TextFilter
 func NewPDFFilter(p map[string]string) (Filter, error) {
 	f := &PDF{
-		params: p,
-		target: "main",
+		params:   p,
+		filename: "",
 	}
 	f.cbFilter = f.DoFilter
 
-	if v, ok := p["target"]; ok {
-		f.target = v
+	if v, ok := p["filename"]; ok {
+		f.filename = v
+	} else {
+		return nil, fmt.Errorf("filename is a mandatory field")
 	}
 
 	return f, nil
@@ -35,9 +38,9 @@ func NewPDFFilter(p map[string]string) (Filter, error) {
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *PDF) DoFilter(msg *data.Message) (bool, error) {
 	var text string
-	if f.target == "main" {
+	if f.filename == "main" {
 		text = msg.GetMessage()
-	} else if v, ok := msg.GetExtra()[f.target]; ok {
+	} else if v, ok := msg.GetExtra()[f.filename]; ok {
 		text = v
 	} else {
 		return false, nil

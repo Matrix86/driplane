@@ -10,7 +10,7 @@ import (
 type Mimetype struct {
 	Base
 
-	target     string
+	filename string
 
 	params map[string]string
 }
@@ -18,13 +18,13 @@ type Mimetype struct {
 // NewMimetypeFilter is the registered method to instantiate a MimetypeFilter
 func NewMimetypeFilter(p map[string]string) (Filter, error) {
 	f := &Mimetype{
-		params:     p,
-		target:     "main",
+		params:   p,
+		filename: "",
 	}
 	f.cbFilter = f.DoFilter
 
-	if v, ok := p["target"]; ok {
-		f.target = v
+	if v, ok := p["filename"]; ok {
+		f.filename = v
 	}
 
 	return f, nil
@@ -34,9 +34,9 @@ func NewMimetypeFilter(p map[string]string) (Filter, error) {
 func (f *Mimetype) DoFilter(msg *data.Message) (bool, error) {
 	var text string
 
-	if f.target == "main" {
+	if f.filename == "main" {
 		text = msg.GetMessage()
-	} else if v, ok := msg.GetExtra()[f.target]; ok {
+	} else if v, ok := msg.GetExtra()[f.filename]; ok {
 		text = v
 	} else {
 		return false, nil
