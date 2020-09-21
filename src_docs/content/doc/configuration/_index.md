@@ -22,7 +22,7 @@ general:
   debug: false # if true enable the debug logs
 ```
 
-<ins>In the configuration is it possible to define default params for _Feeders_ and _Filters_.</ins> In this way we don't need to specify that configuration in the rules.
+<ins>In the configuration it is possible to define default params for _Feeders_ and _Filters_.</ins> In this way we don't need to specify that configuration in the rules.
 
 > For the twitter feeder we can set the keys one time.
 ```yaml
@@ -36,7 +36,7 @@ twitter:
 ```  
 > Each config will be visible __ONLY__ to the related filter or feeder.
 
-We can also define `custom` configurations and they'll be available to all the feeders and filters.
+We can also define `custom` configurations and they will be available to all the feeders and filters.
 
 ```yaml
 custom:

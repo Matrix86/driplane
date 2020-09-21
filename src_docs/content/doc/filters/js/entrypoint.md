@@ -7,12 +7,12 @@ draft: false
 
 ## Entrypoint
 
-The JS file should consist of one or more functions, and they can be used in different filters or in combination between them.
-The function has to respect some constraints:
+The JS file consists of one or more functions, and they can be used in different filters or in combination between them.
+The function must respect some constraints:
 
  * the function's name contained in the `function` parameter of the filter has to start with a capital letter;
- * the function prototype should accept 3 variables;
- * the function has to return a JS object with at least the `filtered` field;
+ * the function prototype must 3 variables;
+ * the function must return a JS object with at least the `filtered` field;
 
 ### Function's prototype
 

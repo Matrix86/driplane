@@ -7,7 +7,7 @@ draft: false
 
 ## Override
 
-This filter allows you to change a field of a Message, before to sent it to the next filter. Template can be used.
+This filter allows you to change a field of a Message, before sending it to the next filter. Template can be used.
 
 ### Parameters
 

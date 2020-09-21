@@ -7,7 +7,7 @@ draft: false
 
 ## Format
 
-This filter is used to format the received Message. It is based on the [Golang templates](https://golang.org/pkg/text/template/) it can load templates from the `template_path` directory specified in the configuration file.  
+This filter is used to format the received Message. It is based on the [Golang templates](https://golang.org/pkg/text/template/) and it can load templates from the `template_path` directory specified in the configuration file.  
 
 ### Parameters
 
@@ -27,7 +27,7 @@ In the template is allowed to use all the fields of the received Message: main o
 
 ### Output
 
-The new formatted text is sent to the next filter in the `main` field of the Message. The extra fields don't undergo changes.
+The new formatted text is sent to the next filter in the `main` field of the Message. The extra fields do not undergo changes.
 
 ### Examples
 

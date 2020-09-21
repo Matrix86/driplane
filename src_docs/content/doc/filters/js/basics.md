@@ -7,7 +7,7 @@ draft: false
 
 ## JS
 
-This filter allows to extend the basic `driplane`'s filter, defining Javascript scripts. It is based on [islazy/plugin](https://github.com/evilsocket/islazy) that is based on [robertkrimen/otto](https://github.com/robertkrimen/otto).
+This filter allows to extend the basic `driplane`'s filter, defining Javascript scripts. It is based on [islazy/plugin](https://github.com/evilsocket/islazy) which in turn is based on [robertkrimen/otto](https://github.com/robertkrimen/otto).
 Defining a JS file with our custom logic, it is possible create a complex filter.
 
 ### Parameters

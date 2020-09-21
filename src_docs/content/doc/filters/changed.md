@@ -21,7 +21,7 @@ This filter is similar to the cache. It can only stop the propagation of the Mes
 
 ### Output
 
-The output is not be changed. This filter can only stop or not the propagation of the Message.
+The output is not being changed. This filter can only stop or not the propagation of the Message.
 
 ### Examples
 

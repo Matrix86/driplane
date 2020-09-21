@@ -29,8 +29,8 @@ Currently supported types of URLs are:
 
 ### Output
 
-If the `extract` parameter is "false", the received Message will be propagated only if at least an URL will be found in it. 
-Otherwise if `extract` is "true" and the Message contains one or more URLs, the `main` field of the propagated Message will contain only the extracted URLs.
+If the `extract` parameter is "false", the received Message will be propagated only if at least one URL is found in it. 
+Otherwise, if `extract` is "true" and the Message contains one or more URLs, the `main` field of the propagated Message will contain only the extracted URLs.
 
 If the `extract` parameter is "true" and the message is propagated, a new extra field is created: `fulltext` will contain the original `target` string.
 

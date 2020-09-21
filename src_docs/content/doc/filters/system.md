@@ -23,7 +23,7 @@ It supports [Golang templates](https://golang.org/pkg/text/template/) (only text
 
 ### Output
 
-The propagated Message will contain the output of the command (if it is there) if it is not failed.
+The propagated Message will contain the output of the command if it is provided, and it is not failed.
 
 ### Examples
 

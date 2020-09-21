@@ -16,18 +16,18 @@ The documentation can be found [HERE](https://matrix86.github.io/driplane/doc/)
 
 ## How it works
 
-The user can define one or more rules. Usually a rule contains a source (`feeder`), who cares of getting the information and sending updates (`Message`) through the pipeline, and one or more `filters`.
+The user can define one or more rules. Usually a rule contains a source (`feeder`), which takes care of getting the information and sending updates (`Message`) through the pipeline, and one or more `filters`.
 The filters' job is to choose whether to propagate or not the `Message` to the next filter in the pipeline relying on a _condition_, or change the `Message` received before to propagate it. The `Message` will be propagated only if it verifies the condition.
 
 ## Use cases
 
-Using `driplane` is it possible to:
+Using `driplane` it is possible to:
 
  * keep track of keywords or users on Twitter, receive the new tweets or quoted tweets from them, search for URLs or particular strings in them and send a Telegram or a Slack message through their webhooks.
  * keep track of a RSS feed or a website, and download and store on file all the new changes to them.
  * keep track of changes on a file, and launch alert if a particular condition is verified.
  
-The rules and the JS plugins allows you to create very complex custom logics.
+The rules and the JS plugins allow you to create very complex custom logics.
   
 ## Usage
 

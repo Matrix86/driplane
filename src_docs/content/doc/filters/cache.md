@@ -26,7 +26,7 @@ Otherwise if the target of the Message is new to the cache, it is inserted in it
 
 ### Output
 
-The output is not be changed. This filter can only stop or not the propagation of the Message.
+The output is not being changed. This filter can only stop or not the propagation of the Message.
 
 ### Examples
 

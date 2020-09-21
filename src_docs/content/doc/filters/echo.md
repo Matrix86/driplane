@@ -7,7 +7,7 @@ draft: false
 
 ## Echo
 
-This filter print the Message on the logs. Mostly used to debug the rules.  
+This filter prints the Message on the logs. It is mostly used to debug the rules.  
 
 ### Parameters
 
@@ -21,7 +21,7 @@ This filter print the Message on the logs. Mostly used to debug the rules.
 
 ### Output
 
-The output is not be changed. This filter prints the received Message and send it to the next filter in the rule.
+The output is not being changed. This filter prints the received Message and send it to the next filter in the rule.
 
 ### Examples
 

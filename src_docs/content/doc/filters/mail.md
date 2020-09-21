@@ -7,8 +7,8 @@ draft: false
 
 ## Mail
 
-This filter allows you to send e-mail. When a `Message` arrives to the filter, we can decide if use the `main` field of the `Message` as URL on the request, or its content for the HTTP data.
-This behaviour can be handle with the parameters.
+This filter allows you to send an e-mail. When a `Message` arrives to the filter, we can decide if use the `main` field of the `Message` as URL on the request, or its content for the HTTP data.
+This behaviour can be handled with the parameters.
 
 ### Parameters
 
@@ -31,7 +31,7 @@ This behaviour can be handle with the parameters.
 {{< /notice >}}
 
 {{< notice success "Remember" >}} 
-Every default value can be set in the configuration, creating a section with the name of the`Filter`/`Feeder`. 
+Every default's value can be set in the configuration, creating a section with the name of the`Filter`/`Feeder`. 
 [more info](../../configuration)
 {{< /notice >}}
 

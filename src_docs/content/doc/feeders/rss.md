@@ -7,7 +7,7 @@ draft: false
 
 ## RSS
 
-This feeder create a stream starting from a feed `RSS`, `ATOM` or `JSON`. 
+This feeder creates a stream starting from a feed `RSS`, `ATOM` or `JSON`. 
 It is based on [gofeed](https://github.com/mmcdole/gofeed) so you can refer to it for more info and supported formats.
 
 ### Parameters
@@ -41,7 +41,7 @@ The `main` field of the Message will contain the `item.Title` string of the `gof
 | feed_copyright | copyright ([feed.Copyright](https://github.com/mmcdole/gofeed#default-mappings)) |
 | feed_generator | generator used to create the feed ([feed.Generator](https://github.com/mmcdole/gofeed#default-mappings)) |
 
-In addiction to the feed tags, the Extra will also contain the item's fields. Since they could be different from feed to feed and it is possible to configure custom tag, <ins>you'll find all them in the extra with their name</ins>. 
+In addition to the feed tags, the Extra will also contain the item's fields. Since they could be different from feed to feed and it is possible to configure custom tag, <ins>you will find all them in the extra with their name</ins>. 
 
 {{< notice warning "ATTENTION" >}} 
 Not all the Extra field could be filled. If the relative tag is not present on the feed it will be empty.

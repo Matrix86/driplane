@@ -8,7 +8,7 @@ draft: false
 ## HTTP
 
 This filter allows you to send HTTP requests. When a `Message` arrives to the filter, we can decide if use the `main` field of the `Message` as URL on the request, or its content for the HTTP data.
-This behaviour can be handle with the parameters.
+This behaviour can be handled with the parameters.
 
 ### Parameters
 

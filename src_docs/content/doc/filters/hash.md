@@ -32,8 +32,8 @@ Supported types of hashes are:
 
 ### Output
 
-If the `extract` parameter is "false", the received Message will be propagated only if at least a hash is found in it. 
-Otherwise if `extract` is "true" and the Message contains one or more hashes, the `main` field of the propagated Message will contain only the extracted hash.
+If the `extract` parameter is "false", the received Message will be propagated only if at least one hash is found in it. 
+Otherwise, if `extract` is "true" and the Message contains one or more hashes, the `main` field of the propagated Message will contain only the extracted hash.
 
 If the `extract` parameter is "true" and the message is propagated, a new extra field is created: `fulltext` will contain the original `target` string.
 
