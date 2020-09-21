@@ -1,11 +1,11 @@
-name: Update docs Site
+name: Update website
 
 on:
   push:
     branches:
-      - master
+      - gh-pages
     paths:
-      - 'src_docs/**'
+      - 'src/**'
     tags: []
 
 jobs:
@@ -24,11 +24,12 @@ jobs:
           extended: true
 
       - name: Build
-        run: hugo --minify -s src_docs
+        run: hugo --minify -s src
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3.7.0-8
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          commit_message: ${{ github.event.head_commit.message }}
           publish_branch: gh-pages
           publish_dir: ./
