@@ -7,7 +7,7 @@ draft: false
 
 ## Packages
 
-Since the JS doesn't have all the useful functions to perform operations like on file manipulation or http request (see [otto docs](https://godoc.org/github.com/robertkrimen/otto) for more info), driplane maps and export to the JS environment some Go functions as packages.
+Since the JS doesn't have all the useful functions to perform operations like on file manipulation or http request (see [otto docs](https://godoc.org/github.com/robertkrimen/otto) for more info), `driplane` maps and export to the JS environment some Go functions as packages.
 
 
 {{< alert theme="warning" >}}
