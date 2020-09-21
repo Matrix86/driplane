@@ -104,7 +104,7 @@ menuTitle?menuTitle.forEach(function(elem){elem.onclick=function(){closeDrawer()
 </span><span class=w>  </span><span class=nt>js_path</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;js&#34;</span><span class=w> </span><span class=c># path of the js plugins</span><span class=w>
 </span><span class=w>  </span><span class=nt>templates_path</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;templates&#34;</span><span class=w> </span><span class=c># path of templates</span><span class=w>
 </span><span class=w>  </span><span class=nt>debug</span><span class=p>:</span><span class=w> </span><span class=kc>false</span><span class=w> </span><span class=c># if true enable the debug logs</span><span class=w>
-</span></code></pre></td></tr></table></div></div><p><ins>In the configuration is it possible to define default params for <em>Feeders</em> and <em>Filters</em>.</ins> In this way we don&rsquo;t need to specify that configuration in the rules.</p><blockquote><p>For the twitter feeder we can set the keys one time.</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
+</span></code></pre></td></tr></table></div></div><p><ins>In the configuration it is possible to define default params for <em>Feeders</em> and <em>Filters</em>.</ins> In this way we don&rsquo;t need to specify that configuration in the rules.</p><blockquote><p>For the twitter feeder we can set the keys one time.</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
 </span><span class=lnt>2
 </span><span class=lnt>3
 </span><span class=lnt>4
@@ -118,7 +118,7 @@ menuTitle?menuTitle.forEach(function(elem){elem.onclick=function(){closeDrawer()
 </span><span class=w>  </span><span class=nt>accessSecret</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;accessSecret&#34;</span><span class=p>,</span><span class=w>
 </span><span class=w>  </span><span class=nt>keywords</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;#italy #coding #malware something&#34;</span><span class=p>,</span><span class=w>
 </span><span class=w>  </span><span class=nt>stallWarnings</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;true&#34;</span><span class=w>
-</span></code></pre></td></tr></table></div></div><blockquote><p>Each config will be visible <strong>ONLY</strong> to the related filter or feeder.</p></blockquote><p>We can also define <code>custom</code> configurations and they&rsquo;ll be available to all the feeders and filters.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
+</span></code></pre></td></tr></table></div></div><blockquote><p>Each config will be visible <strong>ONLY</strong> to the related filter or feeder.</p></blockquote><p>We can also define <code>custom</code> configurations and they will be available to all the feeders and filters.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
 </span><span class=lnt>2
 </span></code></pre></td><td class=lntd><pre class=chroma><code class=language-yaml data-lang=yaml><span class=nt>custom</span><span class=p>:</span><span class=w>
 </span><span class=w>  </span><span class=nt>customKey</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;This is a custom configuration&#34;</span><span class=w>
