@@ -7,7 +7,7 @@ draft: false
 
 ## First look
 
-Driplane include a simple language to define where get the stream and what operation exec, or how to filter the data.
+`Driplane` include a simple language to define where get the stream and what operation exec, or how to filter the data.
 
 In the rule could be defined 3 type of nodes:
 
