@@ -29,4 +29,4 @@ jobs:
           personal_token: ${{ secrets.PERSONAL_TOKEN }}
           commit_message: ${{ github.event.head_commit.message }}
           publish_branch: gh-pages
-          publish_dir: ./
+          publish_dir: ./src_docs/public
