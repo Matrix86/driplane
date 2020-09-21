@@ -11,8 +11,10 @@ require (
 	github.com/dghubble/sling v1.2.0 // indirect
 	github.com/evilsocket/islazy v1.10.6
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
+	github.com/gabriel-vasile/mimetype v1.1.1
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/hpcloud/tail v1.0.0
+	github.com/ledongthuc/pdf v0.0.0-20200323191019-23c5852adbd2
 	github.com/mmcdole/gofeed v1.0.0
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	golang.org/x/net v0.0.0-20181220203305-927f97764cc3
