@@ -79,7 +79,7 @@ func (f *Base) GetIdentifier() string {
 
 // Log print a debug line prepending the name of the rule and of the filter
 func (f *Base) Log(format string, args ...interface{}) {
-	str := fmt.Sprintf("[%s::%s] %s", f.Rule, f.Name(), format)
+	str := fmt.Sprintf("[%s::%s] %s", f.Rule(), f.Name(), format)
 	log.Debug(str, args...)
 }
 
