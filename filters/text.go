@@ -58,8 +58,8 @@ func (f *Text) DoFilter(msg *data.Message) (bool, error) {
 	var text string
 
 	if f.target == "main" {
-		text = msg.GetMessage()
-	} else if v, ok := msg.GetExtra()[f.target]; ok {
+		text = msg.GetMessage().(string)
+	} else if v, ok := msg.GetExtra()[f.target].(string); ok {
 		text = v
 	} else {
 		return false, nil

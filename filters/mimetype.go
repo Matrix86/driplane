@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"bytes"
 	"github.com/Matrix86/driplane/data"
 	"text/template"
 
@@ -11,6 +12,7 @@ import (
 type Mimetype struct {
 	Base
 
+	target   string
 	filename *template.Template
 
 	params map[string]string
@@ -20,6 +22,7 @@ type Mimetype struct {
 func NewMimetypeFilter(p map[string]string) (Filter, error) {
 	f := &Mimetype{
 		params:   p,
+		target: "main",
 	}
 	f.cbFilter = f.DoFilter
 
@@ -29,6 +32,8 @@ func NewMimetypeFilter(p map[string]string) (Filter, error) {
 			return nil, err
 		}
 		f.filename = t
+	} else if v, ok := p["target"]; ok {
+		f.target = v
 	}
 
 	return f, nil
@@ -36,18 +41,26 @@ func NewMimetypeFilter(p map[string]string) (Filter, error) {
 
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Mimetype) DoFilter(msg *data.Message) (bool, error) {
-	text, err := msg.ApplyPlaceholder(f.filename)
-	if err != nil {
-		return false, err
-	}
+	if f.filename != nil {
+		text, err := msg.ApplyPlaceholder(f.filename)
+		if err != nil {
+			return false, err
+		}
 
-	mime, err := mimetype.DetectFile(text)
-	if err != nil {
-		return false, err
+		mime, err := mimetype.DetectFile(text)
+		if err != nil {
+			return false, err
+		}
+		msg.SetMessage(mime.String())
+		msg.SetExtra("mimetype_ext", mime.Extension())
+		msg.SetExtra("fulltext", text)
+	} else {
+		buf := bytes.NewBuffer(msg.GetTarget(f.target).([]byte))
+		mime := mimetype.Detect(buf.Bytes())
+		msg.SetMessage(mime.String())
+		msg.SetExtra("mimetype_ext", mime.Extension())
+		msg.SetExtra("fulltext", msg.GetTarget("main"))
 	}
-	msg.SetMessage(mime.String())
-	msg.SetExtra("mimetype_ext", mime.Extension())
-	msg.SetExtra("fulltext", text)
 
 	return true, nil
 }

@@ -12,16 +12,16 @@ import (
 type Message struct {
 	sync.RWMutex
 
-	fields map[string]string
+	fields map[string]interface{}
 }
 
 // NewMessage creates a new Message struct with only the "main" data
-func NewMessage(msg string) *Message {
-	return NewMessageWithExtra(msg, map[string]string{})
+func NewMessage(msg interface{}) *Message {
+	return NewMessageWithExtra(msg, map[string]interface{}{})
 }
 
 // NewMessageWithExtra creates a Message struct with "main" and extra data
-func NewMessageWithExtra(msg string, extra map[string]string) *Message {
+func NewMessageWithExtra(msg interface{}, extra map[string]interface{}) *Message {
 	extra["main"] = msg
 	return &Message{
 		fields: extra,
@@ -29,21 +29,21 @@ func NewMessageWithExtra(msg string, extra map[string]string) *Message {
 }
 
 // SetMessage allows to change the "main" data in the Message struct
-func (d *Message) SetMessage(msg string) {
+func (d *Message) SetMessage(msg interface{}) {
 	d.Lock()
 	defer d.Unlock()
 	d.fields["main"] = msg
 }
 
 // GetMessage returns the "main" data in the Message struct
-func (d *Message) GetMessage() string {
+func (d *Message) GetMessage() interface{} {
 	d.RLock()
 	defer d.RUnlock()
 	return d.fields["main"]
 }
 
 // SetExtra allows to change the "extra" data with key k and value v in the Message struct
-func (d *Message) SetExtra(k string, v string) {
+func (d *Message) SetExtra(k string, v interface{}) {
 	d.Lock()
 	defer d.Unlock()
 	if k == "main" {
@@ -53,11 +53,11 @@ func (d *Message) SetExtra(k string, v string) {
 }
 
 // GetExtra returns all the "extra" data in the Message struct
-func (d *Message) GetExtra() map[string]string {
+func (d *Message) GetExtra() map[string]interface{} {
 	d.Lock()
 	defer d.Unlock()
 
-	clone := make(map[string]string)
+	clone := make(map[string]interface{})
 	for key, value := range d.fields {
 		if key == "main" {
 			// Ignoring main content
@@ -69,14 +69,14 @@ func (d *Message) GetExtra() map[string]string {
 }
 
 // SetTarget is like SetExtra but it can change also the "main" key
-func (d *Message) SetTarget(name string, value string) {
+func (d *Message) SetTarget(name string, value interface{}) {
 	d.Lock()
 	defer d.Unlock()
 	d.fields[name] = value
 }
 
 // GetTarget returns the value of a key in the Message struct. It can return also the "main" data
-func (d *Message) GetTarget(name string) string {
+func (d *Message) GetTarget(name string) interface{} {
 	d.RLock()
 	defer d.RUnlock()
 	if v, ok := d.fields[name]; ok {
@@ -88,7 +88,7 @@ func (d *Message) GetTarget(name string) string {
 // Clone creates a deep copy of the Message struct
 func (d *Message) Clone() *Message {
 	clone := &Message{
-		fields: make(map[string]string, 0),
+		fields: make(map[string]interface{}, 0),
 	}
 
 	for k, v := range d.fields {

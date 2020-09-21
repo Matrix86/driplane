@@ -25,7 +25,7 @@ func TestChangedDoFilterOnMain(t *testing.T) {
 		t.Errorf("constructor returned '%s'", err)
 	}
 	if e, ok := filter.(*Changed); ok {
-		m := data.NewMessageWithExtra("main message", map[string]string{"test": "1"})
+		m := data.NewMessageWithExtra("main message", map[string]interface{}{"test": "1"})
 		// First time it should return true
 		b, err := e.DoFilter(m)
 		if b == false {
@@ -53,7 +53,7 @@ func TestChangedDoFilterOnMain(t *testing.T) {
 			t.Errorf("DoFilter cannot return an error '%s'", err)
 		}
 
-		m = data.NewMessageWithExtra("main message changed", map[string]string{"test": "2"})
+		m = data.NewMessageWithExtra("main message changed", map[string]interface{}{"test": "2"})
 		b, err = e.DoFilter(m)
 		if b == false {
 			t.Errorf("it should return true, the value is changed")
@@ -72,7 +72,7 @@ func TestChangedDoFilterOnExtra(t *testing.T) {
 		t.Errorf("constructor returned '%s'", err)
 	}
 	if e, ok := filter.(*Changed); ok {
-		m := data.NewMessageWithExtra("main message", map[string]string{"test": "1"})
+		m := data.NewMessageWithExtra("main message", map[string]interface{}{"test": "1"})
 		// First time it should return true
 		b, err := e.DoFilter(m)
 		if b == false {
@@ -100,7 +100,7 @@ func TestChangedDoFilterOnExtra(t *testing.T) {
 			t.Errorf("DoFilter cannot return an error '%s'", err)
 		}
 
-		m = data.NewMessageWithExtra("main message", map[string]string{"test": "2"})
+		m = data.NewMessageWithExtra("main message", map[string]interface{}{"test": "2"})
 		b, err = e.DoFilter(m)
 		if b == false {
 			t.Errorf("it should return true, the value is changed")
@@ -119,7 +119,7 @@ func TestChangedDoFilterIfExtraNotExist(t *testing.T) {
 		t.Errorf("constructor returned '%s'", err)
 	}
 	if e, ok := filter.(*Changed); ok {
-		m := data.NewMessageWithExtra("main message", map[string]string{"test": "1"})
+		m := data.NewMessageWithExtra("main message", map[string]interface{}{"test": "1"})
 		b, err := e.DoFilter(m)
 		if b != false {
 			t.Errorf("it should return false")

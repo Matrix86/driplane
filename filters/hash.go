@@ -63,7 +63,7 @@ func NewHashFilter(p map[string]string) (Filter, error) {
 
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Hash) DoFilter(msg *data.Message) (bool, error) {
-	text := msg.GetTarget(f.target)
+	text := msg.GetTarget(f.target).(string)
 	match := f.regex.FindAllStringSubmatch(text, -1)
 	if match != nil {
 		for _, m := range match {

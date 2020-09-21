@@ -148,7 +148,7 @@ func (f *Web) getBodyAsString(r *http.Response) string {
 
 func (f *Web) parseURL() error {
 	var txt string
-	extra := make(map[string]string)
+	extra := make(map[string]interface{})
 
 	log.Debug("Start Web parsing: %s", f.url)
 	req, err := f.prepareRequest()

@@ -2,7 +2,6 @@ package filters
 
 import (
 	"bytes"
-	"fmt"
 	"text/template"
 
 	"github.com/Matrix86/driplane/data"
@@ -14,6 +13,7 @@ import (
 type PDF struct {
 	Base
 
+	target   string
 	filename *template.Template
 
 	params map[string]string
@@ -22,7 +22,8 @@ type PDF struct {
 // NewPDFFilter is the registered method to instantiate a TextFilter
 func NewPDFFilter(p map[string]string) (Filter, error) {
 	f := &PDF{
-		params:   p,
+		params: p,
+		target: "main",
 	}
 	f.cbFilter = f.DoFilter
 
@@ -32,8 +33,8 @@ func NewPDFFilter(p map[string]string) (Filter, error) {
 			return nil, err
 		}
 		f.filename = t
-	} else {
-		return nil, fmt.Errorf("filename is a mandatory field")
+	} else if v, ok := p["target"]; ok {
+		f.target = v
 	}
 
 	return f, nil
@@ -41,29 +42,49 @@ func NewPDFFilter(p map[string]string) (Filter, error) {
 
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *PDF) DoFilter(msg *data.Message) (bool, error) {
-	text, err := msg.ApplyPlaceholder(f.filename)
-	if err != nil {
-		return false, err
+	if f.filename != nil {
+		text, err := msg.ApplyPlaceholder(f.filename)
+		if err != nil {
+			return false, err
+		}
+
+		h, r, err := pdf.Open(text)
+		// remember close file
+		defer h.Close()
+
+		if err != nil {
+			return false, err
+		}
+
+		var buf bytes.Buffer
+		b, err := r.GetPlainText()
+		if err != nil {
+			return false, err
+		}
+		buf.ReadFrom(b)
+		plain := buf.String()
+
+		msg.SetMessage(plain)
+		msg.SetExtra("fulltext", text)
+	} else {
+		buf := bytes.NewBuffer(msg.GetTarget(f.target).([]byte))
+
+		r, err := pdf.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
+		if err != nil {
+			return false, err
+		}
+
+		var buff bytes.Buffer
+		b, err := r.GetPlainText()
+		if err != nil {
+			return false, err
+		}
+		buff.ReadFrom(b)
+		plain := buff.String()
+
+		msg.SetMessage(plain)
+		msg.SetExtra("fulltext", msg.GetTarget("main"))
 	}
-
-	h, r, err := pdf.Open(text)
-	// remember close file
-	defer h.Close()
-
-	if err != nil {
-		return false, err
-	}
-
-	var buf bytes.Buffer
-	b, err := r.GetPlainText()
-	if err != nil {
-		return false, err
-	}
-	buf.ReadFrom(b)
-	plain := buf.String()
-
-	msg.SetMessage(plain)
-	msg.SetExtra("fulltext", text)
 
 	return true, nil
 }
