@@ -2,11 +2,13 @@ package feeders
 
 import (
 	"fmt"
-	"github.com/Matrix86/driplane/data"
-	"github.com/evilsocket/islazy/log"
-	"github.com/hpcloud/tail"
 	"io"
 	"os"
+
+	"github.com/Matrix86/driplane/data"
+
+	"github.com/evilsocket/islazy/log"
+	"github.com/hpcloud/tail"
 )
 
 // File is a Feeder that creates a stream from a file

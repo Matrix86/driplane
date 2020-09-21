@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/Matrix86/driplane/utils"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -13,6 +12,8 @@ import (
 	"time"
 
 	"github.com/Matrix86/driplane/data"
+	"github.com/Matrix86/driplane/utils"
+
 	"github.com/evilsocket/islazy/log"
 )
 

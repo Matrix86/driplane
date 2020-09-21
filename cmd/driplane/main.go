@@ -3,17 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/Matrix86/driplane/utils"
-	"github.com/evilsocket/islazy/tui"
 	"os"
 	"os/signal"
 	"runtime"
 	"syscall"
 
 	"github.com/Matrix86/driplane/core"
+	"github.com/Matrix86/driplane/utils"
 
 	"github.com/evilsocket/islazy/fs"
 	"github.com/evilsocket/islazy/log"
+	"github.com/evilsocket/islazy/tui"
 )
 
 var (

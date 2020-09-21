@@ -1,8 +1,9 @@
 package filters
 
 import (
-	"github.com/Matrix86/driplane/data"
 	"regexp"
+
+	"github.com/Matrix86/driplane/data"
 )
 
 // Hash is a Filter that searches for hashes in the Message

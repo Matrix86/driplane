@@ -8,6 +8,7 @@ import (
 
 	"github.com/Matrix86/driplane/data"
 	"github.com/evilsocket/islazy/log"
+
 	gomail "gopkg.in/gomail.v2"
 )
 

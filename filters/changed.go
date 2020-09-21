@@ -3,8 +3,9 @@ package filters
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"github.com/Matrix86/driplane/data"
 	"sync"
+
+	"github.com/Matrix86/driplane/data"
 )
 
 // Changed is a Filter that call the propagation method only if

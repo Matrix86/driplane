@@ -2,9 +2,10 @@ package core
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/Matrix86/driplane/feeders"
 	"github.com/evilsocket/islazy/log"
-	"sync"
 )
 
 // Orchestrator handles the pipelines and rules

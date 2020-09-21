@@ -2,11 +2,12 @@ package filters
 
 import (
 	"fmt"
-	"github.com/Matrix86/driplane/data"
 	html "html/template"
 	"io/ioutil"
 	"path/filepath"
 	text "text/template"
+
+	"github.com/Matrix86/driplane/data"
 )
 
 // Format is a Filter that apply a Golang Template to the input Message

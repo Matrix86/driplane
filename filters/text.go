@@ -2,9 +2,10 @@ package filters
 
 import (
 	"fmt"
-	"github.com/Matrix86/driplane/data"
 	"regexp"
 	"strings"
+
+	"github.com/Matrix86/driplane/data"
 )
 
 // Text is a Filter to search and extract strings from the input Message

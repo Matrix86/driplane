@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/Matrix86/driplane/data"
+
 	"github.com/evilsocket/islazy/plugin"
 	"github.com/robertkrimen/otto"
 )

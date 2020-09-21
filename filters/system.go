@@ -5,6 +5,7 @@ import (
 	"text/template"
 
 	"github.com/Matrix86/driplane/data"
+
 	"github.com/evilsocket/islazy/log"
 )
 

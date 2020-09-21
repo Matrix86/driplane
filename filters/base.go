@@ -2,8 +2,10 @@ package filters
 
 import (
 	"fmt"
+
 	"github.com/Matrix86/driplane/data"
 	"github.com/Matrix86/driplane/plugins"
+
 	"github.com/asaskevich/EventBus"
 	"github.com/evilsocket/islazy/log"
 	"github.com/evilsocket/islazy/plugin"

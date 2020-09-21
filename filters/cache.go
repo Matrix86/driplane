@@ -3,10 +3,11 @@ package filters
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"github.com/Matrix86/driplane/data"
-	"github.com/Matrix86/driplane/filters/utils"
 	"sync"
 	"time"
+
+	"github.com/Matrix86/driplane/data"
+	"github.com/Matrix86/driplane/filters/utils"
 )
 
 // Cache handles a cache usable in the rule

@@ -2,12 +2,14 @@ package feeders
 
 import (
 	"fmt"
-	"github.com/Matrix86/driplane/data"
-	"github.com/evilsocket/islazy/log"
-	"github.com/mmcdole/gofeed"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/Matrix86/driplane/data"
+
+	"github.com/evilsocket/islazy/log"
+	"github.com/mmcdole/gofeed"
 )
 
 // RSS is a Feeder that creates a stream from a RSS feed

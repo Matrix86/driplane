@@ -2,13 +2,15 @@ package core
 
 import (
 	"fmt"
-	"github.com/Matrix86/driplane/feeders"
-	"github.com/Matrix86/driplane/filters"
-	bus "github.com/asaskevich/EventBus"
-	"github.com/evilsocket/islazy/log"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/Matrix86/driplane/feeders"
+	"github.com/Matrix86/driplane/filters"
+
+	bus "github.com/asaskevich/EventBus"
+	"github.com/evilsocket/islazy/log"
 )
 
 var (
