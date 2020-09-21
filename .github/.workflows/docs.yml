@@ -2,11 +2,8 @@ name: Update website
 
 on:
   push:
-    branches:
-      - gh-pages
     paths:
       - 'src/**'
-    tags: []
 
 jobs:
   deploy:
