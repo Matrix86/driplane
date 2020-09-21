@@ -1,6 +1,6 @@
 ---
 title: "Driplane Documentation"
-description: "Documentation of the Driplane project"
+description: "Documentation of Driplane project"
 date: 2020-01-11T14:09:21+09:00
 ---
 
