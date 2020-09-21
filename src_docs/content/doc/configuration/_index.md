@@ -7,9 +7,9 @@ draft: false
 
 ## Configuration
 
-Driplane needs a yaml file to work. An example can be found [here](https://github.com/Matrix86/driplane/blob/master/config.yaml.example).
+`Driplane` needs a yaml file to work. An example can be found [here](https://github.com/Matrix86/driplane/blob/master/config.yaml.example).
 
-The configuration file could have several sections, but the mandatory one is the `general` one. It specifies all the paths needed by Driplane to find js files, templates and rules. 
+The configuration file could have several sections, but the mandatory one is the `general` one. It specifies all the paths needed by `driplane` to find js files, templates and rules. 
 
 > It contains the paths of rules, templates and javascript plugins.
 
