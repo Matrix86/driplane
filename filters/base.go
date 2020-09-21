@@ -78,8 +78,9 @@ func (f *Base) GetIdentifier() string {
 
 // Pipe gets a Message from the previous Node and Propagate it to the next one if the Filter's callback will return true
 func (f *Base) Pipe(msg *data.Message) {
-	log.Debug("[%s::%s] received: %#v", f.rule, f.name, msg)
-	b, err := f.cbFilter(msg)
+	clone := msg.Clone()
+	log.Debug("[%s::%s] received: %#v", f.rule, f.name, clone)
+	b, err := f.cbFilter(clone)
 	if err != nil {
 		log.Error("[%s::%s] %s", f.rule, f.name, err)
 	}
@@ -87,7 +88,7 @@ func (f *Base) Pipe(msg *data.Message) {
 	// golang does not provide a logical XOR so we have to "implement" it manually
 	if f.negative != b {
 		log.Debug("[%s::%s] filter matched", f.rule, f.name)
-		f.Propagate(msg)
+		f.Propagate(clone)
 	}
 }
 
