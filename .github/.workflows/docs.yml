@@ -1,9 +1,6 @@
 name: Update website
 
-on:
-  push:
-    paths:
-      - 'src/**'
+on: [push]
 
 jobs:
   deploy:
@@ -30,3 +27,4 @@ jobs:
           commit_message: ${{ github.event.head_commit.message }}
           publish_branch: gh-pages
           publish_dir: ./
+          keep_files: true
