@@ -14,10 +14,11 @@ _Based on the [gabriel-vasile/mimetype](https://github.com/gabriel-vasile/mimety
 
  | Parameter | Type | Default | Description 
  | --- | --- | --- | --- |
- | **filename** | _STRING_ | "main" | the filename of the file to detect (supports [Golang templates](https://golang.org/pkg/text/template/)) |
+ | **target** | _STRING_ | "main" | the field of the Message that should be used for the filter (it could be the `main` or and extra field) |
+ | **filename** | _STRING_ | empty | the filename of the file to detect (supports [Golang templates](https://golang.org/pkg/text/template/)) |
  
 {{< notice info "Example" >}} 
-`... | mime(filename="{{ .main }}") | ...`
+`... | mime(target="{{ .extra_field }}") | ...`
 {{< /notice >}}
 
 ### Output
