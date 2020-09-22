@@ -30,5 +30,6 @@ changelog:
   filters:
     exclude:
       - '^docs:'
+      - 'typo'
       - '^test:'
       - '^src_docs:'
