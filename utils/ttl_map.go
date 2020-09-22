@@ -77,7 +77,7 @@ func (m *TTLMap) Get(k interface{}) (interface{}, bool) {
 		if i.expired() {
 			return nil, false
 		}
-		return i, true
+		return i.value, true
 	}
 	return nil, false
 }

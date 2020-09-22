@@ -28,7 +28,7 @@ func (c *CachePackage) Put(k, v string, ttl int64) {
 }
 
 // Get return a cache item if it exists
-func (c *CachePackage) Get(k interface{}) *CacheResponse {
+func (c *CachePackage) Get(k string) *CacheResponse {
 	cache := utils.GetGlobalTTLMapInstance(5 * time.Minute).Cache
 	v, ok := cache.Get(k)
 	if ok {
