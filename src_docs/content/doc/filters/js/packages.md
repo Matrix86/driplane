@@ -118,3 +118,24 @@ The return value will be a JS object containing 4 fields:
 | http.Post(url string, headers map[string]string, data interface{}) |  |
 | http.DownloadFile(filepath string, method string, uri string, headers interface{}, data interface{}) |  |
 | http.UploadFile(filename string, fieldname string, method string, uri string, headers interface{}, data interface{}) |  |
+
+### Cache
+
+This package contains functions for add and get values from the **global** cache.
+
+#### Return
+
+The return value will be a JS object containing the following fields:
+
+| Name | Type | Description |
+| --- | --- | --- |
+| Status | _BOOL_ | if true the operation was successful |
+| Error | _STRING_ | if status is false it contains the reason of the failure |
+| Value | _STRING_ | if status is true it contains the resulting value |
+
+#### Functions
+
+| Prototype | Description |
+| --- | --- |
+| file.Put(key string, value string, ttl int64) | add the `value` in the cache using the key `key` and it will be deleted after `ttl` seconds |
+| file.Get(key string) | get the value stored in the cache with the key `key` |

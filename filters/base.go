@@ -83,7 +83,6 @@ func (f *Base) Log(format string, args ...interface{}) {
 	log.Debug(str, args...)
 }
 
-
 // Pipe gets a Message from the previous Node and Propagate it to the next one if the Filter's callback will return true
 func (f *Base) Pipe(msg *data.Message) {
 	clone := msg.Clone()
@@ -126,6 +125,7 @@ func init() {
 		"file":    plugins.GetFile(),
 		"util":    plugins.GetUtil(),
 		"strings": plugins.GetStrings(),
+		"cache":   plugins.GetCache(),
 	}
 }
 

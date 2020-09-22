@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/Matrix86/driplane/data"
-	"github.com/Matrix86/driplane/filters/utils"
+	"github.com/Matrix86/driplane/utils"
 )
 
 // Cache handles a cache usable in the rule

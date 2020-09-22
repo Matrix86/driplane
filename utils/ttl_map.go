@@ -70,7 +70,7 @@ func (m *TTLMap) Put(k, v interface{}, ttl int64) {
 }
 
 // Get returns the value of the associated key from the cache
-func (m *TTLMap) Get(k string) (interface{}, bool) {
+func (m *TTLMap) Get(k interface{}) (interface{}, bool) {
 	m.RLock()
 	defer m.RUnlock()
 	if i, ok := m.dict[k]; ok {
