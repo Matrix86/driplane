@@ -3,4 +3,4 @@ go get -u github.com/Matrix86/driplane/&amp;hellip;</description></item><item><t
 To pull the latest image version:
 docker pull matrix86/driplane To run it:
 docker run &amp;ndash;rm -v config:/app/config -it matrix86/driplane:latest -config config/config.yaml where the config directory contains the config.yaml file, the rule directory, the js directory and the templates directory.
-(Link to the Docker repository)[https://hub.docker.com/repository/docker/matrix86/driplane]</description></item></channel></rss>
+Link to the Docker repository</description></item></channel></rss>
