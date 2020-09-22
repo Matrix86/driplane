@@ -1,8 +1,6 @@
 package filters
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"sync"
 	"time"
 
@@ -59,16 +57,6 @@ func NewCacheFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
-func (f *Cache) getMD5Hash(text interface{}) string {
-	var hash [16]byte
-	if v, ok := text.([]byte); ok {
-		hash = md5.Sum(v)
-	} else if v, ok := text.(string); ok {
-		hash = md5.Sum([]byte(v))
-	}
-	return hex.EncodeToString(hash[:])
-}
-
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Cache) DoFilter(msg *data.Message) (bool, error) {
 	var text interface{}
@@ -81,7 +69,7 @@ func (f *Cache) DoFilter(msg *data.Message) (bool, error) {
 		return false, nil
 	}
 
-	hash := f.getMD5Hash(text)
+	hash := utils.MD5Sum(text)
 	if _, ok := f.cache.Get(hash); !ok {
 		f.cache.Put(hash, true, int64(f.ttl.Seconds()))
 		return true, nil
