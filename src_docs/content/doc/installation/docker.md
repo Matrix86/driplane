@@ -24,4 +24,4 @@ docker run --rm -v config:/app/config -it matrix86/driplane:latest -config confi
 where the `config` directory contains the `config.yaml` file, the `rule` directory, the `js` directory and the `templates` directory.
 
 
-(Link to the Docker repository)[https://hub.docker.com/repository/docker/matrix86/driplane]
+[Link to the Docker repository](https://hub.docker.com/repository/docker/matrix86/driplane)
