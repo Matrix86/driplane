@@ -21,6 +21,10 @@ _Based on the [ledongthuc/pdf](https://github.com/ledongthuc/pdf) library._
 `... | pdf(target="{{ .extra_field }}") | ...`
 {{< /notice >}}
 
+{{< notice warning "ATTENTION" >}} 
+The `filename` field override the `target`. They are mutually exclusive, so you can specify only one of them.
+{{< /notice >}}
+
 ### Output
 
 The propagated Message contains the plain text of the input PDF file (`fulltext` will be set to the file name received as input). 

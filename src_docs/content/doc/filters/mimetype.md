@@ -21,6 +21,11 @@ _Based on the [gabriel-vasile/mimetype](https://github.com/gabriel-vasile/mimety
 `... | mime(target="{{ .extra_field }}") | ...`
 {{< /notice >}}
 
+{{< notice warning "ATTENTION" >}} 
+The `filename` field override the `target`. They are mutually exclusive, so you can specify only one of them.
+{{< /notice >}}
+
+
 ### Output
 
 The propagated Message will contain the mimetype's string in the `main` field and the extension in the extra field `mimetype_ext`.
