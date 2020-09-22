@@ -93,6 +93,7 @@ The return value will be a JS object containing 2 fields:
 | --- | --- |
 | util.Sleep(seconds int) | wait for `seconds` seconds |
 | util.Getenv(name string) | get the value of the `name` environment variables, if it exists, and return it on the `Value` field of the returned value |
+| util.Md5File(filename string) | calculate the MD5 hash of the `filename` and return it on the `Value` field |
 
 ### Http
 

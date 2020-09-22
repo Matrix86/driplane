@@ -1,6 +1,7 @@
 package plugins
 
 import (
+	"github.com/Matrix86/driplane/utils"
 	"os"
 	"time"
 )
@@ -35,5 +36,22 @@ func (c *UtilPackage) Getenv(name string) UtilResponse {
 		Error: nil,
 		Status: true,
 		Value: os.Getenv(name),
+	}
+}
+
+// Md5File returns the MD5 hash of the file
+func (c *UtilPackage) Md5File(filename string) UtilResponse {
+	hash, err := utils.Md5File(filename)
+	if err != nil {
+		return UtilResponse{
+			Error:  err,
+			Status: false,
+			Value:  "",
+		}
+	}
+	return UtilResponse{
+		Error:  nil,
+		Status: true,
+		Value:  hash,
 	}
 }
