@@ -15,6 +15,7 @@
     "^(?i)refactor\\b",
     "^(?i)release\\s+\\d+\\.\\d+\\.\\d+",
     "^(?i)minor fix\\b",
+    "^(?i)no comment\\b",
     "^(?i)wip\\b"
   ],
 
