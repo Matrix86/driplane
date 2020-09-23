@@ -9,7 +9,7 @@ func TestGetMetaFromHTML(t *testing.T) {
 	html := "<html><head><title>test</title><meta charset=\"UTF-8\"><meta name=\"description\" content=\"description\"/><meta name=\"keywords\" content=\"one, two, three\"><meta name=\"author\" content=\"John Doe\"><meta name=\"og:description\" content=\"og_description\"><meta name=\"og:title\" content=\"og_title\"><meta name=\"og:image\" content=\"og_image\"><meta name=\"og:site_name\" content=\"og_site_name\"></head></html>"
 	type Test struct {
 		Name     string
-		Html     string
+		HTML     string
 		Expected *HTMLMeta
 	}
 	tests := []Test{
@@ -19,7 +19,7 @@ func TestGetMetaFromHTML(t *testing.T) {
 	}
 
 	for _, v := range tests {
-		had := GetMetaFromHTML(v.Html)
+		had := GetMetaFromHTML(v.HTML)
 		if reflect.DeepEqual(had, v.Expected) == false {
 			t.Errorf("%s: wrong parsing: expected=%#v had=%#v", v.Name, v.Expected, had)
 		}
@@ -30,7 +30,7 @@ func TestExtractTextFromHTML(t *testing.T) {
 	html := "<html><head><title>test</title><meta charset=\"UTF-8\"></head><body><script type=\"text/javascript\">alert('test');</script><h1>title</h1> this is a text!</body></html>"
 	type Test struct {
 		Name     string
-		Html     string
+		HTML     string
 		Expected string
 	}
 	tests := []Test{
@@ -40,7 +40,7 @@ func TestExtractTextFromHTML(t *testing.T) {
 	}
 
 	for _, v := range tests {
-		had := ExtractTextFromHTML(v.Html)
+		had := ExtractTextFromHTML(v.HTML)
 		if had != v.Expected {
 			t.Errorf("%s: wrong parsing: expected=%#v had=%#v", v.Name, v.Expected, had)
 		}
