@@ -58,6 +58,7 @@ func (m *TTLMap) Put(k, v interface{}, ttl int64) {
 	defer m.Unlock()
 
 	if i, ok := m.dict[k]; ok {
+		i.value = v
 		// refresh ttl
 		i.expiration = time.Now().Unix() + ttl
 	} else {
