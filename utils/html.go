@@ -72,7 +72,7 @@ func GetMetaFromHTML(s string) *HTMLMeta {
 
 func extractMetaProperty(t html.Token, prop string) (content string, ok bool) {
 	for _, attr := range t.Attr {
-		if attr.Key == "property" && attr.Val == prop {
+		if attr.Key == "name" && attr.Val == prop {
 			ok = true
 		}
 
