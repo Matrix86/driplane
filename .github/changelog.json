@@ -1,0 +1,23 @@
+{
+  "resolve": "commits",
+  "sort": "asc",
+
+  "template": ".github/changelog_template.md",
+
+  "groupings": [
+    { "name":  "New Features", "patterns":  [ "(?i)\\bnew\\b" ] },
+    { "name":  "Fixes", "patterns":  [ "(?i)\\bfix\\b" ] },
+    { "name":  "Misc", "patterns":  [ ".*" ] }
+  ],
+  "exclude": [
+    "?test\\b",
+    "^docs\\b",
+    "^(?i)release\\s+\\d+\\.\\d+\\.\\d+",
+    "^(?i)minor fix\\b",
+    "^(?i)wip\\b"
+  ],
+
+  "local": false,
+
+  "max_commits": 250
+}
