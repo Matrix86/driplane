@@ -12,6 +12,7 @@
   "exclude": [
     "?test\\b",
     "^docs\\b",
+    "^(?i)refactor\\b",
     "^(?i)release\\s+\\d+\\.\\d+\\.\\d+",
     "^(?i)minor fix\\b",
     "^(?i)wip\\b"
