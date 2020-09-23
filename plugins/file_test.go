@@ -7,152 +7,281 @@ import (
 	"testing"
 )
 
-func TestFilePluginCopyMethod(t *testing.T) {
+func TestFilePackage_Copy(t *testing.T) {
 	h := GetFile()
 
-	file, err := ioutil.TempFile(os.TempDir(), "prefix")
-	if err != nil {
-		t.Errorf("cannot create a temporary file" )
+	type Test struct {
+		Name           string
+		Filename       string
+		CreateFile     bool
+		ExpectedStatus bool
+		ExpectedError  string
 	}
-	defer os.Remove(file.Name())
-
-	dst := path.Join(os.TempDir(), "test1")
-	res := h.Copy(file.Name(), dst)
-	if res.Status == false {
-		t.Errorf("bad response: expected=%t had=%t", true, res.Status )
+	tests := []Test{
+		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), false, false, "stat /tmp/notexistentfile: no such file or directory"},
+		{"NotRegularFile", path.Join(os.TempDir()), false, false, "/tmp is not a regular file"},
+		{"CopyOK", path.Join(os.TempDir(), "test1"), true, true, ""},
 	}
 
-	defer os.Remove(dst)
+	for _, v := range tests {
+		if v.CreateFile {
+			file, err := os.Create(v.Filename)
+			if err != nil {
+				t.Errorf("%s: cannot create a temporary file", v.Name)
+			}
+			defer os.Remove(v.Filename)
 
-	info, err := os.Stat(dst)
-	if os.IsNotExist(err) {
-		t.Errorf("file not copied" )
-	}
-	if !info.IsDir() == false {
-		t.Errorf("file is a directory" )
+			if _, err = file.Write([]byte("test")); err != nil {
+				t.Errorf("%s: can't write on file", v.Name)
+			}
+		}
+
+		dst := path.Join(os.TempDir(), "destination")
+		had := h.Copy(v.Filename, dst)
+		if v.ExpectedStatus != had.Status {
+			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedStatus, had.Status)
+		}
+		if v.ExpectedStatus == false && v.ExpectedError != had.Error.Error() {
+			t.Errorf("%s: wrong result: expected=%#v had=%#v", v.Name, v.ExpectedError, had.Error.Error())
+		}
+
+		if v.CreateFile {
+			os.Remove(dst)
+		}
 	}
 }
 
-func TestFilePluginMoveMethod( t *testing.T) {
+func TestFilePackage_Move(t *testing.T) {
 	h := GetFile()
 
-	file, err := ioutil.TempFile(os.TempDir(), "prefix")
-	if err != nil {
-		t.Errorf("cannot create a temporary file" )
+	type Test struct {
+		Name           string
+		Filename       string
+		Destination    string
+		CreateFile     bool
+		ExpectedStatus bool
+		ExpectedError  string
+	}
+	tests := []Test{
+		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), "", false, false, "stat /tmp/notexistentfile: no such file or directory"},
+		{"NotRegularSrcFile", path.Join(os.TempDir()), "", false, false, "/tmp is not a regular file"},
+		{"NotRegularDstFile", path.Join(os.TempDir(), "test1"), os.TempDir(), true, false, "rename /tmp/test1 /tmp: file exists"},
+		{"MoveOK", path.Join(os.TempDir(), "test2"), path.Join(os.TempDir(), "newfile"), true, true, ""},
 	}
 
-	dst := path.Join(os.TempDir(), "test1")
-	res := h.Move(file.Name(), dst)
-	if res.Status == false {
-		t.Errorf("bad response: expected=%t had=%t", true, res.Status )
-	}
+	for _, v := range tests {
+		if v.CreateFile {
+			file, err := os.Create(v.Filename)
+			if err != nil {
+				t.Errorf("%s: cannot create a temporary file", v.Name)
+			}
+			defer os.Remove(v.Filename)
 
-	defer os.Remove(dst)
+			if _, err = file.Write([]byte("test")); err != nil {
+				t.Errorf("%s: can't write on file", v.Name)
+			}
+		}
 
-	info, err := os.Stat(dst)
-	if os.IsNotExist(err) {
-		t.Errorf("file not moved" )
-	}
-	if !info.IsDir() == false {
-		t.Errorf("file is a directory" )
+		had := h.Move(v.Filename, v.Destination)
+		if v.ExpectedStatus != had.Status {
+			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedStatus, had.Status)
+		}
+		if v.ExpectedStatus == false && v.ExpectedError != had.Error.Error() {
+			t.Errorf("%s: wrong result: expected=%#v had=%#v", v.Name, v.ExpectedError, had.Error.Error())
+		}
+
+		if v.CreateFile {
+			os.Remove(v.Destination)
+		}
 	}
 }
 
-func TestFilePluginTruncateMethod(t *testing.T) {
+func TestFilePackage_Truncate(t *testing.T) {
 	h := GetFile()
 
-	file, err := ioutil.TempFile(os.TempDir(), "prefix")
-	if err != nil {
-		t.Errorf("cannot create a temporary file" )
+	type Test struct {
+		Name           string
+		Filename       string
+		CreateFile     bool
+		ExpectedStatus bool
+		ExpectedError  string
+		ExpectedSize   int64
 	}
-	defer os.Remove(file.Name())
-
-	text := []byte("This is a test!")
-	if _, err = file.Write(text); err != nil {
-		t.Error("can't write on file")
-	}
-
-	res := h.Truncate(file.Name(), 0)
-	if res.Status == false {
-		t.Errorf("bad response: expected=%t had=%t", true, res.Status )
-	}
-
-	info, err := os.Stat(file.Name())
-	if os.IsNotExist(err) {
-		t.Errorf("file not exist" )
+	tests := []Test{
+		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), false, false, "stat /tmp/notexistentfile: no such file or directory", 0},
+		{"NotRegularFile", path.Join(os.TempDir()), false, false, "/tmp is not a regular file", 0},
+		{"TruncateZero", path.Join(os.TempDir(), "test1"), true, true, "", 0},
+		{"TruncateTwo", path.Join(os.TempDir(), "test1"), true, true, "", 2},
 	}
 
-	if info.Size() != 0 {
-		t.Errorf("size should be 0" )
+	for _, v := range tests {
+		if v.CreateFile {
+			file, err := os.Create(v.Filename)
+			if err != nil {
+				t.Errorf("%s: cannot create a temporary file", v.Name)
+			}
+			defer os.Remove(v.Filename)
+
+			if _, err = file.Write([]byte("test")); err != nil {
+				t.Errorf("%s: can't write on file", v.Name)
+			}
+		}
+
+		had := h.Truncate(v.Filename, v.ExpectedSize)
+		if v.ExpectedStatus != had.Status {
+			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedStatus, had.Status)
+		}
+		if v.ExpectedStatus == false && v.ExpectedError != had.Error.Error() {
+			t.Errorf("%s: wrong result: expected=%#v had=%#v", v.Name, v.ExpectedError, had.Error.Error())
+		}
+		if v.ExpectedStatus != false {
+			info, err := os.Stat(v.Filename)
+			if os.IsNotExist(err) {
+				t.Errorf("%s: wrong result: file not found", v.Name)
+			}
+
+			if info.Size() != v.ExpectedSize {
+				t.Errorf("%s: wrong size: expected=%d had=%d", v.Name, v.ExpectedSize, info.Size())
+			}
+		}
 	}
 }
 
-func TestFilePluginDeleteMethod(t *testing.T) {
+func TestFilePackage_Delete(t *testing.T) {
 	h := GetFile()
 
-	file, err := ioutil.TempFile(os.TempDir(), "prefix")
-	if err != nil {
-		t.Errorf("cannot create a temporary file" )
+	type Test struct {
+		Name           string
+		Filename       string
+		CreateFile     bool
+		ExpectedStatus bool
+		ExpectedError  string
+		ExpectedExist  bool
 	}
-	defer os.Remove(file.Name())
-
-	res := h.Delete("/tmp/this_file_doesnt_exist")
-	if res.Status == true {
-		t.Errorf("bad response: expected=%t had=%t", false, res.Status )
-	}
-
-	res = h.Delete(file.Name())
-	if res.Status == false {
-		t.Errorf("bad response: expected=%t had=%t", true, res.Status )
+	tests := []Test{
+		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), false, false, "stat /tmp/notexistentfile: no such file or directory", false},
+		{"NotRegularFile", path.Join(os.TempDir()), false, false, "/tmp is not a regular file", false},
+		{"FileRemoved", path.Join(os.TempDir(), "test1"), true, true, "", true},
 	}
 
-	_, err = os.Stat(file.Name())
-	if !os.IsNotExist(err) {
-		t.Errorf("file %s not deleted", file.Name() )
+	for _, v := range tests {
+		if v.CreateFile {
+			file, err := os.Create(v.Filename)
+			if err != nil {
+				t.Errorf("%s: cannot create a temporary file", v.Name)
+			}
+			defer os.Remove(v.Filename)
+
+			if _, err = file.Write([]byte("test")); err != nil {
+				t.Errorf("%s: can't write on file", v.Name)
+			}
+		}
+
+		had := h.Delete(v.Filename)
+		if v.ExpectedStatus != had.Status {
+			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedStatus, had.Status)
+		}
+		if v.ExpectedStatus == false && v.ExpectedError != had.Error.Error() {
+			t.Errorf("%s: wrong result: expected=%#v had=%#v", v.Name, v.ExpectedError, had.Error.Error())
+		}
+		if v.ExpectedStatus != false {
+			_, err := os.Stat(v.Filename)
+			if os.IsExist(err) == v.ExpectedExist {
+				t.Errorf("%s: wrong result: file has not been not deleted correctly", v.Name)
+			}
+		}
 	}
 }
 
-func TestFilePluginExistsMethod(t *testing.T) {
+func TestFilePackage_Exists(t *testing.T) {
 	h := GetFile()
 
-	file, err := ioutil.TempFile(os.TempDir(), "prefix")
-	if err != nil {
-		t.Errorf("cannot create a temporary file" )
+	type Test struct {
+		Name           string
+		Filename       string
+		CreateFile     bool
+		ExpectedStatus bool
+		ExpectedError  string
 	}
-	defer os.Remove(file.Name())
-
-	res := h.Exists("/tmp/this_file_doesnt_exist")
-	if res.Status == true {
-		t.Errorf("bad response: expected=%t had=%t", false, res.Status )
+	tests := []Test{
+		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), false, false, "stat /tmp/notexistentfile: no such file or directory"},
+		{"NotRegularFile", path.Join(os.TempDir()), false, false, "/tmp is not a regular file"},
+		{"FileExist", path.Join(os.TempDir(), "test1"), true, true, ""},
 	}
 
-	res = h.Exists(file.Name())
-	if res.Status == false {
-		t.Errorf("bad response: expected=%t had=%t", true, res.Status )
+	for _, v := range tests {
+		if v.CreateFile {
+			file, err := os.Create(v.Filename)
+			if err != nil {
+				t.Errorf("%s: cannot create a temporary file", v.Name)
+			}
+			defer os.Remove(v.Filename)
+
+			if _, err = file.Write([]byte("test")); err != nil {
+				t.Errorf("%s: can't write on file", v.Name)
+			}
+		}
+
+		had := h.Exists(v.Filename)
+		if v.ExpectedStatus != had.Status {
+			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedStatus, had.Status)
+		}
+		if v.ExpectedStatus == false && v.ExpectedError != had.Error.Error() {
+			t.Errorf("%s: wrong result: expected=%#v had=%#v", v.Name, v.ExpectedError, had.Error.Error())
+		}
 	}
 }
 
-func TestFilePluginAppendStringMethod(t *testing.T) {
+func TestFilePackage_AppendString(t *testing.T) {
 	h := GetFile()
 
-	file, err := ioutil.TempFile(os.TempDir(), "prefix")
-	if err != nil {
-		t.Errorf("cannot create a temporary file" )
+	type Test struct {
+		Name           string
+		Filename       string
+		CreateFile     bool
+		InitFile       bool
+		ExpectedStatus bool
+		ExpectedError  string
+		ExpectedString string
 	}
-	defer os.Remove(file.Name())
-
-	res := h.AppendString(file.Name(), "test")
-	if res.Status != true {
-		t.Errorf("bad response: expected=%t had=%t", false, res.Status )
+	tests := []Test{
+		{"CannotOpenFile", os.TempDir(), false, false, false, "open /tmp: is a directory", ""},
+		{"CreateFile", path.Join(os.TempDir(), "create"), false, false, true, "", "append ok"},
+		{"AppendFile", path.Join(os.TempDir(), "append"), true, true, true, "", "file ok append ok"},
 	}
 
-	info, err := os.Stat(file.Name())
-	if os.IsNotExist(err) {
-		t.Errorf("file not exist" )
-	}
+	for _, v := range tests {
+		if v.CreateFile {
+			file, err := os.Create(v.Filename)
+			if err != nil {
+				t.Errorf("%s: cannot create a temporary file", v.Name)
+			}
+			defer os.Remove(v.Filename)
 
-	if info.Size() != 4 {
-		t.Errorf("size should be 4" )
+			if v.InitFile {
+				if _, err = file.Write([]byte("file ok ")); err != nil {
+					t.Errorf("%s: can't write on file", v.Name)
+				}
+			}
+		}
+
+		had := h.AppendString(v.Filename, "append ok")
+		defer os.Remove(v.Filename)
+		if v.ExpectedStatus != had.Status {
+			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedStatus, had.Status)
+		}
+		if v.ExpectedStatus == false && v.ExpectedError != had.Error.Error() {
+			t.Errorf("%s: wrong result: expected=%#v had=%#v", v.Name, v.ExpectedError, had.Error.Error())
+		}
+		if v.ExpectedStatus {
+			content, err := ioutil.ReadFile(v.Filename)
+			if err != nil {
+				t.Errorf("%s: cannot read the file '%s'", v.Name, v.Filename)
+			}
+			if string(content) != v.ExpectedString {
+				t.Errorf("%s: wrong write: expected=%#v had=%#v", v.Name, v.ExpectedString, string(content))
+			}
+		}
+
 	}
 }
-

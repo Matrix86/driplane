@@ -108,9 +108,13 @@ func (c *FilePackage) Delete(filename string) FileResponse {
 // Exists returns true if the file exists
 func (c *FilePackage) Exists(filename string) FileResponse {
 	sourceFileStat, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return FileResponse{Status: false}
+	if err != nil {
+		return FileResponse{Error: err}
 	}
+	if !sourceFileStat.Mode().IsRegular() {
+		return FileResponse{Error: fmt.Errorf("%s is not a regular file", filename)}
+	}
+
 	return FileResponse{Status: !sourceFileStat.IsDir()}
 }
 
