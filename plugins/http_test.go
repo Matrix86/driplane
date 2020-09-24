@@ -64,7 +64,7 @@ func TestHTTPPackage_Request(t *testing.T) {
 	}
 	tests := []Test{
 		{"FailCreateRequest", "GET", ts.URL, nil, []byte{}, HTTPResponse{Status: false, Error: fmt.Errorf("wrong data type")}},
-		{"FailDoRequest", "GET", "wrongurl", nil, nil, HTTPResponse{Status: false, Error: fmt.Errorf("Get wrongurl: unsupported protocol scheme \"\"")}},
+		{"FailDoRequest", "GET", "wrongurl", nil, nil, HTTPResponse{Status: false, Error: fmt.Errorf("Get wrongurl: unsupported protocol scheme ")}},
 		{"RequestDone", "GET", ts.URL, nil, nil, HTTPResponse{Status: true, Error: nil, Body: "Hello, client"}},
 		{"RequestWithHeaders", "GET", ts.URL, map[string]interface{}{"name": "value"}, nil, HTTPResponse{Status: true, Error: nil, Body: "Hello, client"}},
 		{"RequestWithDataAsString", "GET", ts.URL, nil, "name=value", HTTPResponse{Status: true, Error: nil, Body: "Hello, client"}},
@@ -79,7 +79,7 @@ func TestHTTPPackage_Request(t *testing.T) {
 		if res.Status != v.ExpectedResponse.Status {
 			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Status, res.Status)
 		}
-		if v.ExpectedResponse.Status == false && strings.Trim(res.Error.Error(), "\"") != strings.Trim(v.ExpectedResponse.Error.Error(), "\"") {
+		if v.ExpectedResponse.Status == false && strings.Trim(res.Error.Error(), "\\\"") != strings.Trim(v.ExpectedResponse.Error.Error(), "\\\"") {
 			t.Errorf("%s: wrong error: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Error.Error(), res.Error.Error())
 		}
 		if v.ExpectedResponse.Status && v.ExpectedResponse.Body != res.Body {
@@ -118,8 +118,8 @@ func TestHTTPPackage_DownloadFile(t *testing.T) {
 		if res.Status != v.ExpectedResponse.Status {
 			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Status, res.Status)
 		}
-		if v.ExpectedResponse.Status == false && strings.Trim(res.Error.Error(), "\"") != strings.Trim(v.ExpectedResponse.Error.Error(), "\"") {
-			t.Errorf("%s: wrong error: expected=%#v had=%#v", v.Name, strings.Trim(v.ExpectedResponse.Error.Error(), "\""), strings.Trim(res.Error.Error(), "\""))
+		if v.ExpectedResponse.Status == false && strings.Trim(res.Error.Error(), "\\\"") != strings.Trim(v.ExpectedResponse.Error.Error(), "\\\"") {
+			t.Errorf("%s: wrong error: expected=%#v had=%#v", v.Name, strings.Trim(v.ExpectedResponse.Error.Error(), "\\\""), strings.Trim(res.Error.Error(), "\\\""))
 		}
 		if v.ExpectedResponse.Status {
 			dat, _ := ioutil.ReadFile(v.Filepath)
@@ -154,7 +154,7 @@ func TestHTTPPackage_UploadFile(t *testing.T) {
 	tests := []Test{
 		{"FailOpenFile", path.Join(os.TempDir(), "file_not_exist.atall"), false, "", "POST", ts.URL, nil, nil, HTTPResponse{Status: false, Error: fmt.Errorf("open /tmp/file_not_exist.atall: no such file or directory")}},
 		{"FailOpenFile2", os.TempDir(), false, "", "POST", ts.URL, nil, nil, HTTPResponse{Status: false, Error: fmt.Errorf("read /tmp: is a directory")}},
-		{"FailDoRequest", path.Join(os.TempDir(), "upload_test.test"), true, "upload", "POST", "nourl", nil, []byte{}, HTTPResponse{Status: false, Error: fmt.Errorf("Post nourl: unsupported protocol scheme \"\"")}},
+		{"FailDoRequest", path.Join(os.TempDir(), "upload_test.test"), true, "upload", "POST", "nourl", nil, []byte{}, HTTPResponse{Status: false, Error: fmt.Errorf("Post nourl: unsupported protocol scheme ")}},
 		{"RequestDone", path.Join(os.TempDir(), "upload_test.test"), true, "upload", "POST", ts.URL, nil, nil, HTTPResponse{Status: true, Error: nil}},
 	}
 
@@ -178,7 +178,7 @@ func TestHTTPPackage_UploadFile(t *testing.T) {
 		if res.Status != v.ExpectedResponse.Status {
 			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Status, res.Status)
 		}
-		if v.ExpectedResponse.Status == false && strings.Trim(res.Error.Error(), "\"") != strings.Trim(v.ExpectedResponse.Error.Error(), "\"") {
+		if v.ExpectedResponse.Status == false && strings.Trim(res.Error.Error(), "\\\"") != strings.Trim(v.ExpectedResponse.Error.Error(), "\\\"") {
 			t.Errorf("%s: wrong error: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Error.Error(), res.Error.Error())
 		}
 		if v.ExpectedResponse.Status {
