@@ -56,7 +56,7 @@ func TestHTTPPackage_Request(t *testing.T) {
 	type Test struct {
 		Name             string
 		Method           string
-		Uri              string
+		URI              string
 		Headers          interface{}
 		Data             interface{}
 		ExpectedResponse HTTPResponse
@@ -74,7 +74,7 @@ func TestHTTPPackage_Request(t *testing.T) {
 	h := GetHTTP()
 
 	for _, v := range tests {
-		res := h.Request(v.Method, v.Uri, v.Headers, v.Data)
+		res := h.Request(v.Method, v.URI, v.Headers, v.Data)
 		if res.Status != v.ExpectedResponse.Status {
 			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Status, res.Status)
 		}
@@ -98,7 +98,7 @@ func TestHTTPPackage_DownloadFile(t *testing.T) {
 		Name             string
 		Filepath         string
 		Method           string
-		Uri              string
+		URI              string
 		Headers          interface{}
 		Data             interface{}
 		ExpectedResponse HTTPResponse
@@ -113,7 +113,7 @@ func TestHTTPPackage_DownloadFile(t *testing.T) {
 	h := GetHTTP()
 
 	for _, v := range tests {
-		res := h.DownloadFile(v.Filepath, v.Method, v.Uri, v.Headers, v.Data)
+		res := h.DownloadFile(v.Filepath, v.Method, v.URI, v.Headers, v.Data)
 		if res.Status != v.ExpectedResponse.Status {
 			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Status, res.Status)
 		}
@@ -145,7 +145,7 @@ func TestHTTPPackage_UploadFile(t *testing.T) {
 		CreateFile       bool
 		Fieldname        string
 		Method           string
-		Uri              string
+		URI              string
 		Headers          interface{}
 		Data             interface{}
 		ExpectedResponse HTTPResponse
@@ -173,7 +173,7 @@ func TestHTTPPackage_UploadFile(t *testing.T) {
 		}
 
 		// UploadFile(filename string, fieldname string, method string, uri string, headers interface{}, data interface{})
-		res := h.UploadFile(v.Filepath, v.Fieldname, v.Method, v.Uri, v.Headers, v.Data)
+		res := h.UploadFile(v.Filepath, v.Fieldname, v.Method, v.URI, v.Headers, v.Data)
 		if res.Status != v.ExpectedResponse.Status {
 			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Status, res.Status)
 		}
