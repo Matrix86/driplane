@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path"
+	"strings"
 	"testing"
 )
 
@@ -78,7 +79,7 @@ func TestHTTPPackage_Request(t *testing.T) {
 		if res.Status != v.ExpectedResponse.Status {
 			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Status, res.Status)
 		}
-		if v.ExpectedResponse.Status == false && res.Error.Error() != v.ExpectedResponse.Error.Error() {
+		if v.ExpectedResponse.Status == false && strings.Trim(res.Error.Error(), "\"") != strings.Trim(v.ExpectedResponse.Error.Error(), "\"") {
 			t.Errorf("%s: wrong error: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Error.Error(), res.Error.Error())
 		}
 		if v.ExpectedResponse.Status && v.ExpectedResponse.Body != res.Body {
@@ -105,7 +106,7 @@ func TestHTTPPackage_DownloadFile(t *testing.T) {
 	}
 	tests := []Test{
 		{"FailCreateRequest", "", "GET", ts.URL, nil, []byte{}, HTTPResponse{Status: false, Error: fmt.Errorf("wrong data type")}},
-		{"FailDoRequest", "", "GET", "wrongurl", nil, nil, HTTPResponse{Status: false, Error: fmt.Errorf("Get wrongurl: unsupported protocol scheme \"\"")}},
+		{"FailDoRequest", "", "GET", "wrongurl", nil, nil, HTTPResponse{Status: false, Error: fmt.Errorf("Get wrongurl: unsupported protocol scheme ")}},
 		{"FailCreateFile", os.TempDir(), "GET", ts.URL, nil, nil, HTTPResponse{Status: false, Error: fmt.Errorf("open /tmp: is a directory")}},
 		{"RequestDone", path.Join(os.TempDir(), "download_test"), "GET", ts.URL, nil, nil, HTTPResponse{Status: true, Error: nil, Body: "Hello, client"}},
 	}
@@ -117,8 +118,8 @@ func TestHTTPPackage_DownloadFile(t *testing.T) {
 		if res.Status != v.ExpectedResponse.Status {
 			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Status, res.Status)
 		}
-		if v.ExpectedResponse.Status == false && res.Error.Error() != v.ExpectedResponse.Error.Error() {
-			t.Errorf("%s: wrong error: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Error.Error(), res.Error.Error())
+		if v.ExpectedResponse.Status == false && strings.Trim(res.Error.Error(), "\"") != strings.Trim(v.ExpectedResponse.Error.Error(), "\"") {
+			t.Errorf("%s: wrong error: expected=%#v had=%#v", v.Name, strings.Trim(v.ExpectedResponse.Error.Error(), "\""), strings.Trim(res.Error.Error(), "\""))
 		}
 		if v.ExpectedResponse.Status {
 			dat, _ := ioutil.ReadFile(v.Filepath)
@@ -177,7 +178,7 @@ func TestHTTPPackage_UploadFile(t *testing.T) {
 		if res.Status != v.ExpectedResponse.Status {
 			t.Errorf("%s: wrong status: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Status, res.Status)
 		}
-		if v.ExpectedResponse.Status == false && res.Error.Error() != v.ExpectedResponse.Error.Error() {
+		if v.ExpectedResponse.Status == false && strings.Trim(res.Error.Error(), "\"") != strings.Trim(v.ExpectedResponse.Error.Error(), "\"") {
 			t.Errorf("%s: wrong error: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Error.Error(), res.Error.Error())
 		}
 		if v.ExpectedResponse.Status {
