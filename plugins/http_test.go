@@ -65,6 +65,7 @@ func TestHTTPPackage_Request(t *testing.T) {
 	}
 	tests := []Test{
 		{"FailCreateRequest", "GET", ts.URL, nil, []byte{}, HTTPResponse{Status: false, Error: errors.New("wrong data type")}},
+		{"FailCreateRequest", "è", ts.URL, nil, nil, HTTPResponse{Status: false, Error: errors.New("wrong data type")}},
 		{"FailDoRequest", "GET", "wrongurl", nil, nil, HTTPResponse{Status: false, Error: &url.Error{}}},
 		{"RequestDone", "GET", ts.URL, nil, nil, HTTPResponse{Status: true, Error: nil, Body: "Hello, client"}},
 		{"RequestWithHeaders", "GET", ts.URL, map[string]interface{}{"name": "value"}, nil, HTTPResponse{Status: true, Error: nil, Body: "Hello, client"}},
