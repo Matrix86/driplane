@@ -58,7 +58,14 @@ func (f *Text) DoFilter(msg *data.Message) (bool, error) {
 	var text string
 
 	if f.target == "main" {
-		text = msg.GetMessage().(string)
+		if v, ok := msg.GetMessage().(string); ok {
+			text = v
+		} else if v, ok := msg.GetMessage().([]byte); ok {
+			text = string(v)
+		} else {
+			// ERROR this filter can't be used with different types
+			return false, fmt.Errorf("received data is not a string")
+		}
 	} else if v, ok := msg.GetExtra()[f.target].(string); ok {
 		text = v
 	} else {

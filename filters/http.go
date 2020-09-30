@@ -206,7 +206,7 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 		} else if f.getBody {
 			txt := f.readBody(r)
 			if f.textOnly {
-				txt = utils.ExtractTextFromHTML(txt.(string))
+				txt = utils.ExtractTextFromHTML(string(txt.([]byte)))
 			}
 			msg.SetMessage(txt)
 		}
