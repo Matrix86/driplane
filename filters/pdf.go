@@ -2,6 +2,7 @@ package filters
 
 import (
 	"bytes"
+	"fmt"
 	"text/template"
 
 	"github.com/Matrix86/driplane/data"
@@ -67,6 +68,11 @@ func (f *PDF) DoFilter(msg *data.Message) (bool, error) {
 		msg.SetMessage(plain)
 		msg.SetExtra("fulltext", text)
 	} else {
+		if _, ok := msg.GetTarget(f.target).([]byte); !ok {
+			// ERROR this filter can't be used with different types
+			return false, fmt.Errorf("received data is not a string")
+		}
+
 		buf := bytes.NewBuffer(msg.GetTarget(f.target).([]byte))
 
 		r, err := pdf.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
