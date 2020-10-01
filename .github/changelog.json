@@ -5,8 +5,8 @@
   "template": ".github/changelog_template.md",
 
   "groupings": [
-    { "name":  "New Features", "patterns":  [ "(?i)\\bnew\\b" ] },
-    { "name":  "Fixes", "patterns":  [ "(?i)\\bfix\\b" ] },
+    { "name":  "New Features", "patterns":  [ "(?i)^new\\b" ] },
+    { "name":  "Fixes", "patterns":  [ "(?i)^fix\\b" ] },
     { "name":  "Misc", "patterns":  [ ".*" ] }
   ],
   "exclude": [

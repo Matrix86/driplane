@@ -41,6 +41,7 @@ jobs:
           FROM: ${{steps.last.outputs.tag}}
           TO: ${{steps.current.outputs.tag}}
           OUTPUT: .github/CHANGELOG.md
+
       - name: View Changelog
         run: cat .github/CHANGELOG.md
 
@@ -49,10 +50,10 @@ jobs:
         with:
           args: check
 
-      - env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        name: Create release on GitHub
+      - name: Create release on GitHub
         uses: docker://goreleaser/goreleaser:latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: release --rm-dist --release-notes .github/CHANGELOG.md
           workdir: ./cmd/driplane

@@ -15,3 +15,5 @@ vendor/*
 .idea/
 testing/*
 bin/*
+# to avoid the error 'error=git is currently in a dirty state, please check in your pipeline what can be changing the following files:' on goreleaser
+.github/CHANGELOG.md
