@@ -2,6 +2,7 @@ package filters
 
 import (
 	"crypto/tls"
+	"fmt"
 	"html/template"
 	"strconv"
 	"strings"
@@ -81,7 +82,17 @@ func NewMailFilter(p map[string]string) (Filter, error) {
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Mail) DoFilter(msg *data.Message) (bool, error) {
 	var err error
-	text := msg.GetMessage().(string)
+	var text string
+
+	if v, ok := msg.GetMessage().(string); ok {
+		text = v
+	} else if v, ok := msg.GetMessage().([]byte); ok {
+		text = string(v)
+	} else {
+		// ERROR this filter can't be used with different types
+		return false, fmt.Errorf("received data is not a string")
+	}
+
 	if f.template != nil {
 		text, err = msg.ApplyPlaceholder(f.template)
 		if err != nil {

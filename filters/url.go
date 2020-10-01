@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -58,7 +59,16 @@ func NewURLFilter(p map[string]string) (Filter, error) {
 
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *URL) DoFilter(msg *data.Message) (bool, error) {
-	text := msg.GetTarget(f.target).(string)
+	var text string
+
+	if v, ok := msg.GetTarget(f.target).(string); ok {
+		text = v
+	} else if v, ok := msg.GetTarget(f.target).([]byte); ok {
+		text = string(v)
+	} else {
+		// ERROR this filter can't be used with different types
+		return false, fmt.Errorf("received data is not a string")
+	}
 
 	found := false
 	match := f.rURL.FindAllStringSubmatch(text, -1)

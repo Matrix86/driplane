@@ -34,10 +34,11 @@ func NewEchoFilter(p map[string]string) (Filter, error) {
 
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Echo) DoFilter(msg *data.Message) (bool, error) {
-	text := msg.GetMessage()
+	var text string
+	data := msg.GetMessage()
 	if f.printExtra {
 		for k, v := range msg.GetExtra() {
-			text = fmt.Sprintf("%s [%s: %s] ", text, k, v)
+			text = fmt.Sprintf("%#v [%#v: %#v] ", data, k, v)
 		}
 	}
 	log.Info("%s", text)

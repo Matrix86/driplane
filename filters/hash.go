@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"fmt"
 	"regexp"
 
 	"github.com/Matrix86/driplane/data"
@@ -63,7 +64,16 @@ func NewHashFilter(p map[string]string) (Filter, error) {
 
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Hash) DoFilter(msg *data.Message) (bool, error) {
-	text := msg.GetTarget(f.target).(string)
+	var text string
+
+	if v, ok := msg.GetTarget(f.target).(string); ok {
+		text = v
+	} else if v, ok := msg.GetTarget(f.target).([]byte); ok {
+		text = string(v)
+	} else {
+		// ERROR this filter can't be used with different types
+		return false, fmt.Errorf("received data is not a string")
+	}
 	match := f.regex.FindAllStringSubmatch(text, -1)
 	if match != nil {
 		for _, m := range match {

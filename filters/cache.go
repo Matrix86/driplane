@@ -62,7 +62,7 @@ func (f *Cache) DoFilter(msg *data.Message) (bool, error) {
 	var text interface{}
 
 	if f.target == "main" {
-		text = msg.GetMessage().(string)
+		text = msg.GetMessage()
 	} else if v, ok := msg.GetExtra()[f.target]; ok {
 		text = v
 	} else {
