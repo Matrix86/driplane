@@ -10,7 +10,7 @@
     { "name":  "Misc", "patterns":  [ ".*" ] }
   ],
   "exclude": [
-    "?test\\b",
+    "^test\\b",
     "^docs\\b",
     "^(?i)refactor\\b",
     "^(?i)release\\s+\\d+\\.\\d+\\.\\d+",
