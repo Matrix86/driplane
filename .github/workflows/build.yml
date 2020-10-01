@@ -8,7 +8,7 @@ on:
     paths-ignore:
       - 'docs/**'
       - 'src_docs/**'
-      - '.github/workflows/**'
+      - '.github/**'
     tags: []
   pull_request:
 
