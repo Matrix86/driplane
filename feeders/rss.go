@@ -16,21 +16,23 @@ import (
 type RSS struct {
 	Base
 
-	url        string
-	frequency  time.Duration
+	url           string
+	frequency     time.Duration
+	ignorePubDate bool
 
-	parser   *gofeed.Parser
-	stopChan chan bool
-	ticker   *time.Ticker
+	parser      *gofeed.Parser
+	stopChan    chan bool
+	ticker      *time.Ticker
 	lastParsing time.Time
 }
 
 // NewRSSFeeder is the registered method to instantiate a RSSFeeder
 func NewRSSFeeder(conf map[string]string) (Feeder, error) {
 	f := &RSS{
-		parser:     gofeed.NewParser(),
-		stopChan:   make(chan bool),
-		frequency:  60 * time.Second,
+		parser:      gofeed.NewParser(),
+		stopChan:    make(chan bool),
+		frequency:   60 * time.Second,
+		ignorePubDate: false,
 		lastParsing: time.Time{},
 	}
 
@@ -46,6 +48,9 @@ func NewRSSFeeder(conf map[string]string) (Feeder, error) {
 	}
 	if val, ok := conf["rss.start_from_beginning"]; ok && val == "false" {
 		f.lastParsing = time.Now()
+	}
+	if val, ok := conf["rss.ignore_pubdate"]; ok && val == "true" {
+		f.ignorePubDate = true
 	}
 
 	return f, nil
@@ -63,10 +68,10 @@ func (f *RSS) parseFeed() error {
 	for _, item := range feed.Items {
 		extra := make(map[string]interface{})
 
-		log.Debug("time : %s", item.PublishedParsed.Format("2006-01-02 15:04:05"))
+		//log.Debug("time : %s", item.PublishedParsed.Format("2006-01-02 15:04:05"))
 
 		// send messages only if pubDate is setted
-		if item.PublishedParsed != nil && f.lastParsing.Before(*item.PublishedParsed) {
+		if f.ignorePubDate || (item.PublishedParsed != nil && f.lastParsing.Before(*item.PublishedParsed)) {
 			extra["feed_title"] = feed.Title
 			extra["feed_link"] = feed.Link
 			extra["feed_feedlink"] = feed.FeedLink
@@ -103,7 +108,7 @@ func (f *RSS) parseFeed() error {
 		}
 
 		// pubDate of the last rss item
-		if lastPubDate.Before(*item.PublishedParsed) {
+		if item.PublishedParsed != nil && lastPubDate.Before(*item.PublishedParsed) {
 			lastPubDate = *item.PublishedParsed
 		}
 	}

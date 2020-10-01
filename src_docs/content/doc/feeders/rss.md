@@ -16,7 +16,8 @@ It is based on [gofeed](https://github.com/mmcdole/gofeed) so you can refer to i
  | --- | --- | --- | --- |
  | **url** | _STRING_ | empty | URL of the feed |
  | **freq** | _[DURATION](https://golang.org/pkg/time/#ParseDuration)_ | 60s | how often the feed should be parsed |
- | **start_from_beginning** | _BOOL_ | "false" | start to parse from the beginning of the feed |
+ | **start_from_beginning** | _BOOL_ | "false" | if "true" it starts to parse the feed from the beginning (the first time it will ignore the pubdate field of the feed) |
+ | **ignore_pubdate** | _BOOL_ | "false" | if "true" it ignores the pubdate and it returns all the feed content every time |
  
 {{< notice info "Example" >}} 
 `... | <rss: url="https://example.rss", freq="5s", start_from_beginning="false"> | ...`
