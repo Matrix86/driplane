@@ -11,6 +11,44 @@ It includes a mini language that allows you to define the filtering pipelines (t
 
 With `driplane` you can create several rules starting from one or more streams, filter the content in the pipeline and launch tasks or send alerts if some event occurred.
 
+```
+# Define a rule with a Twitter feeder and define keywords and users
+Twitter => <twitter: users="goofy, mickeymouse", keywords="malware, virus, PE">;
+
+# Define a rule to send a slack message using a defined api hook
+slack => http(url="https://hooks.slack.com/services/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",method="POST",headers="{\"Content-type\": \"application/json\"}",rawData="{{.main}}");
+# Define a rule to send a telegram message using a defined api hook
+telegram =>  http(url="https://api.telegram.org/XXX:XXXX/sendMessage", method="POST", headers="{\"Content-type\": \"application/json\"}", rawData="{{.main}}");
+
+# Define a rule that filter the received tweets
+tweet_rule => @Twitter |
+              # ignore spanish tweets
+              !text(target="language", text="es") |
+              # extract hashes from them
+              hash(extract="true") |
+              # add a new field to the stream with the hash
+              override(name="hash", value="{{ .main }}") |
+              # drop it if we saw that hash before
+              cache(ttl="24h", global="true") |
+              # fill the template with extracted data
+              format(file="slack_twitter.txt") |
+              # use the rule defined above to send the filled template to slack endpoint
+              @slack_alert;
+
+# Define a rule called 'RSS' that read a RSS feed every minutes
+RSS => <rss: url="http://rss.cnn.com/rss/cnn_topstories.rss", freq="1m", ignore_pubdate="true">;
+
+news => @RSS |
+        # skip links if we saw that before
+        cache(ttl="100h", target="link") |
+        # Search in the description field using a regular expression
+        text(regexp="(?i)tech|discovery|bitcoin|trump", target="description") |
+        # format the output text to send on telegram
+        format(template="Found new interesting article: {{ .link }}") |
+        @telegram;
+
+```
+
 The documentation can be found [HERE](https://matrix86.github.io/driplane/doc/)
 
 ## How it works
@@ -43,3 +81,4 @@ Usage of driplane:
   -rules string
     	Path of the rules' directory.
 ```
+
