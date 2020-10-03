@@ -45,6 +45,7 @@ func NewWebFeeder(conf map[string]string) (Feeder, error) {
 		params:      conf,
 		checkStatus: 0,
 		stopChan:    make(chan bool),
+		dataPost: make(map[string]string),
 		frequency:   60 * time.Second,
 		method:      "GET",
 		lastParsing: time.Time{},
@@ -73,13 +74,9 @@ func NewWebFeeder(conf map[string]string) (Feeder, error) {
 		}
 	}
 	if v, ok := f.params["web.data"]; ok {
-		tmpMap := make(map[string]string)
-		err := json.Unmarshal([]byte(v), &tmpMap)
+		err := json.Unmarshal([]byte(v), &f.dataPost)
 		if err != nil {
 			return nil, err
-		}
-		for i, v := range tmpMap {
-			f.dataPost[i] = v
 		}
 	}
 	if v, ok := f.params["web.rawData"]; ok {
@@ -156,12 +153,24 @@ func (f *Web) parseURL() error {
 		return err
 	}
 
+	//requestDump, err := httputil.DumpRequest(req, true)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//fmt.Println(string(requestDump))
+
 	client := &http.Client{}
 	r, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer r.Body.Close()
+
+	//responseDump, err := httputil.DumpResponse(r, true)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//fmt.Println(string(responseDump))
 
 	txt = f.getBodyAsString(r)
 	meta := utils.GetMetaFromHTML(txt)
