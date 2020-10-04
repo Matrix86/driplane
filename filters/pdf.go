@@ -70,7 +70,7 @@ func (f *PDF) DoFilter(msg *data.Message) (bool, error) {
 	} else {
 		if _, ok := msg.GetTarget(f.target).([]byte); !ok {
 			// ERROR this filter can't be used with different types
-			return false, fmt.Errorf("received data is not a []byte")
+			return false, fmt.Errorf("received data is not supported")
 		}
 
 		buf := bytes.NewBuffer(msg.GetTarget(f.target).([]byte))

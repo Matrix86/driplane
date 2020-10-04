@@ -2,6 +2,7 @@ package filters
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/Matrix86/driplane/data"
 	"text/template"
 
@@ -55,11 +56,15 @@ func (f *Mimetype) DoFilter(msg *data.Message) (bool, error) {
 		msg.SetExtra("mimetype_ext", mime.Extension())
 		msg.SetExtra("fulltext", text)
 	} else {
-		buf := bytes.NewBuffer(msg.GetTarget(f.target).([]byte))
-		mime := mimetype.Detect(buf.Bytes())
-		msg.SetMessage(mime.String())
-		msg.SetExtra("mimetype_ext", mime.Extension())
-		msg.SetExtra("fulltext", msg.GetTarget("main"))
+		if v, ok := msg.GetTarget(f.target).([]byte); ok {
+			buf := bytes.NewBuffer(v)
+			mime := mimetype.Detect(buf.Bytes())
+			msg.SetMessage(mime.String())
+			msg.SetExtra("mimetype_ext", mime.Extension())
+			msg.SetExtra("fulltext", msg.GetTarget("main"))
+		} else {
+			return false, fmt.Errorf("data type is not supported")
+		}
 	}
 
 	return true, nil
