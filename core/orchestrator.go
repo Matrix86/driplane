@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/Matrix86/driplane/feeders"
+
 	"github.com/evilsocket/islazy/log"
 )
 
