@@ -13,10 +13,11 @@ type Text struct {
 	Base
 
 	regexp *regexp.Regexp
-	text   string
 
-	extractText bool
-	target      string
+	extract      bool
+	pattern      string
+	enableRegexp bool
+	target       string
 
 	params map[string]string
 }
@@ -25,26 +26,30 @@ type Text struct {
 func NewTextFilter(p map[string]string) (Filter, error) {
 	var err error
 	f := &Text{
-		params:      p,
-		regexp:      nil,
-		extractText: false,
-		text:        "",
-		target: "main",
+		params:       p,
+		regexp:       nil,
+		extract:      false,
+		pattern:      "",
+		enableRegexp: false,
+		target:       "main",
 	}
 	f.cbFilter = f.DoFilter
 
-	// Regexp initialization
-	if v, ok := p["regexp"]; ok {
-		f.regexp, err = regexp.Compile(v)
+	// mandatory field
+	if v, ok := p["pattern"]; ok {
+		f.pattern = v
+	} else {
+		return nil, fmt.Errorf("pattern field is required on textfilter")
+	}
+
+	if v, ok := p["regexp"]; ok && v == "true" {
+		f.regexp, err = regexp.Compile(f.pattern)
 		if err != nil {
-			return nil, fmt.Errorf("textfilter: cannot compile the regular expression in 'regexp' parameter")
+			return nil, fmt.Errorf("textfilter: cannot compile the regular expression '%s'", f.pattern)
 		}
 	}
 	if v, ok := f.params["extract"]; ok && v == "true" {
-		f.extractText = true
-	}
-	if v, ok := p["text"]; ok {
-		f.text = v
+		f.extract = true
 	}
 	if v, ok := p["target"]; ok {
 		f.target = v
@@ -68,7 +73,7 @@ func (f *Text) DoFilter(msg *data.Message) (bool, error) {
 
 	found := false
 	if f.regexp != nil {
-		if f.extractText {
+		if f.extract {
 			matched := make([]string, 0)
 			match := f.regexp.FindAllStringSubmatch(text, -1)
 			if match != nil {
@@ -92,7 +97,7 @@ func (f *Text) DoFilter(msg *data.Message) (bool, error) {
 		} else if f.regexp.MatchString(text) {
 			found = true
 		}
-	} else if f.text != "" && strings.Contains(text, f.text) {
+	} else if f.pattern != "" && strings.Contains(text, f.pattern) {
 		found = true
 	}
 

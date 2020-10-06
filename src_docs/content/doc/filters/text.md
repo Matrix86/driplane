@@ -15,19 +15,19 @@ If the string is found, the condition is matched and the Message is propagated t
  | Parameter | Type | Default | Description 
  | --- | --- | --- | --- |
  | **target** | _STRING_ | "main" | the field of the Message that should be used for the filter (it could be main or and extra field) |
- | **regexp** | _STRING_ | empty | regular expression to search or extract one or more strings |
- | **extract** | _BOOL_ | "false" | if "true" the `main` field of the propagated Message will contain the extracted string (it can be used only if `regexp` parameter is specified) |
- | **text** | _STRING_ | specifies the string that should be matched on the Message to check the condition |
+ | **regexp** | _BOOL_ | false | the pattern field is a regular expression |
+ | **extract** | _BOOL_ | "false" | if "true" the `main` field of the propagated Message will contain the extracted string (it can be used only if `regexp` parameter is set true) |
+ | **pattern** | _STRING_ | specifies the pattern that should be matched on the Message to check the condition |
 
  
 {{< notice info "Example" >}} 
-`... | text(target="description", regexp="(#[^\\s]+)", extract="true") | ...`
+`... | text(target="description", pattern="(#[^\\s]+)", regexp="true", extract="true") | ...`
 {{< /notice >}}
 
 ### Output
 
-If the `extract` parameter is "false", the received Message will be propagated only if the specified `text` or `regexp` is matched in the `target` field of the Message. 
-Otherwise if `extract` is "true" (only `regexp` can be used in this case), and one or more strings matches with the `regexp` filter, the `main` field of the propagated Message will contain only the matched string.
+If the `extract` parameter is "false", the received Message will be propagated only if the specified `pattern` is matched in the `target` field of the Message. 
+Otherwise if `extract` is "true" (only `regexp` can be used in this case), and one or more strings matches with the pattern, the `main` field of the propagated Message will contain only the matched string.
 
 If the `extract` parameter is "true" and the message is propagated, a new extra field is created: `fulltext` will contain the original `target` string.
 

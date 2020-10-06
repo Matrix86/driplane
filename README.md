@@ -23,7 +23,7 @@ telegram =>  http(url="https://api.telegram.org/XXX:XXXX/sendMessage", method="P
 # Define a rule that filter the received tweets
 tweet_rule => @Twitter |
               # ignore spanish tweets
-              !text(target="language", text="es") |
+              !text(target="language", pattern="es") |
               # extract hashes from them
               hash(extract="true") |
               # add a new field to the stream with the hash
@@ -42,7 +42,7 @@ news => @RSS |
         # skip links if we saw that before
         cache(ttl="100h", target="link") |
         # Search in the description field using a regular expression
-        text(regexp="(?i)tech|discovery|bitcoin|trump", target="description") |
+        text(pattern="(?i)tech|discovery|bitcoin|trump", regexp="true", target="description") |
         # format the output text to send on telegram
         format(template="Found new interesting article: {{ .link }}") |
         @telegram;
