@@ -66,7 +66,7 @@ func TestText_DoFilter(t *testing.T) {
 		{"TypeNotSupported", map[string]string{"pattern":""}, data.NewMessage(false), false, false, "received data is not a string", nil},
 		{"TypeString", map[string]string{"pattern": "test"}, data.NewMessage("test"), false, true, "", []*data.Message{data.NewMessage("test")}},
 		{"TypeByte", map[string]string{"pattern": "test"}, data.NewMessage([]byte("test")), false, true, "", []*data.Message{data.NewMessage([]byte("test"))}},
-		{"TargetNotFound", map[string]string{"pattern": "test", "target": "notexist"}, data.NewMessage("test"), false,  false, "", []*data.Message{data.NewMessage("test")}},
+		{"TargetNotFound", map[string]string{"pattern": "test", "target": "notexist"}, data.NewMessage("test"), false,  false, "target not found", []*data.Message{}},
 		{"Regexp", map[string]string{"pattern": "[a-z]est", "regexp": "true"}, data.NewMessage("test"), false,  true, "", []*data.Message{data.NewMessage("test")}},
 		{"ExtractSingle", map[string]string{"pattern": "([a-z]est)", "regexp": "true", "extract": "true"}, data.NewMessage("test here"), false,  true, "", []*data.Message{data.NewMessageWithExtra("test", map[string]interface{}{"fulltext": "test here"})}},
 		{"ExtractMultiple", map[string]string{"pattern": "([a-z]est)", "regexp": "true", "extract": "true"}, data.NewMessage("test here beast fast best"), true,  false, "", []*data.Message{data.NewMessageWithExtra("test", map[string]interface{}{"fulltext": "test here beast fast best", "rule_name":""}), data.NewMessageWithExtra("best", map[string]interface{}{"fulltext": "test here beast fast best", "rule_name":""})}},

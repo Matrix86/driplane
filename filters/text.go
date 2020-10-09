@@ -61,10 +61,13 @@ func NewTextFilter(p map[string]string) (Filter, error) {
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Text) DoFilter(msg *data.Message) (bool, error) {
 	var text string
-
-	if v, ok := msg.GetTarget(f.target).(string); ok {
+	target := msg.GetTarget(f.target)
+	if target == nil {
+		return false, fmt.Errorf("target not found")
+	}
+	if v, ok := target.(string); ok {
 		text = v
-	} else if v, ok := msg.GetTarget(f.target).([]byte); ok {
+	} else if v, ok := target.([]byte); ok {
 		text = string(v)
 	} else {
 		// ERROR this filter can't be used with different types
