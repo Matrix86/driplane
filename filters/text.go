@@ -63,7 +63,7 @@ func (f *Text) DoFilter(msg *data.Message) (bool, error) {
 	var text string
 	target := msg.GetTarget(f.target)
 	if target == nil {
-		return false, fmt.Errorf("target not found")
+		return false, nil
 	}
 	if v, ok := target.(string); ok {
 		text = v
