@@ -9,7 +9,6 @@ on:
       - 'docs/**'
       - 'src_docs/**'
       - '.github/**'
-    tags: []
   pull_request:
 
 jobs:
