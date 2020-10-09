@@ -104,8 +104,8 @@ func TestText_DoFilter(t *testing.T) {
 					}
 				}
 			} else {
-				if err.Error() != v.ExpectedError {
-					t.Errorf("%s: wrong error: expected=%#v had=%#v", v.Name, v.ExpectedError, err.Error())
+				if err == nil || err.Error() != v.ExpectedError {
+					t.Errorf("%s: wrong error: expected=%#v had=%#v", v.Name, v.ExpectedError, err)
 				}
 			}
 		}
