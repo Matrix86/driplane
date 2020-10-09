@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -17,6 +18,8 @@ type Cache struct {
 	ttl          time.Duration
 	refreshOnGet bool
 	global       bool
+
+	persistentFile string
 
 	params map[string]string
 	cache  *utils.TTLMap
@@ -49,9 +52,17 @@ func NewCacheFilter(p map[string]string) (Filter, error) {
 	}
 	if v, ok := f.params["global"]; ok && v == "true" {
 		f.global = true
-		f.cache = utils.GetGlobalTTLMapInstance(5 *time.Minute).Cache
+		f.cache = utils.GetGlobalTTLMapInstance(5 * time.Minute).Cache
 	} else {
 		f.cache = utils.NewTTLMap(5 * time.Minute)
+	}
+
+	if v, ok := f.params["file"]; ok {
+		err := f.cache.SetPersistence(v)
+		if err != nil {
+			return nil, fmt.Errorf("cache tried to load %s: %s", v, err)
+		}
+		f.persistentFile = v
 	}
 
 	return f, nil

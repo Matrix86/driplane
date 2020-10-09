@@ -7,7 +7,7 @@ import (
 )
 
 func TestNewCacheFilter(t *testing.T) {
-	filter, err := NewCacheFilter(map[string]string{"none": "none", "target": "main", "ttl": "1s"})
+	filter, err := NewCacheFilter(map[string]string{"none": "none", "target": "main", "ttl": "1s", "file": "/tmp/test_file_cache.dat"})
 	if err != nil {
 		t.Errorf("constructor returned '%s'", err)
 	}

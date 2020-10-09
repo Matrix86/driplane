@@ -1,25 +1,31 @@
 package utils
 
 import (
+	"encoding/gob"
+	"fmt"
+	"os"
 	"sync"
 	"time"
+
+	"github.com/juju/fslock"
 )
 
 type item struct {
-	value      interface{}
-	expiration int64
+	Value      interface{}
+	Expiration int64
 }
 
 func (i *item) expired() bool {
-	return i.expiration <= time.Now().Unix()
+	return i.Expiration <= time.Now().Unix()
 }
 
 // TTLMap is a cache with ttl
 type TTLMap struct {
 	sync.RWMutex
 
-	dict    map[interface{}]*item
-	gcdelay time.Duration
+	filename string
+	dict     map[interface{}]*item
+	gcdelay  time.Duration
 }
 
 // NewTTLMap creates a TTLMap instance
@@ -39,6 +45,7 @@ func NewTTLMap(gcdelay time.Duration) (m *TTLMap) {
 					delete(m.dict, k)
 				}
 			}
+			m.syncFile()
 			m.Unlock()
 		}
 	}()
@@ -58,13 +65,13 @@ func (m *TTLMap) Put(k, v interface{}, ttl int64) {
 	defer m.Unlock()
 
 	if i, ok := m.dict[k]; ok {
-		i.value = v
+		i.Value = v
 		// refresh ttl
-		i.expiration = time.Now().Unix() + ttl
+		i.Expiration = time.Now().Unix() + ttl
 	} else {
 		i := &item{
-			value:      v,
-			expiration: time.Now().Unix() + ttl,
+			Value:      v,
+			Expiration: time.Now().Unix() + ttl,
 		}
 		m.dict[k] = i
 	}
@@ -78,7 +85,74 @@ func (m *TTLMap) Get(k interface{}) (interface{}, bool) {
 		if i.expired() {
 			return nil, false
 		}
-		return i.value, true
+		return i.Value, true
 	}
 	return nil, false
+}
+
+func (m *TTLMap) syncFile() error {
+	if m.filename == "" {
+		return nil
+	}
+
+	// Try to lock the file during the sync
+	lock := fslock.New(m.filename)
+	err := lock.LockWithTimeout(m.gcdelay)
+	if err != nil {
+		return err
+	}
+	defer lock.Unlock()
+
+	file, err := os.Create(m.filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	encoder := gob.NewEncoder(file)
+	if err := encoder.Encode(m.dict); err != nil {
+		return err
+	}
+	return nil
+}
+
+// SetPersistence load the map from a file (it can be used only the first time)
+func (m *TTLMap) SetPersistence(filename string) error {
+	m.Lock()
+	defer m.Unlock()
+
+	if m.filename != "" {
+		return fmt.Errorf("file already loaded: '%s'", m.filename)
+	}
+
+	info, err := os.Stat(filename)
+	// file doesn't not exist or empty
+	if os.IsNotExist(err) || ( !info.IsDir() && info.Size() == 0 ) {
+		file, err := os.Create(filename)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		m.filename = filename
+		return nil
+	}
+
+	// Try to lock the file during the sync
+	lock := fslock.New(filename)
+	err = lock.LockWithTimeout(m.gcdelay)
+	if err != nil {
+		return err
+	}
+	defer lock.Unlock()
+
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	decoder := gob.NewDecoder(file)
+	if err := decoder.Decode(&m.dict); err != nil {
+		return err
+	}
+	m.filename = filename
+	return nil
 }
