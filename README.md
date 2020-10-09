@@ -5,6 +5,8 @@
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Matrix86/driplane?color=red)
 ![Codecov](https://img.shields.io/codecov/c/github/Matrix86/driplane)
 
+---
+
 `Driplane` allows you to create an automatic alerting system or start automated tasks triggered by events.
 You can keep under control a stream source as Twitter, a file, a RSS feed or a website.
 It includes a mini language that allows you to define the filtering pipelines (the rules), and it is extensible thanks to an integrated JS plugin system. 
