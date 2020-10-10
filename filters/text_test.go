@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"fmt"
 	"github.com/asaskevich/EventBus"
 	"regexp"
 	"testing"
@@ -59,17 +60,17 @@ func TestText_DoFilter(t *testing.T) {
 		Message          *data.Message
 		MultipleMessage  bool
 		ExpectedBool     bool
-		ExpectedError    string
+		ExpectedError    error
 		ExpectedMessages []*data.Message
 	}
 	tests := []Test{
-		{"TypeNotSupported", map[string]string{"pattern":""}, data.NewMessage(false), false, false, "received data is not a string", nil},
-		{"TypeString", map[string]string{"pattern": "test"}, data.NewMessage("test"), false, true, "", []*data.Message{data.NewMessage("test")}},
-		{"TypeByte", map[string]string{"pattern": "test"}, data.NewMessage([]byte("test")), false, true, "", []*data.Message{data.NewMessage([]byte("test"))}},
+		{"TypeNotSupported", map[string]string{"pattern":""}, data.NewMessage(false), false, false, fmt.Errorf("received data is not a string"), nil},
+		{"TypeString", map[string]string{"pattern": "test"}, data.NewMessage("test"), false, true, nil, []*data.Message{data.NewMessage("test")}},
+		{"TypeByte", map[string]string{"pattern": "test"}, data.NewMessage([]byte("test")), false, true, nil, []*data.Message{data.NewMessage([]byte("test"))}},
 		{"TargetNotFound", map[string]string{"pattern": "test", "target": "notexist"}, data.NewMessage("test"), false,  false, nil, []*data.Message{}},
-		{"Regexp", map[string]string{"pattern": "[a-z]est", "regexp": "true"}, data.NewMessage("test"), false,  true, "", []*data.Message{data.NewMessage("test")}},
-		{"ExtractSingle", map[string]string{"pattern": "([a-z]est)", "regexp": "true", "extract": "true"}, data.NewMessage("test here"), false,  true, "", []*data.Message{data.NewMessageWithExtra("test", map[string]interface{}{"fulltext": "test here"})}},
-		{"ExtractMultiple", map[string]string{"pattern": "([a-z]est)", "regexp": "true", "extract": "true"}, data.NewMessage("test here beast fast best"), true,  false, "", []*data.Message{data.NewMessageWithExtra("test", map[string]interface{}{"fulltext": "test here beast fast best", "rule_name":""}), data.NewMessageWithExtra("best", map[string]interface{}{"fulltext": "test here beast fast best", "rule_name":""})}},
+		{"Regexp", map[string]string{"pattern": "[a-z]est", "regexp": "true"}, data.NewMessage("test"), false,  true, nil, []*data.Message{data.NewMessage("test")}},
+		{"ExtractSingle", map[string]string{"pattern": "([a-z]est)", "regexp": "true", "extract": "true"}, data.NewMessage("test here"), false,  true, nil, []*data.Message{data.NewMessageWithExtra("test", map[string]interface{}{"fulltext": "test here"})}},
+		{"ExtractMultiple", map[string]string{"pattern": "([a-z]est)", "regexp": "true", "extract": "true"}, data.NewMessage("test here beast fast best"), true,  false, nil, []*data.Message{data.NewMessageWithExtra("test", map[string]interface{}{"fulltext": "test here beast fast best", "rule_name":""}), data.NewMessageWithExtra("best", map[string]interface{}{"fulltext": "test here beast fast best", "rule_name":""})}},
 
 	}
 
@@ -90,7 +91,8 @@ func TestText_DoFilter(t *testing.T) {
 				t.Errorf("%s: wrong bool: expected=%#v had=%#v", v.Name, v.ExpectedBool, hadBool)
 			}
 
-			if v.ExpectedError == "" {
+			fmt.Println(v.Name)
+			if v.ExpectedError == nil {
 				if err != nil {
 					t.Errorf("%s: wrong error: expected=nil had=%#v", v.Name, err)
 				}
@@ -99,12 +101,12 @@ func TestText_DoFilter(t *testing.T) {
 						t.Errorf("%s: wrong: expected=%#v had=%#v", v.Name, v.ExpectedMessages, fb.Collected)
 					}
 				} else {
-					if assert.Equal(t, v.ExpectedMessages[0], orig) == false {
+					if len(v.ExpectedMessages) != 0 && assert.Equal(t, v.ExpectedMessages[0], orig) == false {
 						t.Errorf("%s: wrong: expected=%#v had=%#v", v.Name, v.ExpectedMessages, fb.Collected)
 					}
 				}
 			} else {
-				if err == nil || err.Error() != v.ExpectedError {
+				if err == nil || err.Error() != v.ExpectedError.Error() {
 					t.Errorf("%s: wrong error: expected=%#v had=%#v", v.Name, v.ExpectedError, err)
 				}
 			}
