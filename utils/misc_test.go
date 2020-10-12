@@ -103,3 +103,67 @@ func TestMd5File(t *testing.T) {
 		}
 	}
 }
+
+func TestFlatStruct(t *testing.T) {
+	type SubTest struct {
+		Map    map[string]string
+		Slice  []string
+		Int    int
+		Float  float32
+		String string
+		Bool   bool
+	}
+	type Test struct {
+		Map        map[string]string
+		Slice      []string
+		Int        int
+		Float      float32
+		String     string
+		Bool       bool
+		Struct     SubTest
+		ignoreThis string
+	}
+	i := &Test{
+		Map:    map[string]string{"key1": "value1", "key2": "value2"},
+		Slice:  []string{"one", "two", "three"},
+		Int:    10,
+		Float:  1.55,
+		String: "This is a test",
+		Bool:   true,
+		Struct: SubTest{
+			Map:    map[string]string{"key1": "value1", "key2": "value2"},
+			Slice:  []string{"one", "two", "three"},
+			Int:    10,
+			Float:  1.55,
+			String: "This is a test",
+			Bool:   true,
+		},
+		ignoreThis: "This field will be ignored because it is private",
+	}
+
+	res := map[string]string{
+		"bool":            "true",
+		"struct_int":      "10",
+		"struct_float":    "1.550000",
+		"struct_bool":     "true",
+		"int":             "10",
+		"float":           "1.550000",
+		"string":          "This is a test",
+		"map_key2":        "value2",
+		"struct_slice":    "one,two,three",
+		"struct_map_key2": "value2",
+		"struct_string":   "This is a test",
+		"map_key1":        "value1",
+		"slice":           "one,two,three",
+		"struct_map_key1": "value1",
+	}
+
+	flat := FlatStruct(i)
+	for k, v := range res {
+		if vv, ok := flat[k]; !ok {
+			t.Errorf("key not found: %s", k)
+		} else if vv != v {
+			t.Errorf("bad value key '%s': expected=%#v had=%#v", k, v, vv)
+		}
+	}
+}
