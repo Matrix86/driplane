@@ -23,7 +23,7 @@ This filter is used to inject an extra field with a random number in the propaga
 
 ### Output
 
-The output `Message` will be equal to the input one, but it will also include the new random field.
+The output `Message` will be equal to the input, but it will also include the new random field.
 
 ### Examples
 
