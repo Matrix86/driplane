@@ -19,6 +19,7 @@ Otherwise if the target of the Message is new to the cache, it is inserted in it
  | **refresh_on_get** | _BOOL_ | "true" | the TTL is refreshed if the key has been looked up |
  | **ttl** | _[DURATION](https://golang.org/pkg/time/#ParseDuration)_ | 24h | how long after the key will be deleted |
  | **global** | _BOOL_ | "false" | make this cache global |
+ | **file** | _STRING_ | "" | enable cache persistence. It loads and writes the cache from a file |
  
 {{< notice info "Example" >}} 
 `... | cache(ttl="24h", global="true") | ...`
