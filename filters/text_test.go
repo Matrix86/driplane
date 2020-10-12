@@ -91,7 +91,6 @@ func TestText_DoFilter(t *testing.T) {
 				t.Errorf("%s: wrong bool: expected=%#v had=%#v", v.Name, v.ExpectedBool, hadBool)
 			}
 
-			fmt.Println(v.Name)
 			if v.ExpectedError == nil {
 				if err != nil {
 					t.Errorf("%s: wrong error: expected=nil had=%#v", v.Name, err)
