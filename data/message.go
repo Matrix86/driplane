@@ -82,7 +82,7 @@ func (d *Message) GetTarget(name string) interface{} {
 	if v, ok := d.fields[name]; ok {
 		return v
 	}
-	return ""
+	return nil
 }
 
 // Clone creates a deep copy of the Message struct
