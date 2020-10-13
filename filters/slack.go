@@ -101,13 +101,30 @@ func (f *Slack) sendMessageText(client *slack.Client, dst string, text string) e
 func (f *Slack) sendMessageBlocks(client *slack.Client, dst string, jsonBlocks string) error {
 	log.Debug("Slack: send message to %s", dst)
 
-	var blocks slack.Block
-	err := json.Unmarshal([]byte(jsonBlocks), &blocks)
-	if err != nil {
-		return fmt.Errorf("sendMessageBlocks: can not unmarshal the json")
+	// This is done because the blocks.Unmarshal returns the error:
+	// "cannot unmarshal object into Go value of type []json.RawMessage"
+	// So we remove the blocks field from the json
+	var jsonArray string
+	var i interface{}
+	if err := json.Unmarshal([]byte(jsonBlocks), &i); err != nil {
+		return fmt.Errorf("sendMessageBlocks: %s", err)
+	}
+	if m, ok := i.(map[string]interface{}); ok {
+		q := m["blocks"]
+		output, err := json.Marshal(q)
+		if err != nil {
+			return fmt.Errorf("sendMessageBlocks: %s", err)
+		}
+		jsonArray = string(output)
 	}
 
-	_, _, err = client.PostMessage(dst, slack.MsgOptionBlocks(blocks))
+	var blocks slack.Blocks
+	err := blocks.UnmarshalJSON([]byte(jsonArray))
+	if err != nil {
+		return fmt.Errorf("sendMessageBlocks: %s", err)
+	}
+
+	_, _, err = client.PostMessage(dst, slack.MsgOptionBlocks(blocks.BlockSet...))
 	if err != nil {
 		return fmt.Errorf("sendMessage: slack returned: %s", err)
 	}

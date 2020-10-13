@@ -21,8 +21,9 @@ require (
 	github.com/localtunnel/go-localtunnel v0.0.0-20170326223115-8a804488f275
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mmcdole/gofeed v1.0.0
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
-	github.com/slack-go/slack v0.7.0
+	github.com/slack-go/slack v0.7.1
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.3.0
 	golang.org/x/net v0.0.0-20181220203305-927f97764cc3
