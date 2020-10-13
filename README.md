@@ -14,6 +14,7 @@ It includes a mini language that allows you to define the filtering pipelines (t
 With `driplane` you can create several rules starting from one or more streams, filter the content in the pipeline and launch tasks or send alerts if some event occurred.
 
 ```bash
+# Twitter feed
 # Define a rule with a Twitter feeder and define keywords and users
 Twitter => <twitter: users="goofy, mickeymouse", keywords="malware, virus, PE">;
 
@@ -36,7 +37,8 @@ tweet_rule => @Twitter |
               format(file="slack_twitter.txt") |
               # use the rule defined above to send the filled template to slack endpoint
               @slack_alert;
-
+```
+```bash
 # Feed example
 # Define a rule called 'RSS' that read a RSS feed every minutes
 RSS => <rss: url="http://rss.cnn.com/rss/cnn_topstories.rss", freq="1m", ignore_pubdate="true">;
@@ -49,7 +51,8 @@ news => @RSS |
         # format the output text to send on telegram
         format(template="Found new interesting article: {{ .link }}") |
         @telegram;
-
+```
+```bash
 # Simple Slack Bot
 # define the slack feeder: token and verification token are defined in the configuration file
 SlackEvent => <slack>;
