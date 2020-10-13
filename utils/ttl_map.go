@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/gob"
-	"fmt"
 	"os"
 	"sync"
 	"time"
@@ -121,7 +120,7 @@ func (m *TTLMap) SetPersistence(filename string) error {
 	defer m.Unlock()
 
 	if m.filename != "" {
-		return fmt.Errorf("file already loaded: '%s'", m.filename)
+		return nil
 	}
 
 	info, err := os.Stat(filename)

@@ -2,6 +2,7 @@ package filters
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -23,6 +24,7 @@ type Slack struct {
 	action      string
 	target      string
 	token       string
+	blocks      bool
 	filename    *template.Template
 	downloadURL *template.Template
 	body        *template.Template
@@ -46,6 +48,9 @@ func NewSlackFilter(p map[string]string) (Filter, error) {
 			return nil, err
 		}
 		f.body = t
+	}
+	if v, ok := f.params["blocks"]; ok && v == "true" {
+		f.blocks = true
 	}
 	if v, ok := f.params["action"]; ok {
 		f.action = v
@@ -78,15 +83,31 @@ func NewSlackFilter(p map[string]string) (Filter, error) {
 		f.to = t
 	}
 
-	if (f.action == "send_message" || f.action == "download_file") && f.to == nil {
+	if (f.action == "send_message" || f.action == "send_file") && f.to == nil {
 		return nil, fmt.Errorf("destination 'to' is mandatory with this action")
 	}
 	return f, nil
 }
 
-func (f *Slack) sendMessage(client *slack.Client, dst string, text string) error {
+func (f *Slack) sendMessageText(client *slack.Client, dst string, text string) error {
 	log.Debug("Slack: send message to %s", dst)
 	_, _, err := client.PostMessage(dst, slack.MsgOptionText(text, false))
+	if err != nil {
+		return fmt.Errorf("sendMessage: slack returned: %s", err)
+	}
+	return nil
+}
+
+func (f *Slack) sendMessageBlocks(client *slack.Client, dst string, jsonBlocks string) error {
+	log.Debug("Slack: send message to %s", dst)
+
+	var blocks slack.Block
+	err := json.Unmarshal([]byte(jsonBlocks), &blocks)
+	if err != nil {
+		return fmt.Errorf("sendMessageBlocks: can not unmarshal the json")
+	}
+
+	_, _, err = client.PostMessage(dst, slack.MsgOptionBlocks(blocks))
 	if err != nil {
 		return fmt.Errorf("sendMessage: slack returned: %s", err)
 	}
@@ -178,6 +199,7 @@ func (f *Slack) DoFilter(msg *data.Message) (bool, error) {
 		} else {
 			return false, fmt.Errorf("destination not specified (param to)")
 		}
+
 		if f.body != nil {
 			text, err = msg.ApplyPlaceholder(f.body)
 			if err != nil {
@@ -196,9 +218,16 @@ func (f *Slack) DoFilter(msg *data.Message) (bool, error) {
 				return false, fmt.Errorf("received data is not a string")
 			}
 		}
-		err = f.sendMessage(client, dst, text)
-		if err != nil {
-			return false, fmt.Errorf("%s", err)
+		if f.blocks {
+			err = f.sendMessageBlocks(client, dst, text)
+			if err != nil {
+				return false, fmt.Errorf("%s", err)
+			}
+		} else {
+			err = f.sendMessageText(client, dst, text)
+			if err != nil {
+				return false, fmt.Errorf("%s", err)
+			}
 		}
 	case "send_file":
 		var filename string

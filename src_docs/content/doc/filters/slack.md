@@ -28,6 +28,7 @@ Each `action` can use different parameters:
  | **to** | _STRING_ | "" | channel ID or User ID that should receive the message (supports [Golang templates](https://golang.org/pkg/text/template/)) |
  | **target** | _STRING_ | "main" | if `text` is not used you can choose which field of `Message` to use as text |
  | **text** | _STRING_ | "" | you can define the text of the message to send (supports [Golang templates](https://golang.org/pkg/text/template/)) | 
+ | **blocks** | _BOOL_ | false | if true you can use the Slack template blocks ([block builder](https://api.slack.com/tools/block-kit-builder)) | 
 
 #### action = send_file
 
