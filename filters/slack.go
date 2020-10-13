@@ -107,13 +107,13 @@ func (f *Slack) sendMessageBlocks(client *slack.Client, dst string, jsonBlocks s
 	var jsonArray string
 	var i interface{}
 	if err := json.Unmarshal([]byte(jsonBlocks), &i); err != nil {
-		return fmt.Errorf("sendMessageBlocks: %s", err)
+		return fmt.Errorf("sendMessageBlocks: unmarshalling: %s", err)
 	}
 	if m, ok := i.(map[string]interface{}); ok {
 		q := m["blocks"]
 		output, err := json.Marshal(q)
 		if err != nil {
-			return fmt.Errorf("sendMessageBlocks: %s", err)
+			return fmt.Errorf("sendMessageBlocks: marshalling: %s", err)
 		}
 		jsonArray = string(output)
 	}
@@ -121,7 +121,7 @@ func (f *Slack) sendMessageBlocks(client *slack.Client, dst string, jsonBlocks s
 	var blocks slack.Blocks
 	err := blocks.UnmarshalJSON([]byte(jsonArray))
 	if err != nil {
-		return fmt.Errorf("sendMessageBlocks: %s", err)
+		return fmt.Errorf("sendMessageBlocks: blocks unmarshalling: %s", err)
 	}
 
 	_, _, err = client.PostMessage(dst, slack.MsgOptionBlocks(blocks.BlockSet...))
