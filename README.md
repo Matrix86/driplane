@@ -13,7 +13,7 @@ It includes a mini language that allows you to define the filtering pipelines (t
 
 With `driplane` you can create several rules starting from one or more streams, filter the content in the pipeline and launch tasks or send alerts if some event occurred.
 
-```
+```bash
 # Define a rule with a Twitter feeder and define keywords and users
 Twitter => <twitter: users="goofy, mickeymouse", keywords="malware, virus, PE">;
 
@@ -37,6 +37,7 @@ tweet_rule => @Twitter |
               # use the rule defined above to send the filled template to slack endpoint
               @slack_alert;
 
+# Feed example
 # Define a rule called 'RSS' that read a RSS feed every minutes
 RSS => <rss: url="http://rss.cnn.com/rss/cnn_topstories.rss", freq="1m", ignore_pubdate="true">;
 
@@ -48,6 +49,36 @@ news => @RSS |
         # format the output text to send on telegram
         format(template="Found new interesting article: {{ .link }}") |
         @telegram;
+
+# Simple Slack Bot
+# define the slack feeder: token and verification token are defined in the configuration file
+SlackEvent => <slack>;
+
+# Get status from zMD
+status => @SlackEvent |
+          # consider only message events
+          text(target="type", pattern="message") |
+          # extract all the hashes found in the message
+          hash(extract="true") |
+          # logic to get the info in the report
+          js(path="bot.js", function="GetHashReport") |
+          # format of the response using the Slack template system
+          format(file="slack_report.txt") |
+          # reply to the channel where the event has been generated 
+          slack(action="send_message", to="{{.channel}}", target="main", blocks="true");
+
+# Upload file and get status
+upload => @SlackEvent |
+          # consider only file_share events
+          text(target="subtype", pattern="file_share") |
+          # download the file and store it in /tmp/nameofthefile
+          slack(action="download_file", filename="/tmp/{{ .name }}") |
+          # call the method UploadFile() in bot.js: it extract info from the file and return them
+          js(path="bot.js", function="UploadFile") |
+          # format of the response using the Slack template system
+          format(file="slack_report.txt") |
+          # reply to the channel where the event has been generated 
+          slack(action="send_message", to="{{.channel}}", target="main");
 
 ```
 
