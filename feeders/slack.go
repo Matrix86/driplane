@@ -123,9 +123,12 @@ func (s *Slack) GetClient() *slack.Client {
 	return s.client
 }
 
-func (s *Slack) propagateFiles(msg string, files []slackevents.File) {
+func (s *Slack) propagateFiles(msg string, extra map[string]interface{}, files []slackevents.File) {
 	for _, file := range files {
 		extraf := make(map[string]interface{})
+		for k, v := range extra {
+			extraf[k] = v
+		}
 		extraf["type"] = "file_shared"
 		extraf["slackfeeder.token"] = s.token
 		fr := reflect.ValueOf(file)
@@ -203,16 +206,16 @@ func (s *Slack) startEventsEndpoint() {
 					}
 					v := reflect.ValueOf(*ev)
 					txt = ev.Text
-					// propagate multiple messages, one for each shared file
-					if _, ok := s.events["file_shared"]; ok {
-						s.propagateFiles(txt, ev.Files)
-					}
 					for i := 0; i < v.NumField(); i++ {
 						if v.Field(i).CanInterface() {
 							if str, ok := v.Field(i).Interface().(string); ok {
 								extra[strings.ToLower(v.Type().Field(i).Name)] = str
 							}
 						}
+					}
+					// propagate multiple messages, one for each shared file
+					if _, ok := s.events["file_shared"]; ok {
+						s.propagateFiles(txt, extra, ev.Files)
 					}
 				case *slackevents.MemberJoinedChannelEvent:
 					v := reflect.ValueOf(*ev)
