@@ -19,6 +19,9 @@ The complete documentation can be found [HERE](https://matrix86.github.io/dripla
 Keep under control the Twitter account of some users or keywords used in Tweets, search for hashes and send a message on Slack using the webhook. 
 The cache will avoid sending messages with hashes already seen in the last 24h. 
 
+<details>
+<summary>Show example</summary>
+
 **`twitter.rule`**
 ```bash
 # Twitter feed
@@ -65,9 +68,14 @@ tweet_rule => @Twitter |
 }
 ```
 
+</details>
+
 ### RSS Feed
 
 Check a RSS feed with a defined frequency to be alerted every time a news containing one or more interesting keywords are published, and send a telegram message.
+
+<details>
+<summary>Show example</summary>
 
 **`rss.rule`**
 ```bash
@@ -88,12 +96,17 @@ news => @RSS |
         @telegram;
 ```
 
+</details>
+
 ### Slack
 
 Creates a simple bot or keep under control one or more channel. Using the event APIs of Slack every time the bot receives 
 a message with hashes, it will try to get information from this hash and it replies to the original channel 
 (in a private chat if the user contacted the bot privately or in a channel if it has been added to a channel and the event comes from there) with all the gathered info.
 Also, using another rule, if a file is uploaded, the bot will analyze it and return a report in the reply message. 
+
+<details>
+<summary>Show example</summary>
 
 **`slack.rule`**
 ```bash
@@ -128,6 +141,8 @@ upload => @SlackEvent |
           slack(action="send_message", to="{{.channel}}", target="main");
 
 ```
+
+</details>
 
 ## How it works
 
