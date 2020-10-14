@@ -118,6 +118,16 @@ menuTitle?menuTitle.forEach(function(elem){elem.onclick=function(){closeDrawer()
 </span><span class=w>  </span><span class=nt>accessSecret</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;accessSecret&#34;</span><span class=p>,</span><span class=w>
 </span><span class=w>  </span><span class=nt>keywords</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;#italy #coding #malware something&#34;</span><span class=p>,</span><span class=w>
 </span><span class=w>  </span><span class=nt>stallWarnings</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;true&#34;</span><span class=w>
+</span></code></pre></td></tr></table></div></div><blockquote><p>Same for the Slack feeder and/or feeder.</p></blockquote><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-yaml data-lang=yaml><span class=nt>slack</span><span class=p>:</span><span class=w>
+</span><span class=w>  </span><span class=nt>token</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;xoxb-xxx-xxx-xxx&#34;</span><span class=w>
+</span><span class=w>    </span><span class=nt>verification_token</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;xxx&#34;</span><span class=w>
+</span><span class=w>    </span><span class=nt>lt_enable</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;true&#34;</span><span class=w>
+</span><span class=w>    </span><span class=nt>lt_subdomain</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;mytestdomain&#34;</span><span class=w>
 </span></code></pre></td></tr></table></div></div><blockquote><p>Each config will be visible <strong>ONLY</strong> to the related filter or feeder.</p></blockquote><p>We can also define <code>custom</code> configurations and they will be available to all the feeders and filters.</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt>1
 </span><span class=lnt>2
 </span></code></pre></td><td class=lntd><pre class=chroma><code class=language-yaml data-lang=yaml><span class=nt>custom</span><span class=p>:</span><span class=w>
