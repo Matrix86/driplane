@@ -20,7 +20,7 @@ Keep under control the Twitter account of some users or keywords used in Tweets,
 The cache will avoid sending messages with hashes already seen in the last 24h. 
 
 <details>
-<summary>Show example</summary>
+<summary>*Show example*</summary>
 
 **`twitter.rule`**
 ```bash
@@ -75,7 +75,7 @@ tweet_rule => @Twitter |
 Check a RSS feed with a defined frequency to be alerted every time a news containing one or more interesting keywords are published, and send a telegram message.
 
 <details>
-<summary>Show example</summary>
+<summary>*Show example*</summary>
 
 **`rss.rule`**
 ```bash
@@ -106,7 +106,7 @@ a message with hashes, it will try to get information from this hash and it repl
 Also, using another rule, if a file is uploaded, the bot will analyze it and return a report in the reply message. 
 
 <details>
-<summary>Show example</summary>
+<summary>*Show example*</summary>
 
 **`slack.rule`**
 ```bash
