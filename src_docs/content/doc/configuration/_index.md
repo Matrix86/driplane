@@ -34,6 +34,15 @@ twitter:
   keywords: "#italy #coding #malware something",
   stallWarnings: "true"
 ```  
+
+> Same for the Slack feeder and/or feeder.
+```yaml
+slack:
+  token: "xoxb-xxx-xxx-xxx"
+    verification_token: "xxx"
+    lt_enable: "true"
+    lt_subdomain: "mytestdomain"
+```  
 > Each config will be visible __ONLY__ to the related filter or feeder.
 
 We can also define `custom` configurations and they will be available to all the feeders and filters.

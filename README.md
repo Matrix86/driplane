@@ -1,4 +1,7 @@
-![Logo](https://github.com/Matrix86/driplane/blob/gh-pages/logo.png)
+<p align="center">
+  <img src="https://github.com/Matrix86/driplane/blob/gh-pages/logo.png"/>
+</p>
+
 ![License](https://img.shields.io/github/license/Matrix86/driplane)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/Matrix86/driplane)
 ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Matrix86/driplane/Build%20and%20Test/master)
@@ -13,6 +16,16 @@ It includes a mini language that allows you to define the filtering pipelines (t
 
 With `driplane` you can create several rules starting from one or more streams, filter the content in the pipeline and launch tasks or send alerts if some event occurred.
 
+The complete documentation can be found [HERE](https://matrix86.github.io/driplane/doc/)
+
+## Examples
+
+### Twitter
+
+Keep under control the Twitter account of some users or keywords used in Tweets, search for hashes and send a message on Slack using the webhook. 
+The cache will avoid sending messages with hashes already seen in the last 24h. 
+
+**`twitter.rule`**
 ```bash
 # Twitter feed
 # Define a rule with a Twitter feeder and define keywords and users
@@ -20,8 +33,6 @@ Twitter => <twitter: users="goofy, mickeymouse", keywords="malware, virus, PE">;
 
 # Define a rule to send a slack message using a defined api hook
 slack => http(url="https://hooks.slack.com/services/XXXXXXXXXX/XXXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",method="POST",headers="{\"Content-type\": \"application/json\"}",rawData="{{.main}}");
-# Define a rule to send a telegram message using a defined api hook
-telegram =>  http(url="https://api.telegram.org/XXX:XXXX/sendMessage", method="POST", headers="{\"Content-type\": \"application/json\"}", rawData="{{.main}}");
 
 # Define a rule that filter the received tweets
 tweet_rule => @Twitter |
@@ -38,10 +49,40 @@ tweet_rule => @Twitter |
               # use the rule defined above to send the filled template to slack endpoint
               @slack_alert;
 ```
+
+**`slack_twitter.txt`**
+```json
+{
+	"blocks": [{
+		"type": "context",
+		"elements": [{
+			"text": "*Rule* : {{.rule_name}} | *Feeder* : {{.source_feeder}} ",
+			"type": "mrkdwn"
+		}]
+	}, {
+		"type": "divider"
+	}, {
+		"type": "section",
+		"text": {
+			"type": "mrkdwn",
+			"text": "Found a new hash : _{{.hash}}_\nLink to the Twitter post: {{ .link }}"
+		}
+	}]
+}
+```
+
+### RSS Feed
+
+Check a RSS feed with a defined frequency to be alerted every time a news containing one or more interesting keywords are published, and send a telegram message.
+
+**`rss.rule`**
 ```bash
 # Feed example
 # Define a rule called 'RSS' that read a RSS feed every minutes
 RSS => <rss: url="http://rss.cnn.com/rss/cnn_topstories.rss", freq="1m", ignore_pubdate="true">;
+
+# Define a rule to send a telegram message using a defined api hook
+telegram =>  http(url="https://api.telegram.org/XXX:XXXX/sendMessage", method="POST", headers="{\"Content-type\": \"application/json\"}", rawData="{{.main}}");
 
 news => @RSS |
         # skip links if we saw that before
@@ -52,6 +93,15 @@ news => @RSS |
         format(template="Found new interesting article: {{ .link }}") |
         @telegram;
 ```
+
+### Slack
+
+Creates a simple bot or keep under control one or more channel. Using the event APIs of Slack every time the bot receives 
+a message with hashes, it will try to get information from this hash and it replies to the original channel 
+(in a private chat if the user contacted the bot privately or in a channel if it has been added to a channel and the event comes from there) with all the gathered info.
+Also, using another rule, if a file is uploaded, the bot will analyze it and return a report in the reply message. 
+
+**`slack.rule`**
 ```bash
 # Simple Slack Bot
 # define the slack feeder: token and verification token are defined in the configuration file
@@ -73,7 +123,7 @@ status => @SlackEvent |
 # Upload file and get status
 upload => @SlackEvent |
           # consider only file_share events
-          text(target="subtype", pattern="file_share") |
+          text(target="type", pattern="file_share") |
           # download the file and store it in /tmp/nameofthefile
           slack(action="download_file", filename="/tmp/{{ .name }}") |
           # call the method UploadFile() in bot.js: it extract info from the file and return them
@@ -84,8 +134,6 @@ upload => @SlackEvent |
           slack(action="send_message", to="{{.channel}}", target="main");
 
 ```
-
-The documentation can be found [HERE](https://matrix86.github.io/driplane/doc/)
 
 ## How it works
 
