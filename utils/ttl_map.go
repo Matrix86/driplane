@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/gob"
+	"fmt"
 	"os"
 	"sync"
 	"time"
@@ -100,10 +101,10 @@ func (m *TTLMap) syncFile() error {
 	}
 
 	// Try to lock the file during the sync
-	lock := fslock.New(m.filename)
+	lock := fslock.New(m.filename + ".lock")
 	err := lock.LockWithTimeout(m.gcdelay)
 	if err != nil {
-		return err
+		return fmt.Errorf("file locking: %s", err)
 	}
 	defer lock.Unlock()
 
@@ -114,7 +115,7 @@ func (m *TTLMap) syncFile() error {
 	defer file.Close()
 	encoder := gob.NewEncoder(file)
 	if err := encoder.Encode(m.dict); err != nil {
-		return err
+		return fmt.Errorf("encoding: %s", err)
 	}
 
 	log.Debug("cache file synced : %s", m.filename)
