@@ -18,6 +18,7 @@ type Cache struct {
 	ttl          time.Duration
 	refreshOnGet bool
 	global       bool
+	syncTime     time.Duration
 
 	persistentFile string
 
@@ -33,6 +34,7 @@ func NewCacheFilter(p map[string]string) (Filter, error) {
 		refreshOnGet: true,
 		global:       false,
 		ttl:          24 * time.Hour,
+		syncTime:     5 * time.Minute,
 	}
 	f.cbFilter = f.DoFilter
 
@@ -41,6 +43,14 @@ func NewCacheFilter(p map[string]string) (Filter, error) {
 	}
 	if v, ok := f.params["refresh_on_get"]; ok && v == "false" {
 		f.refreshOnGet = false
+	}
+	if v, ok := f.params["sync_time"]; ok {
+		// https://golang.org/pkg/time/#ParseDuration
+		i, err := time.ParseDuration(v)
+		if err != nil {
+			return nil, err
+		}
+		f.syncTime = i
 	}
 	if v, ok := f.params["ttl"]; ok {
 		// https://golang.org/pkg/time/#ParseDuration
@@ -52,9 +62,9 @@ func NewCacheFilter(p map[string]string) (Filter, error) {
 	}
 	if v, ok := f.params["global"]; ok && v == "true" {
 		f.global = true
-		f.cache = utils.GetGlobalTTLMapInstance(5 * time.Minute).Cache
+		f.cache = utils.GetGlobalTTLMapInstance(f.syncTime).Cache
 	} else {
-		f.cache = utils.NewTTLMap(5 * time.Minute)
+		f.cache = utils.NewTTLMap(f.syncTime)
 	}
 
 	if v, ok := f.params["file"]; ok {
