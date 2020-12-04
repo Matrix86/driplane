@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"encoding/gob"
 	"fmt"
 	"os"
@@ -8,7 +9,7 @@ import (
 	"time"
 
 	"github.com/evilsocket/islazy/log"
-	"github.com/juju/fslock"
+	"github.com/gofrs/flock"
 )
 
 type item struct {
@@ -95,18 +96,21 @@ func (m *TTLMap) Get(k interface{}) (interface{}, bool) {
 }
 
 func (m *TTLMap) syncFile() error {
-	log.Debug("called!")
 	if m.filename == "" {
 		return nil
 	}
 
 	// Try to lock the file during the sync
-	lock := fslock.New(m.filename + ".lock")
-	err := lock.LockWithTimeout(m.gcdelay)
+	lock := flock.New(m.filename + ".lock")
+	lockCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	locked, err := lock.TryLockContext(lockCtx, 500*time.Millisecond)
 	if err != nil {
 		return fmt.Errorf("file locking: %s", err)
 	}
-	defer lock.Unlock()
+	if locked {
+		defer lock.Unlock()
+	}
 
 	file, err := os.Create(m.filename)
 	if err != nil {
@@ -144,12 +148,16 @@ func (m *TTLMap) SetPersistence(filename string) error {
 	}
 
 	// Try to lock the file during the sync
-	lock := fslock.New(filename)
-	err = lock.LockWithTimeout(m.gcdelay)
+	lock := flock.New(filename + ".lock")
+	lockCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	locked, err := lock.TryLockContext(lockCtx, 500*time.Millisecond)
 	if err != nil {
-		return err
+		return fmt.Errorf("file locking: %s", err)
 	}
-	defer lock.Unlock()
+	if locked {
+		defer lock.Unlock()
+	}
 
 	file, err := os.Open(filename)
 	if err != nil {
