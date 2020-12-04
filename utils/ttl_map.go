@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/evilsocket/islazy/log"
 	"github.com/juju/fslock"
 )
 
@@ -44,7 +45,10 @@ func NewTTLMap(gcdelay time.Duration) (m *TTLMap) {
 					delete(m.dict, k)
 				}
 			}
-			m.syncFile()
+			err := m.syncFile()
+			if err != nil {
+				log.Error("TTLMap syncFile: %s", err)
+			}
 			m.Unlock()
 		}
 	}()
@@ -90,6 +94,7 @@ func (m *TTLMap) Get(k interface{}) (interface{}, bool) {
 }
 
 func (m *TTLMap) syncFile() error {
+	log.Debug("called!")
 	if m.filename == "" {
 		return nil
 	}
@@ -111,6 +116,8 @@ func (m *TTLMap) syncFile() error {
 	if err := encoder.Encode(m.dict); err != nil {
 		return err
 	}
+
+	log.Debug("cache file synced : %s", m.filename)
 	return nil
 }
 
@@ -125,7 +132,7 @@ func (m *TTLMap) SetPersistence(filename string) error {
 
 	info, err := os.Stat(filename)
 	// file doesn't not exist or empty
-	if os.IsNotExist(err) || ( !info.IsDir() && info.Size() == 0 ) {
+	if os.IsNotExist(err) || (!info.IsDir() && info.Size() == 0) {
 		file, err := os.Create(filename)
 		if err != nil {
 			return err
