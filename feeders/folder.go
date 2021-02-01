@@ -6,6 +6,7 @@ import (
 	"github.com/evilsocket/islazy/log"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 // Folder is a Feeder that creates a stream from a folder
@@ -43,7 +44,11 @@ func NewFolderFeeder(conf map[string]string) (Feeder, error) {
 func (f *Folder) Start() {
 	go func() {
 		for event := range f.watcher.Events {
-			msg := data.NewMessage(path.Join(f.folderName, event.Name))
+			fileName := event.Name
+			if strings.Index(fileName, f.folderName) != 0 {
+				fileName = path.Join(f.folderName, fileName)
+			}
+			msg := data.NewMessage(fileName)
 			msg.SetExtra("op", event.Op.String())
 			f.Propagate(msg)
 		}
