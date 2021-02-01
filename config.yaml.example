@@ -6,9 +6,9 @@ general:
   debug: false
 
 twitter:
-  consumerKey: "",
-  consumerSecret: "",
-  accessToken: "",
-  accessSecret: "",
-  keywords: "#italy #coding #malware something",
+  consumerKey: ""
+  consumerSecret: ""
+  accessToken: ""
+  accessSecret: ""
+  keywords: "#italy #coding #malware something"
   stallWarnings: "true"
