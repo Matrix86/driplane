@@ -96,7 +96,8 @@ func main() {
 	if config.Get("general.log_path") != "" {
 		log.Output = config.Get("general.log_path")
 		if err := log.Open(); err != nil {
-			log.Fatal("log file opening: %v", err)
+			fmt.Printf("log file opening: %v\n", err)
+			os.Exit(1)
 		}
 		defer log.Close()
 	}
