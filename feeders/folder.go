@@ -1,12 +1,14 @@
 package feeders
 
 import (
-	"github.com/Matrix86/driplane/data"
-	"github.com/dietsche/rfsnotify"
-	"github.com/evilsocket/islazy/log"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/Matrix86/driplane/data"
+
+	"github.com/dietsche/rfsnotify"
+	"github.com/evilsocket/islazy/log"
 )
 
 // Folder is a Feeder that creates a stream from a folder
@@ -22,11 +24,11 @@ func NewFolderFeeder(conf map[string]string) (Feeder, error) {
 	f := &Folder{}
 
 	if val, ok := conf["folder.name"]; ok {
-		if full, err := filepath.Abs(val); err != nil {
+		full, err := filepath.Abs(val)
+		if err != nil {
 			return nil, err
-		} else {
-			f.folderName = full
 		}
+		f.folderName = full
 	}
 
 	if watcher, err := rfsnotify.NewWatcher(); err != nil {
