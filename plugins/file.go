@@ -3,6 +3,7 @@ package plugins
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 )
 
@@ -18,6 +19,27 @@ func GetFile() *FilePackage {
 type FileResponse struct {
 	Error  error
 	Status bool
+	Binary []byte
+	String string
+}
+
+func (c *FilePackage) Read(fileName string) FileResponse {
+	resp := FileResponse{}
+
+	resp.Binary, resp.Error = ioutil.ReadFile(fileName)
+	resp.Status = resp.Error == nil
+	resp.String = string(resp.Binary)
+
+	return resp
+}
+
+func (c *FilePackage) Write(fileName string, data []byte) FileResponse {
+	resp := FileResponse{}
+
+	resp.Error = ioutil.WriteFile(fileName, data, os.ModePerm)
+	resp.Status = resp.Error == nil
+
+	return resp
 }
 
 // Copy handles the copy of a file to another file
