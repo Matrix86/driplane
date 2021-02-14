@@ -60,15 +60,18 @@ func NewFolderFeeder(conf map[string]string) (Feeder, error) {
 		}
 	}
 
-	if watcher, err := cloudwatcher.New(f.serviceName, f.folderName, f.frequency); err != nil {
+	watcher, err := cloudwatcher.New(f.serviceName, f.folderName, f.frequency)
+	if err != nil {
 		return nil, fmt.Errorf("folder feeder: %s", err)
-	} else {
-		err := watcher.SetConfig(watcherConfig)
-		if err != nil {
-			return nil, fmt.Errorf("folder feeder: %s", err)
-		}
-		f.watcher = watcher
 	}
+
+	err = watcher.SetConfig(watcherConfig)
+	if err != nil {
+		return nil, fmt.Errorf("folder feeder: %s", err)
+	}
+	
+	f.watcher = watcher
+
 	return f, nil
 }
 
