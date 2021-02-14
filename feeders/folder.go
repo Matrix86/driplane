@@ -1,13 +1,15 @@
 package feeders
 
 import (
-	"path"
+	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/Matrix86/driplane/data"
+	"github.com/Matrix86/driplane/utils"
 
-	"github.com/dietsche/rfsnotify"
+	"github.com/Matrix86/cloudwatcher"
 	"github.com/evilsocket/islazy/log"
 )
 
@@ -15,44 +17,92 @@ import (
 type Folder struct {
 	Base
 
-	folderName string
-	watcher    *rfsnotify.RWatcher
+	folderName  string
+	serviceName string
+	frequency   time.Duration
+	stopChan    chan bool
+	watcher     cloudwatcher.Watcher
 }
 
 // NewFolderFeeder is the registered method to instantiate a FolderFeeder
 func NewFolderFeeder(conf map[string]string) (Feeder, error) {
-	f := &Folder{}
-
-	if val, ok := conf["folder.name"]; ok {
-		full, err := filepath.Abs(val)
-		if err != nil {
-			return nil, err
-		}
-		f.folderName = full
+	f := &Folder{
+		stopChan:  make(chan bool),
+		frequency: 2 * time.Second,
 	}
 
-	if watcher, err := rfsnotify.NewWatcher(); err != nil {
-		return nil, err
-	} else if err = watcher.AddRecursive(f.folderName); err != nil {
-		return nil, err
+	watcherConfig := make(map[string]string)
+
+	for k, v := range conf {
+		if k == "folder.name" {
+			f.folderName = v
+			// Get absolute path only if the service type is local (fsnotify)
+			if t, ok := conf["folder.type"]; ok && t == "local" {
+				full, err := filepath.Abs(v)
+				if err != nil {
+					return nil, err
+				}
+				f.folderName = full
+			}
+		} else if k == "folder.type" {
+			f.serviceName = v
+		} else if k == "folder.freq" {
+			d, err := time.ParseDuration(v)
+			if err != nil {
+				return nil, fmt.Errorf("specified frequency cannot be parsed '%s': %s", v, err)
+			}
+			f.frequency = d
+		} else if strings.HasPrefix(k, "folder.") {
+			splitted := strings.Split(k, ".")
+			if len(splitted) == 2 {
+				watcherConfig[splitted[1]] = v
+			}
+		}
+	}
+
+	if watcher, err := cloudwatcher.New(f.serviceName, f.folderName, f.frequency); err != nil {
+		return nil, fmt.Errorf("folder feeder: %s", err)
 	} else {
+		err := watcher.SetConfig(watcherConfig)
+		if err != nil {
+			return nil, fmt.Errorf("folder feeder: %s", err)
+		}
 		f.watcher = watcher
 	}
-
 	return f, nil
 }
 
 // Start propagates a message every time a new fs event happens in the folder
 func (f *Folder) Start() {
 	go func() {
-		for event := range f.watcher.Events {
-			fileName := event.Name
-			if strings.Index(fileName, f.folderName) != 0 {
-				fileName = path.Join(f.folderName, fileName)
+		err := f.watcher.Start()
+		if err != nil {
+			f.isRunning = false
+			log.Error("%s: %s", f.Name(), err)
+			return
+		}
+
+		for {
+			select {
+			case <-f.stopChan:
+				log.Debug("%s: stop arrived on the channel", f.Name())
+				return
+			case event := <-f.watcher.GetEvents():
+				log.Debug("received on folder feed : %#v", event)
+				fileName := event.Key
+				msg := data.NewMessage(fileName)
+				msg.SetExtra("op", event.TypeString())
+
+				// Set the object's properties as extra parameters
+				flat := utils.FlatStruct(event.Object)
+				for k, v := range flat {
+					msg.SetExtra(k, v)
+				}
+				f.Propagate(msg)
+
+			case err := <-f.watcher.GetErrors():
+				log.Error("%s: %s", f.Name(), err)
 			}
-			msg := data.NewMessage(fileName)
-			msg.SetExtra("op", event.Op.String())
-			f.Propagate(msg)
 		}
 	}()
 
@@ -63,6 +113,7 @@ func (f *Folder) Start() {
 func (f *Folder) Stop() {
 	log.Debug("feeder '%s' stream stop", f.Name())
 	f.watcher.Close()
+	f.stopChan <- true
 	f.isRunning = false
 }
 

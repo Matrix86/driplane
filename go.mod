@@ -3,6 +3,7 @@ module github.com/Matrix86/driplane
 go 1.13
 
 require (
+	github.com/Matrix86/cloudwatcher v1.0.0
 	github.com/alecthomas/participle v0.2.1
 	github.com/asaskevich/EventBus v0.0.0-20180315140547-d46933a94f05
 	github.com/cenkalti/backoff v2.1.1+incompatible // indirect
@@ -11,7 +12,6 @@ require (
 	github.com/dghubble/sling v1.2.0 // indirect
 	github.com/dietsche/rfsnotify v0.0.0-20200716145600-b37be6e4177f
 	github.com/evilsocket/islazy v1.10.6
-	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/gabriel-vasile/mimetype v1.1.1
 	github.com/gofrs/flock v0.8.0
 	github.com/google/go-querystring v1.0.0 // indirect
@@ -22,9 +22,8 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	github.com/slack-go/slack v0.7.1
-	github.com/stretchr/testify v1.3.0
-	golang.org/x/net v0.0.0-20181220203305-927f97764cc3
-	golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae // indirect
+	github.com/stretchr/testify v1.6.1
+	golang.org/x/net v0.0.0-20210119194325-5f4716e94777
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
