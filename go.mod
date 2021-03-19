@@ -3,7 +3,7 @@ module github.com/Matrix86/driplane
 go 1.13
 
 require (
-	github.com/Matrix86/cloudwatcher v1.1.3
+	github.com/Matrix86/cloudwatcher v1.1.2
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/alecthomas/participle v0.2.1
 	github.com/asaskevich/EventBus v0.0.0-20180315140547-d46933a94f05
@@ -26,7 +26,6 @@ require (
 	github.com/minio/minio-go/v7 v7.0.10 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
 	github.com/mmcdole/gofeed v1.0.0
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	github.com/slack-go/slack v0.7.1
 	github.com/stretchr/testify v1.6.1
