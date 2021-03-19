@@ -17,7 +17,7 @@ The feeder use [cloudwatcher](https://github.com/Matrix86/cloudwatcher) to keep 
 | Parameter | Type | Default | Description
  | --- | --- | --- | --- |
 | **name** | _STRING_ | empty | the path of the folder that it has to keep track |
-| **type** | _STRING_ | "local" | the type of service to use `local`, `dropbox`, `gdrive`, `s3` |
+| **type** | _STRING_ | "local" | the type of service to use `local`, `dropbox`, `gdrive`, `s3` or `git` |
 | **freq** | _[DURATION](https://golang.org/pkg/time/#ParseDuration)_ | 2s | how often the directory should be checked for updates |
 
 {{< alert theme="warning" >}}
