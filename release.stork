@@ -2,7 +2,7 @@
 
 git:changelog
 
-version:file "version.go"
+version:file "core/version.go"
 version:from_user
 
 git:create_tag $VERSION
