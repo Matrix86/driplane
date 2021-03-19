@@ -3,7 +3,7 @@ module github.com/Matrix86/driplane
 go 1.13
 
 require (
-	github.com/Matrix86/cloudwatcher v1.1.2
+	github.com/Matrix86/cloudwatcher v1.1.3
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/alecthomas/participle v0.2.1
 	github.com/asaskevich/EventBus v0.0.0-20180315140547-d46933a94f05
