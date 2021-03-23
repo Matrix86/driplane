@@ -3,7 +3,7 @@ module github.com/Matrix86/driplane
 go 1.13
 
 require (
-	github.com/Matrix86/cloudwatcher v1.1.3
+	github.com/Matrix86/cloudwatcher v1.1.5
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/alecthomas/participle v0.2.1
 	github.com/asaskevich/EventBus v0.0.0-20180315140547-d46933a94f05
@@ -30,11 +30,11 @@ require (
 	github.com/slack-go/slack v0.7.1
 	github.com/stretchr/testify v1.6.1
 	github.com/xanzy/ssh-agent v0.3.0 // indirect
-	golang.org/x/crypto v0.0.0-20210317152858-513c2a44f670 // indirect
+	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2 // indirect
 	golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4
-	golang.org/x/sys v0.0.0-20210319071255-635bc2c9138d // indirect
+	golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4 // indirect
 	google.golang.org/api v0.42.0 // indirect
-	google.golang.org/genproto v0.0.0-20210319143718-93e7006c17a6 // indirect
+	google.golang.org/genproto v0.0.0-20210322173543-5f0e89347f5a // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
