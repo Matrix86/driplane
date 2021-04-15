@@ -2,6 +2,7 @@ package filters
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -125,7 +126,10 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 	var req *http.Request
 	var err error
 
-	client := &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
 
 	urlString := ""
 	urlString, err = msg.ApplyPlaceholder(f.urlTemplate)
