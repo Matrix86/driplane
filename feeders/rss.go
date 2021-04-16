@@ -91,6 +91,13 @@ func (f *RSS) parseFeed() error {
 				f := elems.Field(i)
 				if f.Type().String() == "string" {
 					extra[strings.ToLower(typeOfT.Field(i).Name)] = f.Interface().(string)
+				} else if f.Type().String() == "[]string" {
+					slice := f.Interface().([]string)
+					quoted := make([]string, len(slice))
+					for x, v := range slice {
+						quoted[x] = fmt.Sprintf("'%s'", v)
+					}
+					extra[strings.ToLower(typeOfT.Field(i).Name)] = strings.Join(quoted, ",")
 				}
 			}
 
