@@ -215,6 +215,7 @@ func NewPipeRule(node *RuleNode, config *Configuration, filename string, deps []
 	return rule, nil
 }
 
+// GetIdentifier return the name with the file of the current Piperule
 func (p *PipeRule) GetIdentifier() string {
 	return strings.Join([]string{p.file, p.Name}, ":")
 }

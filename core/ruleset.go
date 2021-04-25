@@ -37,6 +37,7 @@ func RuleSetInstance() *Ruleset {
 	return instance
 }
 
+// CompileAst compiles the AST
 func (r *Ruleset) CompileAst(filename string, ast *AST, config *Configuration) ([]string, error) {
 	// file has been already compiled
 	if c, ok := r.compiledDeps[filename]; ok {
