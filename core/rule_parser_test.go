@@ -20,9 +20,12 @@ func TestNewParser(t *testing.T) {
 func TestParser_ParseFile(t *testing.T) {
 	type Test struct {
 		Name          string
-		Filename      string
-		CreateFile    bool
-		FileContent   string
+		Filename1      string
+		CreateFile1    bool
+		FileContent1   string
+		Filename2      string
+		CreateFile2    bool
+		FileContent2   string
 		ExpectedAST   *AST
 		ExpectedError string
 	}
@@ -30,9 +33,10 @@ func TestParser_ParseFile(t *testing.T) {
 	v1, v2, v3 := "value1", "value2", "{'k':'v'}"
 
 	tests := []Test{
-		{"FileNotExist", path.Join(os.TempDir(), "notexist"), false, "", nil, "open /tmp/notexist: no such file or directory"},
-		{"EmptyFile", path.Join(os.TempDir(), "test"), true, "", &AST{Rules: nil}, ""},
-		{"UnexpectedEOF", path.Join(os.TempDir(), "test"), true, "ident =>", nil, "<source>:0:0: unexpected \"<EOF>\" (expected <ident> ...)"},
+		{"FileNotExist", path.Join(os.TempDir(), "notexist"), false, "", "", false, "",nil, "parsing '/tmp/notexist': open /tmp/notexist: no such file or directory"},
+		{"EmptyFile", path.Join(os.TempDir(), "test"), true, "", "", false, "", &AST{Dependencies:map[string]*AST{}, Rules:[]*RuleNode(nil)}, ""},
+		{"UnexpectedEOF", path.Join(os.TempDir(), "test"), true, "ident =>", "", false, "", nil, "<source>:0:0: unexpected \"<EOF>\" (expected <ident> ...)"},
+		{"CyclicDep", path.Join(os.TempDir(), "test1"), true, "#import \"test1\"", path.Join(os.TempDir(), "test2"), true, "#import \"test2\"", nil, "can't parse import file '/tmp/test1': cyclic dependency on /tmp/test1"},
 		{
 			"ParseOk",
 			path.Join(os.TempDir(), "test"),
@@ -40,6 +44,7 @@ func TestParser_ParseFile(t *testing.T) {
 			"rule1 => <identifier: param1='value1', param2=\"value2\", param3=\"{'k':'v'}\">;\n" +
 				"# comment ignored\n" +
 				"rule2 => @rule1 | filter1(p1='value1',p2=\"value2\") | @anotherrule | ok();",
+			"", false, "",
 			&AST{
 				Rules: []*RuleNode{
 					&RuleNode{
@@ -120,26 +125,39 @@ func TestParser_ParseFile(t *testing.T) {
 						},
 					},
 				},
+				Dependencies:map[string]*AST{},
 			},
 			"",
 		},
 	}
 
 	for _, v := range tests {
-		if v.CreateFile {
-			file, err := os.Create(v.Filename)
+		if v.CreateFile1 {
+			file, err := os.Create(v.Filename1)
 			if err != nil {
 				t.Errorf("%s: cannot create a temporary file", v.Name)
 			}
-			defer os.Remove(v.Filename)
+			defer os.Remove(v.Filename1)
 
-			if _, err = file.Write([]byte(v.FileContent)); err != nil {
+			if _, err = file.Write([]byte(v.FileContent1)); err != nil {
+				t.Errorf("%s: can't write on file", v.Name)
+			}
+		}
+
+		if v.CreateFile2 {
+			file, err := os.Create(v.Filename2)
+			if err != nil {
+				t.Errorf("%s: cannot create a temporary file", v.Name)
+			}
+			defer os.Remove(v.Filename2)
+
+			if _, err = file.Write([]byte(v.FileContent2)); err != nil {
 				t.Errorf("%s: can't write on file", v.Name)
 			}
 		}
 
 		parser, _ := NewParser()
-		had, err := parser.ParseFile(v.Filename)
+		had, err := parser.ParseFile(v.Filename1)
 
 		if v.ExpectedError == "" && err != nil {
 			t.Errorf("%s: wrong error: expected=nil had=%#v", v.Name, err)
@@ -147,7 +165,7 @@ func TestParser_ParseFile(t *testing.T) {
 			t.Errorf("%s: wrong error: expected=%#v had=%#v", v.Name, v.ExpectedError, err.Error())
 		}
 
-		if assert.Equal(t, had, v.ExpectedAST) == false {
+		if assert.Equal(t, v.ExpectedAST, had) == false {
 			t.Errorf("%s: wrong AST: expected=%#v had=%#v", v.Name, v.ExpectedAST, had)
 		}
 	}

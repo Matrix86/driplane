@@ -11,7 +11,6 @@ import (
 	"github.com/Matrix86/driplane/core"
 	"github.com/Matrix86/driplane/utils"
 
-	"github.com/evilsocket/islazy/fs"
 	"github.com/evilsocket/islazy/log"
 	"github.com/evilsocket/islazy/tui"
 )
@@ -113,35 +112,15 @@ func main() {
 		}
 	}
 
-	parser, _ := core.NewParser()
-
-	ruleAsts := make(map[string]*core.AST)
-	err = fs.Glob(config.Get("general.rules_path"), "*.rule", func(file string) error {
-		ast, err := parser.ParseFile(file)
-		if err != nil {
-			log.Fatal("rule parsing: %s", err)
-		}
-		ruleAsts[file] = ast
-		return nil
-	})
+	o, err := core.NewOrchestrator(config)
 	if err != nil {
-		log.Fatal("rule directory enumeration: %s", err)
-	}
-
-	o, err := core.NewOrchestrator(ruleAsts, config)
-	if err != nil {
-		log.Fatal("Error %s", err)
+		log.Fatal("%s", err)
 	}
 
 	go Signal(&o)
 
 	log.Debug("Trying to start orchestrator")
 	o.StartFeeders()
-
-	//c := make(chan os.Signal)
-	//signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
-	//fmt.Println(<-c)
-
 	o.WaitFeeders()
 
 	log.Debug("Stopping")

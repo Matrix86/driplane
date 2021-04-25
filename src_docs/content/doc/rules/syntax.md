@@ -10,6 +10,15 @@ draft: false
 The syntax of the `driplane`'s rules is very simple. As for the BASH every filter's output is sent to the next filter's input concatenating the two of them with the `|` character.
 All the rules have to start with a name and end with a `;` char.
 
+### Import
+Using the directive `import` it is possible to include one or more files and their rules in another one. All the rules defined in an included file
+are available for the file that imports them.
+
+To use this directive the path of the file can be absolute or relative to the `rules directory` specified in the configuration:
+
+> Example:
+> `#import "file_to_import.rule"`
+
 ### Rule Name and Rule Call
 
 Each rule has to start with an identifier follow by `=>`. This identifier identifies _rule name_ and it could be used in another rule to concatenate 2 rules together.

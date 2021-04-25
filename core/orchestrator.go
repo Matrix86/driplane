@@ -2,10 +2,12 @@ package core
 
 import (
 	"fmt"
+	"path/filepath"
 	"sync"
 
 	"github.com/Matrix86/driplane/feeders"
 
+	"github.com/evilsocket/islazy/fs"
 	"github.com/evilsocket/islazy/log"
 )
 
@@ -19,23 +21,36 @@ type Orchestrator struct {
 }
 
 // NewOrchestrator create a new instance of the Orchestrator
-func NewOrchestrator(asts map[string]*AST, config *Configuration) (Orchestrator, error) {
-	o := Orchestrator{}
-
-	o.asts = asts
-	o.config = config
-
-	for file, ast := range asts {
-		for _, rn := range ast.Rules {
-			//pp.Println(rn)
-			err := RuleSetInstance().AddRule(rn, o.config)
-			if err != nil {
-				err = fmt.Errorf("file '%s': %s", file, err)
-				return o, err
-			}
-		}
+func NewOrchestrator(config *Configuration) (Orchestrator, error) {
+	o := Orchestrator{
+		config: config,
+		asts: make(map[string]*AST),
 	}
 
+	parser, _ := NewParser()
+
+	err := fs.Glob(config.Get("general.rules_path"), "*.rule", func(file string) error {
+		abs, err := filepath.Abs(file)
+		if err != nil {
+			log.Fatal("cannot get absolute path of %s: %s", file, err)
+		}
+		file = abs
+		log.Info("parsing rule file: %s", file)
+		ast, err := parser.ParseFile(file)
+		if err != nil {
+			log.Fatal("rule parsing: file '%s': %s", file, err)
+		}
+		o.asts[file] = ast
+
+		_, err = RuleSetInstance().CompileAst(file, ast, o.config)
+		if err != nil {
+			return fmt.Errorf("compilation of '%s': %s", file, err)
+		}
+		return nil
+	})
+	if err != nil {
+		return o, fmt.Errorf("%s", err)
+	}
 	return o, nil
 }
 

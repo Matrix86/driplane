@@ -1,11 +1,17 @@
 package core
 
 import (
+	"fmt"
+	"github.com/evilsocket/islazy/log"
 	"io/ioutil"
+	"path/filepath"
+	"regexp"
 
 	"github.com/alecthomas/participle"
 	"github.com/alecthomas/participle/lexer"
 )
+
+var importRegexp = regexp.MustCompile(`(?m)^#import\s+"([^"]+)"\s*$`)
 
 // A custom regexp lexer
 var ruleLexer = lexer.Must(lexer.Regexp(
@@ -21,7 +27,8 @@ var ruleLexer = lexer.Must(lexer.Regexp(
 
 // AST defines a set of Rules
 type AST struct {
-	Rules []*RuleNode `@@*`
+	Dependencies map[string]*AST
+	Rules        []*RuleNode `@@*`
 }
 
 // RuleNode defines the first part of the Rule
@@ -79,7 +86,7 @@ type Value struct {
 
 // Parser handles the parsing of the rules
 type Parser struct {
-	handle *participle.Parser
+	handle     *participle.Parser
 }
 
 // NewParser creates a new Parser struct
@@ -98,16 +105,70 @@ func NewParser() (*Parser, error) {
 	return parser, nil
 }
 
-// ParseFile returns the AST of the input file
-func (p *Parser) ParseFile(filename string) (*AST, error) {
+func (p *Parser) extractImports(content string, relativeTo string) []string {
+	imports := make([]string, 0)
+	matches := importRegexp.FindAllStringSubmatch(content, -1)
+	if matches != nil {
+		for _, m := range matches {
+			f := filepath.Join(relativeTo, m[1])
+			imports = append(imports, f)
+		}
+	}
+	return imports
+}
+
+func (p *Parser) parseFile(filename string, deps []string) (*AST, error){
+	for _, i := range deps {
+		if i == filename {
+			return nil, fmt.Errorf("cyclic dependency on %s", filename)
+		}
+	}
+
 	ast := &AST{}
+	log.Debug("parsing %s", filename)
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parsing '%s': %s", filename, err)
 	}
+
+	// Parsing current file
 	err = p.handle.ParseBytes(content, ast)
 	if err != nil {
 		return nil, err
 	}
+
+	deps = append(deps, filename)
+
+	// init the map after ParseBytes to avoid overwriting
+	ast.Dependencies = make(map[string]*AST)
+	// preprocessing phase for imports
+	imports := p.extractImports(string(content), filepath.Dir(filename))
+	for _, f := range imports {
+		if !filepath.IsAbs(f) {
+			// path should be relative respect filename
+			abs, err := filepath.Abs(f)
+			if err != nil {
+				log.Error("getting abs path for '%s': %s", filename, abs)
+			}
+			f = abs
+		}
+
+		// avoid to parse imported file twice in the same file
+		if _, ok := ast.Dependencies[f]; ok {
+			return nil, fmt.Errorf("file '%s' has been imported twice", f)
+		}
+		i, err := p.parseFile(f, deps)
+		if err != nil {
+			return nil, fmt.Errorf("can't parse import file '%s': %s", f, err)
+		}
+		ast.Dependencies[f] = i
+	}
+
 	return ast, nil
+}
+
+// ParseFile fills the map with all the ASTs parsed from the input file
+func (p *Parser) ParseFile(filename string) (*AST, error) {
+	deps := make([]string, 0)
+	return p.parseFile(filename, deps)
 }
