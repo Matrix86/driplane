@@ -1,6 +1,7 @@
 package data
 
-const EVENT_TOPIC_NAME = "#EVENT_TYPE#"
+// EventTopicName name of the topic on the bus
+const EventTopicName = "#EVENT_TYPE#"
 
 // Event contains the info about what just happened
 type Event struct {

@@ -106,6 +106,6 @@ func (o *Orchestrator) StopFeeders() {
 	}
 
 	// sending a shutdown event on the bus
-	rs.bus.Publish(data.EVENT_TOPIC_NAME, &data.Event{Type: "shutdown"})
+	rs.bus.Publish(data.EventTopicName, &data.Event{Type: "shutdown"})
 	rs.bus.WaitAsync()
 }

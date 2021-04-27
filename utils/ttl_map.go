@@ -212,6 +212,7 @@ func (m *TTLMap) SetPersistence(filename string) error {
 	return nil
 }
 
+// Close is closing the map
 func (m *TTLMap) Close() {
 	if m.dict == nil {
 		return

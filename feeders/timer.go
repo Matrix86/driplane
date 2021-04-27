@@ -69,7 +69,7 @@ func (f *Timer) Stop() {
 }
 
 // OnEvent is called when an event occurs
-func (s *Timer) OnEvent(event *data.Event) {}
+func (f *Timer) OnEvent(event *data.Event) {}
 
 // Auto factory adding
 func init() {

@@ -112,7 +112,7 @@ func (p *PipeRule) addNode(node *Node, prev string) error {
 			}
 		}
 
-		err = rs.bus.SubscribeAsync(data.EVENT_TOPIC_NAME, f.OnEvent, false)
+		err = rs.bus.SubscribeAsync(data.EventTopicName, f.OnEvent, false)
 		if err != nil {
 			return err
 		}
@@ -214,7 +214,7 @@ func NewPipeRule(node *RuleNode, config *Configuration, filename string, deps []
 		}
 		
 		// Adding the feeder node to the event bus 
-		rs.bus.SubscribeAsync(data.EVENT_TOPIC_NAME, f.OnEvent, false)
+		rs.bus.SubscribeAsync(data.EventTopicName, f.OnEvent, false)
 	} else { // It doesn't start with a feeder
 		if err := rule.addNode(node.First, ""); err != nil {
 			return nil, err
