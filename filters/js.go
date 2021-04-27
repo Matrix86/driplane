@@ -118,6 +118,9 @@ func (f *Js) DoFilter(msg *data.Message) (bool, error) {
 	return triggered, nil
 }
 
+// OnEvent is called when an event occurs
+func (f *Js) OnEvent(event *data.Event){}
+
 // Set the name of the filter
 func init() {
 	register("js", NewJsFilter)

@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/Matrix86/driplane/data"
 	"strconv"
 	"strings"
 
@@ -111,6 +112,11 @@ func (p *PipeRule) addNode(node *Node, prev string) error {
 			}
 		}
 
+		err = rs.bus.SubscribeAsync(data.EVENT_TOPIC_NAME, f.OnEvent, false)
+		if err != nil {
+			return err
+		}
+
 		p.nodes = append(p.nodes, f)
 
 		return p.addNode(node.Filter.Next, f.GetIdentifier())
@@ -206,6 +212,9 @@ func NewPipeRule(node *RuleNode, config *Configuration, filename string, deps []
 		if err := rule.addNode(next, f.GetIdentifier()); err != nil {
 			return nil, err
 		}
+		
+		// Adding the feeder node to the event bus 
+		rs.bus.SubscribeAsync(data.EVENT_TOPIC_NAME, f.OnEvent, false)
 	} else { // It doesn't start with a feeder
 		if err := rule.addNode(node.First, ""); err != nil {
 			return nil, err

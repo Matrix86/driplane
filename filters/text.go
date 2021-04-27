@@ -107,6 +107,9 @@ func (f *Text) DoFilter(msg *data.Message) (bool, error) {
 	return found, nil
 }
 
+// OnEvent is called when an event occurs
+func (f *Text) OnEvent(event *data.Event){}
+
 // Set the name of the filter
 func init() {
 	register("text", NewTextFilter)

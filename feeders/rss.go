@@ -155,6 +155,9 @@ func (f *RSS) Stop() {
 	f.isRunning = false
 }
 
+// OnEvent is called when an event occurs
+func (f *RSS) OnEvent(event *data.Event) {}
+
 // Auto factory adding
 func init() {
 	register("rss", NewRSSFeeder)

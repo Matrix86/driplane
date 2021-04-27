@@ -24,6 +24,7 @@ type Feeder interface {
 	Stop()
 	IsRunning() bool
 	GetIdentifier() string
+	OnEvent(e *data.Event)
 }
 
 // Base is inherited from the feeders

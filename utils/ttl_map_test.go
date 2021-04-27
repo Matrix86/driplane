@@ -19,7 +19,7 @@ func TestDeleteOnGC(t *testing.T) {
 	m := NewTTLMap(gc)
 	m.Put("key", "value", 0)
 	l := len(m.dict)
-	time.Sleep(1001*time.Millisecond)
+	time.Sleep(1010*time.Millisecond)
 	if _, ok := m.dict["key"]; ok {
 		t.Errorf("the expired key has not been removed")
 	}
@@ -154,5 +154,20 @@ func TestTTLMap_SetPersistence(t *testing.T) {
 	v, ok := m2.Get("test")
 	if ok && v.(string) != "test" {
 		t.Errorf("wrong value: %s", v)
+	}
+}
+
+func TestTTLMap_Close(t *testing.T) {
+	m := NewTTLMap(1*time.Second)
+	err := m.SetPersistence("/tmp/ttl_map_cache.data")
+	if err != nil {
+		t.Errorf("wrong error: %s", err)
+	}
+
+	m.Close()
+
+	err = m.SetPersistence("/aaa/ttl_map_cache.data")
+	if err == nil || err.Error() != "map has been closed" {
+		t.Errorf("wrong error: expected %s had %s", "map has been closed", err)
 	}
 }

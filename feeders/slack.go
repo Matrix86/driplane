@@ -370,6 +370,9 @@ func (s *Slack) Stop() {
 	s.isRunning = false
 }
 
+// OnEvent is called when an event occurs
+func (s *Slack) OnEvent(event *data.Event) {}
+
 // Auto factory adding
 func init() {
 	register("slack", NewSlackFeeder)

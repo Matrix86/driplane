@@ -234,6 +234,9 @@ func (t *Twitter) Stop() {
 	t.isRunning = false
 }
 
+// OnEvent is called when an event occurs
+func (t *Twitter) OnEvent(event *data.Event) {}
+
 // Auto factory adding
 func init() {
 	register("twitter", NewTwitterFeeder)

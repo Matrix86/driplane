@@ -92,6 +92,9 @@ func (f *Format) DoFilter(msg *data.Message) (bool, error) {
 	return true, nil
 }
 
+// OnEvent is called when an event occurs
+func (f *Format) OnEvent(event *data.Event){}
+
 // Set the name of the filter
 func init() {
 	register("format", NewFormatFilter)

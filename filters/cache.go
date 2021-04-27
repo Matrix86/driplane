@@ -100,6 +100,13 @@ func (f *Cache) DoFilter(msg *data.Message) (bool, error) {
 	return false, nil
 }
 
+// OnEvent is called when an event occurs
+func (f *Cache) OnEvent(event *data.Event) {
+	if event.Type == "shutdown" {
+		f.cache.Close()
+	}
+}
+
 // Set the name of the filter
 func init() {
 	register("cache", NewCacheFilter)

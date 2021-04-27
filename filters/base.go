@@ -30,6 +30,7 @@ type Filter interface {
 	Pipe(msg *data.Message)
 	GetIdentifier() string
 	Log(format string, args ...interface{})
+	OnEvent(e *data.Event)
 }
 
 // Base is inherited from the feeders

@@ -98,6 +98,9 @@ func (f *URL) DoFilter(msg *data.Message) (bool, error) {
 	return found, nil
 }
 
+// OnEvent is called when an event occurs
+func (f *URL) OnEvent(event *data.Event){}
+
 // Set the name of the filter
 func init() {
 	register("url", NewURLFilter)

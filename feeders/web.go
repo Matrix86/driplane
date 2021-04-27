@@ -227,6 +227,9 @@ func (f *Web) Stop() {
 	f.isRunning = false
 }
 
+// OnEvent is called when an event occurs
+func (f *Web) OnEvent(event *data.Event) {}
+
 // Auto factory adding
 func init() {
 	register("web", NewWebFeeder)

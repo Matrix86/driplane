@@ -332,6 +332,9 @@ func (f *Slack) DoFilter(msg *data.Message) (bool, error) {
 	return true, nil
 }
 
+// OnEvent is called when an event occurs
+func (f *Slack) OnEvent(event *data.Event){}
+
 // Set the name of the filter
 func init() {
 	register("slack", NewSlackFilter)

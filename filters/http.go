@@ -229,6 +229,9 @@ func (f *HTTP) readBody(r *http.Response) interface{} {
 	return body
 }
 
+// OnEvent is called when an event occurs
+func (f *HTTP) OnEvent(event *data.Event){}
+
 // Set the name of the filter
 func init() {
 	register("http", NewHTTPFilter)

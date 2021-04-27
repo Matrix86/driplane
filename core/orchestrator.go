@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/Matrix86/driplane/data"
 	"path/filepath"
 	"sync"
 
@@ -103,4 +104,8 @@ func (o *Orchestrator) StopFeeders() {
 			log.Debug("[%s] Stopped %s", rulename, f.Name())
 		}
 	}
+
+	// sending a shutdown event on the bus
+	rs.bus.Publish(data.EVENT_TOPIC_NAME, &data.Event{Type: "shutdown"})
+	rs.bus.WaitAsync()
 }

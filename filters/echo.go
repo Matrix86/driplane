@@ -46,6 +46,9 @@ func (f *Echo) DoFilter(msg *data.Message) (bool, error) {
 	return true, nil
 }
 
+// OnEvent is called when an event occurs
+func (f *Echo) OnEvent(event *data.Event){}
+
 // Set the name of the filter
 func init() {
 	register("echo", NewEchoFilter)

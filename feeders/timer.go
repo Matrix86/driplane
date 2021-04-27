@@ -68,6 +68,9 @@ func (f *Timer) Stop() {
 	f.isRunning = false
 }
 
+// OnEvent is called when an event occurs
+func (s *Timer) OnEvent(event *data.Event) {}
+
 // Auto factory adding
 func init() {
 	register("timer", NewTimerFeeder)

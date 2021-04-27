@@ -80,6 +80,9 @@ func (f *File) Stop() {
 	f.isRunning = false
 }
 
+// OnEvent is called when an event occurs
+func (f *File) OnEvent(event *data.Event) {}
+
 // Auto factory adding
 func init() {
 	register("file", NewFileFeeder)

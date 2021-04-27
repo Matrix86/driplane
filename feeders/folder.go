@@ -134,6 +134,9 @@ func (f *Folder) Stop() {
 	f.isRunning = false
 }
 
+// OnEvent is called when an event occurs
+func (f *Folder) OnEvent(event *data.Event) {}
+
 // Auto factory adding
 func init() {
 	register("folder", NewFolderFeeder)

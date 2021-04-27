@@ -104,6 +104,9 @@ func (f *Hash) DoFilter(msg *data.Message) (bool, error) {
 	return false, nil
 }
 
+// OnEvent is called when an event occurs
+func (f *Hash) OnEvent(event *data.Event){}
+
 // Set the name of the filter
 func init() {
 	register("hash", NewHashFilter)

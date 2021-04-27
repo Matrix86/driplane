@@ -57,6 +57,9 @@ func (f *Changed) DoFilter(msg *data.Message) (bool, error) {
 	return false, nil
 }
 
+// OnEvent is called when an event occurs
+func (f *Changed) OnEvent(event *data.Event){}
+
 // Set the name of the filter
 func init() {
 	register("changed", NewChangedFilter)
