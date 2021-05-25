@@ -2,6 +2,13 @@
   <img src="https://github.com/Matrix86/driplane/blob/gh-pages/logo.png"/>
 </p>
 
+
+<p align="center">
+  <a href="https://www.buymeacoffee.com/mtx86">
+    <img src="https://img.shields.io/badge/Buy me a-%F0%9F%8D%BA%20beer-blue?logo=beer&style=for-the-badge&color=grey&logoColor=white&labelColor=blue">
+  </a>
+</p>
+
 # Driplane ![License](https://img.shields.io/github/license/Matrix86/driplane) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/Matrix86/driplane) ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Matrix86/driplane/Build%20and%20Test/master) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Matrix86/driplane?color=red) ![Codecov](https://img.shields.io/codecov/c/github/Matrix86/driplane) 
 
 `Driplane` allows you to create an automatic alerting system or start automated tasks triggered by events.
