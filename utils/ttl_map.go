@@ -25,12 +25,14 @@ func (i *item) expired() bool {
 type TTLMap struct {
 	sync.RWMutex
 
-	filename string
-	dict     map[interface{}]*item
-	gcdelay  time.Duration
-	ticker   *time.Ticker
-	close    chan bool
-	wg       sync.WaitGroup
+	filename  string
+	dict      map[interface{}]*item
+	gcdelay   time.Duration
+	ticker    *time.Ticker
+	close     chan bool
+	wg        sync.WaitGroup
+	closing   bool
+	closeLock sync.Mutex
 }
 
 // NewTTLMap creates a TTLMap instance
@@ -214,9 +216,17 @@ func (m *TTLMap) SetPersistence(filename string) error {
 
 // Close is closing the map
 func (m *TTLMap) Close() {
+	m.closeLock.Lock()
+	defer m.closeLock.Unlock()
+	if m.closing {
+		return
+	}
+	m.closing = true
+
 	if m.dict == nil {
 		return
 	}
+
 	m.close <- true
 	// waiting the cleaning close
 	m.wg.Wait()
