@@ -1,5 +1,5 @@
 ---
-weight: 12
+weight: 17
 title: "Striptag"
 date: 2021-07-01T22:38:02+02:00
 draft: false
