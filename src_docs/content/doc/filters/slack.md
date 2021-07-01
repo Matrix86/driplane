@@ -1,5 +1,4 @@
 ---
-weight: 16
 title: "Slack"
 date: 2020-10-12T19:38:02+02:00
 draft: false
