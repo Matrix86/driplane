@@ -13,4 +13,4 @@
 # RuleFile => <file: filename="/var/log/system.log"> | echo();
 
 # get events from a folder
-RuleFolder => <folder: name="/tmp"> | echo();
+RuleFolder => <folder: name="/tmp", type="local"> | echo();
