@@ -12,5 +12,5 @@
 # "tail -f" on a file and filtering urls
 # RuleFile => <file: filename="/var/log/system.log"> | echo();
 
-# get events from a folder
-RuleFolder => <folder: name="/tmp", type="local"> | echo();
+# get events from a folder and print file contents
+RuleFolder => <folder: name="/tmp", type="local"> | file() | echo();
