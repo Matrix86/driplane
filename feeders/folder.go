@@ -93,26 +93,28 @@ func (f *Folder) Start() {
 			case event := <-f.watcher.GetEvents():
 				log.Debug("received on folder feed : %#v", event)
 				// check if the watcher is on a git repository and it is checking the commit/tag instead of files
-				if v, ok := f.watcherConfig["monitor_type"]; ok && v == "repo" && f.serviceName == "git" {
-					for _, c := range event.Object.(*cloudwatcher.GitObject).Commits {
-						msg := data.NewMessage(c.Message)
-						msg.SetExtra("git_event_type", event.Key)
-						flat := utils.FlatStruct(event.Object)
-						for k, v := range flat {
-							msg.SetExtra(strings.Join([]string{"git", k}, "_"), v)
-						}
-						f.Propagate(msg)
-					}
-				} else {
-					fileName := event.Key
-					msg := data.NewMessage(fileName)
-					msg.SetExtra("op", event.TypeString())
-					msg.SetExtra("git_event_type", "file")
-
-					// Set the object's properties as extra parameters
-					flat := utils.FlatStruct(event.Object)
+				msg := data.NewMessage("")
+				flat := utils.FlatStruct(event.Object)
+				if f.serviceName == "git" {
 					for k, v := range flat {
 						msg.SetExtra(strings.Join([]string{"git", k}, "_"), v)
+					}
+
+					if v, ok := f.watcherConfig["monitor_type"]; ok && v == "repo" {
+						for _, c := range event.Object.(*cloudwatcher.GitObject).Commits {
+							msg.SetMessage(c.Message)
+							msg.SetExtra("git_event_type", event.Key)
+						}
+					} else {
+						fileName := event.Key
+						msg.SetMessage(fileName)
+						msg.SetExtra("op", event.TypeString())
+						msg.SetExtra("git_event_type", "file")
+					}
+					f.Propagate(msg)
+				} else {
+					for k, v := range flat {
+						msg.SetExtra(k, v)
 					}
 					f.Propagate(msg)
 				}
