@@ -11,11 +11,13 @@ require (
 	github.com/dghubble/go-twitter v0.0.0-20190305084156-0022a70e9bee
 	github.com/dghubble/oauth1 v0.5.0
 	github.com/dghubble/sling v1.2.0 // indirect
+	github.com/elastic/go-elasticsearch/v7 v7.14.0 // indirect
 	github.com/evilsocket/islazy v1.10.6
 	github.com/gabriel-vasile/mimetype v1.1.1
 	github.com/gofrs/flock v0.8.0
 	github.com/golang/protobuf v1.5.1 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
+	github.com/google/uuid v1.2.0 // indirect
 	github.com/hpcloud/tail v1.0.0
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 // indirect
