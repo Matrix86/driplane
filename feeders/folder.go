@@ -95,6 +95,8 @@ func (f *Folder) Start() {
 				// check if the watcher is on a git repository and it is checking the commit/tag instead of files
 				msg := data.NewMessage("")
 				flat := utils.FlatStruct(event.Object)
+				msg.SetExtra("folder_service", f.serviceName)
+				msg.SetExtra("folder_event", event.TypeString())
 				if f.serviceName == "git" {
 					if v, ok := f.watcherConfig["monitor_type"]; ok && v == "repo" {
 						for _, c := range event.Object.(*cloudwatcher.GitObject).Commits {
