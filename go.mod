@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	cloud.google.com/go v0.94.1 // indirect
-	github.com/Matrix86/cloudwatcher v1.1.6
+	github.com/Matrix86/cloudwatcher v1.1.7
 	github.com/ProtonMail/go-crypto v0.0.0-20210707164159-52430bf6b52c // indirect
 	github.com/alecthomas/participle v0.2.1
 	github.com/asaskevich/EventBus v0.0.0-20180315140547-d46933a94f05
