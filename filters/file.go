@@ -2,6 +2,7 @@ package filters
 
 import (
 	"io/ioutil"
+	"os"
 
 	"github.com/Matrix86/driplane/data"
 )
@@ -20,13 +21,19 @@ func NewFileFilter(p map[string]string) (Filter, error) {
 
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *File) DoFilter(msg *data.Message) (bool, error) {
-	path := msg.GetMessage().(string)
-	if data, err := ioutil.ReadFile(path); err != nil {
-		return true, err
-	} else {
-		msg.SetMessage(string(data))
-		return true, nil
+	// if the message data is a string
+	if path, ok := msg.GetMessage().(string); ok {
+		// if the path exists and it's a file
+		if stat, err := os.Stat(path); err == nil && !stat.IsDir() {
+			if data, err := ioutil.ReadFile(path); err != nil {
+				return true, err
+			} else {
+				msg.SetMessage(string(data))
+				return true, nil
+			}
+		}
 	}
+	return false, nil
 }
 
 // OnEvent is called when an event occurs
