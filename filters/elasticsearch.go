@@ -56,11 +56,11 @@ func NewElasticSearchFilter(p map[string]string) (Filter, error) {
 	}
 
 	if v, ok := f.params["retries"]; ok {
-		if n, err := strconv.Atoi(v); err != nil {
+		n, err := strconv.Atoi(v)
+		if err != nil {
 			return nil, err
-		} else {
-			f.retries = n
 		}
+		f.retries = n
 	}
 
 	return f, nil
@@ -91,10 +91,9 @@ func (f *ElasticSearch) connect() (err error) {
 			defer res.Body.Close()
 			if res.IsError() {
 				return fmt.Errorf("error getting information from ES cluster: %v", res)
-			} else {
-				log.Debug("%+v", res)
-				return nil
 			}
+			log.Debug("%+v", res)
+			return nil
 		}
 	}
 

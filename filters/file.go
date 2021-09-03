@@ -21,12 +21,12 @@ func NewFileFilter(p map[string]string) (Filter, error) {
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *File) DoFilter(msg *data.Message) (bool, error) {
 	path := msg.GetMessage().(string)
-	if data, err := ioutil.ReadFile(path); err != nil {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
 		return true, err
-	} else {
-		msg.SetMessage(string(data))
-		return true, nil
 	}
+	msg.SetMessage(string(data))
+	return true, nil
 }
 
 // OnEvent is called when an event occurs
