@@ -27,12 +27,12 @@ func (f *File) DoFilter(msg *data.Message) (bool, error) {
 		// if the path exists and it's a file
 		if stat, err := os.Stat(path); err == nil && !stat.IsDir() {
 			log.Debug("path='%s' size=%d extra=%v", path, stat.Size(), msg.GetExtra())
-			if data, err := ioutil.ReadFile(path); err != nil {
+			readData, err := ioutil.ReadFile(path)
+			if err != nil {
 				return true, err
-			} else {
-				msg.SetMessage(string(data))
-				return true, nil
 			}
+			msg.SetMessage(string(readData))
+			return true, nil
 		}
 	}
 	return false, nil
