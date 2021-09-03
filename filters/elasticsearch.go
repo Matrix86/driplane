@@ -2,6 +2,7 @@ package filters
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"strconv"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	elasticsearch "github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/evilsocket/islazy/log"
-	guuid "github.com/google/uuid"
 )
 
 // ElasticSearch is a filter that imports JSON documents in an Elastsic Search database.
@@ -108,11 +108,15 @@ func (f *ElasticSearch) DoFilter(msg *data.Message) (bool, error) {
 		}
 	}
 
-	docID := guuid.New().String()
+	rawJSON := msg.GetMessage().(string)
+	// make the document id contents dependent so that if we have multiple
+	// events for the same object we're not going to create duplicate events
+	docID := fmt.Sprintf("%s", sha256.Sum256([]byte(rawJSON)))
+
 	req := esapi.IndexRequest{
 		Index:      f.index,
 		DocumentID: docID,
-		Body:       strings.NewReader(msg.GetMessage().(string)),
+		Body:       strings.NewReader(rawJSON),
 		Refresh:    "true",
 	}
 	log.Debug("IndexRequest: %#v", req)

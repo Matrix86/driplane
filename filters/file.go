@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Matrix86/driplane/data"
+	"github.com/evilsocket/islazy/log"
 )
 
 // File is a filter that interprets the input Message as a file path, reads it and prints it.
@@ -25,6 +26,7 @@ func (f *File) DoFilter(msg *data.Message) (bool, error) {
 	if path, ok := msg.GetMessage().(string); ok {
 		// if the path exists and it's a file
 		if stat, err := os.Stat(path); err == nil && !stat.IsDir() {
+			log.Debug("path='%s' size=%d extra=%v", path, stat.Size(), msg.GetExtra())
 			if data, err := ioutil.ReadFile(path); err != nil {
 				return true, err
 			} else {
