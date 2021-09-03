@@ -96,23 +96,26 @@ func (f *Folder) Start() {
 				msg := data.NewMessage("")
 				flat := utils.FlatStruct(event.Object)
 				if f.serviceName == "git" {
-					for k, v := range flat {
-						msg.SetExtra(strings.Join([]string{"git", k}, "_"), v)
-					}
-
 					if v, ok := f.watcherConfig["monitor_type"]; ok && v == "repo" {
 						for _, c := range event.Object.(*cloudwatcher.GitObject).Commits {
-							msg.SetMessage(c.Message)
+							msg := data.NewMessage(c.Message)
 							msg.SetExtra("git_event_type", event.Key)
+							for k, v := range flat {
+								msg.SetExtra(strings.Join([]string{"git", k}, "_"), v)
+							}
+							f.Propagate(msg)
 						}
 					} else {
-						fileName := event.Key
-						msg.SetMessage(fileName)
+						msg.SetMessage(event.Key)
 						msg.SetExtra("op", event.TypeString())
 						msg.SetExtra("git_event_type", "file")
+						for k, v := range flat {
+							msg.SetExtra(strings.Join([]string{"git", k}, "_"), v)
+						}
+						f.Propagate(msg)
 					}
-					f.Propagate(msg)
 				} else {
+					msg.SetMessage(event.Key)
 					for k, v := range flat {
 						msg.SetExtra(k, v)
 					}
