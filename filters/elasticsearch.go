@@ -111,7 +111,7 @@ func (f *ElasticSearch) DoFilter(msg *data.Message) (bool, error) {
 	rawJSON := msg.GetMessage().(string)
 	// make the document id contents dependent so that if we have multiple
 	// events for the same object we're not going to create duplicate events
-	docID := fmt.Sprintf("%s", sha256.Sum256([]byte(rawJSON)))
+	docID := fmt.Sprintf("%x", sha256.Sum256([]byte(rawJSON)))
 
 	req := esapi.IndexRequest{
 		Index:      f.index,
