@@ -12,7 +12,7 @@ require (
 	github.com/dghubble/go-twitter v0.0.0-20190305084156-0022a70e9bee
 	github.com/dghubble/oauth1 v0.5.0
 	github.com/dghubble/sling v1.2.0 // indirect
-	github.com/elastic/go-elasticsearch/v7 v7.14.0 // indirect
+	github.com/elastic/go-elasticsearch/v7 v7.14.0
 	github.com/evilsocket/islazy v1.10.6
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.1.1

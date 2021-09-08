@@ -19,7 +19,8 @@ Based on [slack-go/slack](https://github.com/slack-go/slack)
  | **token** | _STRING_ | empty | token Bot (starting with xoxb-*) |
  | **verification_token** | _STRING_ | empty | token to verify the requests (you can find it in the Basic information section) |
  | **addr** | _STRING_ | ":3000" | address and port in the form IP:PORT |
- | **lt_enable** | _STRING_ | empty | enable localtunnel for the server |
+ | **lt_enable** | _BOOL_ | false | enable localtunnel for the server |
+ | **lt_baseurl** | _STRING_ | "https://localtunnel.me" | URL to the Proxy server |
  | **lt_subdomain** | _STRING_ | empty | specify a subdomain to use with localtunnel |
  | **events** | _STRING_ | *events | comma separated event list to handle |
  | **ignore_bot** | _BOOL_ | true | if true the bot will ignore mentions and messages created by another bot |

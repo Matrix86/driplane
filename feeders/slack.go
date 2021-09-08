@@ -30,6 +30,7 @@ type Slack struct {
 	addr              string
 	enableLocalTunnel bool
 	ltSubdomain       string
+	ltBaseURL         string
 	port              int
 	events            map[string]bool
 	ignoreBot         bool
@@ -85,6 +86,9 @@ func NewSlackFeeder(conf map[string]string) (Feeder, error) {
 	}
 	if val, ok := conf["slack.lt_enable"]; ok && val == "true" {
 		s.enableLocalTunnel = true
+	}
+	if val, ok := conf["slack.lt_baseurl"]; ok {
+		s.ltBaseURL = val
 	}
 	if val, ok := conf["slack.lt_subdomain"]; ok {
 		s.ltSubdomain = val
@@ -316,6 +320,9 @@ func (s *Slack) startEventsEndpoint() {
 		if s.enableLocalTunnel {
 			opts := localtunnel.Options{
 				Subdomain: s.ltSubdomain,
+			}
+			if s.ltBaseURL != "" {
+				opts.BaseURL = s.ltBaseURL
 			}
 			tunnel, err := localtunnel.Listen(opts)
 			if err != nil {
