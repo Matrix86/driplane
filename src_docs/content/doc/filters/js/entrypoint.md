@@ -36,7 +36,7 @@ The method used on `function` parameter can return a JS object containing at lea
 If this field has been set to true, the `Message` will be sent to the next filter, otherwise if the `filtered` field has been set to false, the filter will drop the Message.
 
 We would change the fields of the `Message`, and to do that we can use the `data` field in the returned object.
-It should be an associative array and it will be mapped in a map[string]string object in the Go env. 
+It could be an associative array or an array of associative array (for multiple messages to send through the pipeline) and it will be mapped in a map[string]string/[]map[string] object in the Go env. 
 The key of the array's row is the name of the field to add or change, while the value is the string that field's Message will contain after the return.
 
 ```javascript
@@ -47,6 +47,24 @@ function Entry(mainData, extra, params) {
             "main": "main field of the input Message changed",
             "new_field": "new_field will be added as Message's extra field"
         }
+    };
+}
+```
+
+```javascript
+function Entry(mainData, extra, params) {
+    return {
+        "filtered": true,
+        "data": [
+            {
+                "main": "main field of the input Message changed",
+                "new_field": "new_field will be added as Message's extra field"
+            },
+            {
+                "main": "main field of the secondo Message",
+                "new_field": "new_field will be added as Message's extra field"
+            },
+        ]
     };
 }
 ```

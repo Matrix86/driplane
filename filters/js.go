@@ -69,6 +69,24 @@ func NewJsFilter(p map[string]string) (Filter, error) {
 	return f, nil
 }
 
+func (f *Js) jsResponse2Msg(obj interface{}, msg *data.Message) {
+	switch t := obj.(type) {
+	case string:
+		msg.SetMessage(t)
+
+	case map[string]interface{}:
+		for key, vi := range t {
+			if value, ok := vi.(string); ok {
+				if key == "main" {
+					msg.SetMessage(value)
+				} else {
+					msg.SetExtra(key, value)
+				}
+			}
+		}
+	}
+}
+
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Js) DoFilter(msg *data.Message) (bool, error) {
 	triggered := false
@@ -93,21 +111,17 @@ func (f *Js) DoFilter(msg *data.Message) (bool, error) {
 
 				if triggered {
 					if v, ok := result["data"]; ok {
-						switch t := v.(type) {
-						case string:
-							msg.SetMessage(t)
-							msg.SetExtra("fulltext", text)
-
-						case map[string]interface{}:
-							for key, vi := range t {
-								if value, ok := vi.(string); ok {
-									if key == "data" {
-										msg.SetMessage(value)
-									} else {
-										msg.SetExtra(key, value)
-									}
-								}
+						if array, ok := v.([]map[string]interface {}); ok {
+							triggered = false // avoiding to send the original message more than once
+							for _, x := range array {
+								clone := msg.Clone()
+								f.jsResponse2Msg(x, clone)
+								clone.SetExtra("fulltext", text)
+								f.Propagate(clone)
 							}
+						} else {
+							f.jsResponse2Msg(v, msg)
+							msg.SetExtra("fulltext", text)
 						}
 					}
 				}
