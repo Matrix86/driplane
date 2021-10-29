@@ -138,5 +138,5 @@ The return value will be a JS object containing the following fields:
 
 | Prototype | Description |
 | --- | --- |
-| file.Put(key string, value string, ttl int64) | add the `value` in the cache using the key `key` and it will be deleted after `ttl` seconds |
-| file.Get(key string) | get the value stored in the cache with the key `key` |
+| cache.Put(key string, value string, ttl int64) | add the `value` in the cache using the key `key` and it will be deleted after `ttl` seconds |
+| cache.Get(key string) | get the value stored in the cache with the key `key` |
