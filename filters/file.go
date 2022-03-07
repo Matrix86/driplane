@@ -33,9 +33,8 @@ func (f *File) DoFilter(msg *data.Message) (bool, error) {
 			}
 			msg.SetMessage(string(readData))
 			return true, nil
-		} else {
-			log.Debug("%s is not a file", path)
 		}
+		log.Debug("%s is not a file", path)
 	}
 	return false, nil
 }
