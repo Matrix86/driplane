@@ -29,11 +29,11 @@ type RSS struct {
 // NewRSSFeeder is the registered method to instantiate a RSSFeeder
 func NewRSSFeeder(conf map[string]string) (Feeder, error) {
 	f := &RSS{
-		parser:      gofeed.NewParser(),
-		stopChan:    make(chan bool),
-		frequency:   60 * time.Second,
+		parser:        gofeed.NewParser(),
+		stopChan:      make(chan bool),
+		frequency:     60 * time.Second,
 		ignorePubDate: false,
-		lastParsing: time.Time{},
+		lastParsing:   time.Time{},
 	}
 
 	if val, ok := conf["rss.url"]; ok {
@@ -56,6 +56,15 @@ func NewRSSFeeder(conf map[string]string) (Feeder, error) {
 	return f, nil
 }
 
+func getPublishDate(item *gofeed.Item) *time.Time {
+	if item.PublishedParsed != nil {
+		return item.PublishedParsed
+	} else if item.UpdatedParsed != nil {
+		return item.UpdatedParsed
+	}
+	return nil
+}
+
 func (f *RSS) parseFeed() error {
 	var lastPubDate time.Time
 	log.Debug("Start RSS parsing: %s", f.url)
@@ -69,9 +78,10 @@ func (f *RSS) parseFeed() error {
 		extra := make(map[string]interface{})
 
 		//log.Debug("time : %s", item.PublishedParsed.Format("2006-01-02 15:04:05"))
+		pubdate := getPublishDate(item)
 
 		// send messages only if pubDate is setted
-		if f.ignorePubDate || (item.PublishedParsed != nil && f.lastParsing.Before(*item.PublishedParsed)) {
+		if f.ignorePubDate || (pubdate != nil && f.lastParsing.Before(*pubdate)) {
 			extra["feed_title"] = feed.Title
 			extra["feed_link"] = feed.Link
 			extra["feed_feedlink"] = feed.FeedLink
@@ -115,8 +125,8 @@ func (f *RSS) parseFeed() error {
 		}
 
 		// pubDate of the last rss item
-		if item.PublishedParsed != nil && lastPubDate.Before(*item.PublishedParsed) {
-			lastPubDate = *item.PublishedParsed
+		if pubdate != nil && lastPubDate.Before(*pubdate) {
+			lastPubDate = *pubdate
 		}
 	}
 
