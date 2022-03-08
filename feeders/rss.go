@@ -108,11 +108,19 @@ func (f *RSS) parseFeed() error {
 						quoted[x] = fmt.Sprintf("'%s'", v)
 					}
 					extra[strings.ToLower(typeOfT.Field(i).Name)] = strings.Join(quoted, ",")
+				} else if f.Type().String() == "*gofeed.Person" && f.Interface() != nil {
+					author := f.Interface().(*gofeed.Person)
+					if author != nil {
+						extra["author_name"] = author.Name
+						extra["author_email"] = author.Email
+					}
 				}
 			}
 
-			for k, v := range item.Custom {
-				extra[strings.ToLower(k)] = v
+			if item.Custom != nil {
+				for k, v := range item.Custom {
+					extra[strings.ToLower(k)] = v
+				}
 			}
 
 			main := ""
