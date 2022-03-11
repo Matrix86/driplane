@@ -22,9 +22,10 @@ type Apt struct {
 	distribution  string
 	indexURL      string
 	packageType   string
-	architecture string
+	architecture  string
 	frequency     time.Duration
-	insecure bool
+	insecure      bool
+	repo          *apt.Repository
 
 	stopChan chan bool
 	ticker   *time.Ticker
@@ -55,6 +56,7 @@ func NewAptFeeder(conf map[string]string) (Feeder, error) {
 	}
 	if val, ok := conf["apt.index"]; ok {
 		f.indexURL = val
+		f.url = val[:strings.LastIndex(val, "/")]
 	}
 	if val, ok := conf["apt.insecure"]; ok && val == "true" {
 		f.insecure = true
@@ -64,7 +66,7 @@ func NewAptFeeder(conf map[string]string) (Feeder, error) {
 	return f, nil
 }
 
-func getExtraFromPackage(item *apt.BinaryPackage) map[string]interface{} {
+func (f *Apt) getExtraFromPackage(item *apt.BinaryPackage) map[string]interface{} {
 	extra := make(map[string]interface{})
 	elems := reflect.ValueOf(item).Elem()
 	typeOfT := elems.Type()
@@ -82,6 +84,9 @@ func getExtraFromPackage(item *apt.BinaryPackage) map[string]interface{} {
 		} else if f.Type().String() == "int" {
 			extra[strings.ToLower(typeOfT.Field(i).Name)] = fmt.Sprintf("%d", f.Interface().(int))
 		}
+	}
+	if filename, ok := extra["filename"]; ok {
+		extra["link"] = fmt.Sprintf("%s/%s", f.url, filename)
 	}
 	return extra
 }
@@ -115,8 +120,9 @@ func (f *Apt) parseFeed() error {
 		return err
 	}
 	log.Debug("reading index file '%s'", repo.GetIndexURL())
+	f.indexURL = repo.GetIndexURL()
 	for _, item := range packages {
-		extra := getExtraFromPackage(&item)
+		extra := f.getExtraFromPackage(&item)
 		main := ""
 		if item.Filename != "" {
 			main = item.Filename
