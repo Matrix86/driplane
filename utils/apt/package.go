@@ -17,7 +17,7 @@ type Index struct {
 type BinaryPackage struct {
 	// mandatory
 	Filename string
-	Size     int
+	Size     string
 
 	// optional
 	BinaryPackage  string
@@ -26,7 +26,7 @@ type BinaryPackage struct {
 	SHA256         string
 	DescriptionMD5 string
 	Depends        []string `delim:", " strip:"\n\r\t "`
-	InstalledSize  int      `control:"Installed-Size"`
+	InstalledSize  string   `control:"Installed-Size"`
 	Package        string
 	Architecture   string
 	Version        string

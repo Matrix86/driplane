@@ -140,15 +140,13 @@ func (r *Repository) ReloadPackages() error {
 }
 
 func (r *Repository) GetPackages() ([]BinaryPackage, error) {
-	if r.packagesFile != nil {
-		return r.packagesFile.Binaries, nil
-	} else {
+	if r.packagesFile == nil {
 		err := r.ReloadPackages()
 		if err != nil {
-			return nil, fmt.Errorf("retrieving index: %s", err)
+			return nil, err
 		}
-		return r.packagesFile.Binaries, nil
 	}
+	return r.packagesFile.Binaries, nil
 }
 
 func (r *Repository) findIndex() error {
@@ -187,11 +185,10 @@ func (r *Repository) findIndex() error {
 		fmt.Sprintf("/binary-%s/Packages.gz", r.architecture),
 		fmt.Sprintf("/binary-%s/Packages", r.architecture),
 	}
-
-	for _, path := range r.releaseFile.PackagePaths {
-		for _, archPath := range archPaths {
-			if strings.Contains(path, archPath) {
-				packagesURL := fmt.Sprintf("%s/dists/%s%s", r.rootArchiveURL, r.distribution, path)
+	for _, archPath := range archPaths {
+		for _, path := range r.releaseFile.PackagePaths {
+			if strings.HasSuffix(path, archPath) {
+				packagesURL := fmt.Sprintf("%s/dists/%s/%s", r.rootArchiveURL, r.distribution, path)
 				buff := bytes.NewBuffer(nil)
 				err := getFileTo(packagesURL, buff)
 				if err != nil {
