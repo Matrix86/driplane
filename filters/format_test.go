@@ -40,4 +40,25 @@ func TestFormatDoFilter(t *testing.T) {
 	} else {
 		t.Errorf("cannot cast to proper Filter...")
 	}
+
+	filter, err = NewFormatFilter(map[string]string{"target": "other", "template": "main : {{.main}} extra : {{.test}}"})
+	if err != nil {
+		t.Errorf("constructor returned '%s'", err)
+	}
+	if e, ok := filter.(*Format); ok {
+		m := data.NewMessageWithExtra("message", map[string]interface{}{"test": "1"})
+		b, err := e.DoFilter(m)
+		if err != nil {
+			t.Errorf("DoFilter returned an error '%s'", err)
+		}
+		if b == false {
+			t.Errorf("it should return true")
+		}
+
+		if m.GetTarget("other") != "main : message extra : 1" {
+			t.Errorf("message not formatted correctly")
+		}
+	} else {
+		t.Errorf("cannot cast to proper Filter...")
+	}
 }

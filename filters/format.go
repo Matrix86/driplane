@@ -15,6 +15,7 @@ import (
 type Format struct {
 	Base
 
+	target       string
 	template     interface{}
 	templateType string // html or text
 
@@ -24,6 +25,7 @@ type Format struct {
 // NewFormatFilter is the registered method to instantiate a FormatFilter
 func NewFormatFilter(p map[string]string) (Filter, error) {
 	f := &Format{
+		target:       "main",
 		params:       p,
 		templateType: "text",
 	}
@@ -31,6 +33,10 @@ func NewFormatFilter(p map[string]string) (Filter, error) {
 
 	if v, ok := f.params["type"]; ok && v == "html" {
 		f.templateType = "html"
+	}
+
+	if v, ok := f.params["target"]; ok {
+		f.target = v
 	}
 
 	if v, ok := f.params["template"]; ok {
@@ -88,12 +94,12 @@ func (f *Format) DoFilter(msg *data.Message) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	msg.SetMessage(txt)
+	msg.SetTarget(f.target, txt)
 	return true, nil
 }
 
 // OnEvent is called when an event occurs
-func (f *Format) OnEvent(event *data.Event){}
+func (f *Format) OnEvent(event *data.Event) {}
 
 // Set the name of the filter
 func init() {
