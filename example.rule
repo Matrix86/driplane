@@ -11,13 +11,3 @@
 
 # "tail -f" on a file and filtering urls
 # RuleFile => <file: filename="/var/log/system.log"> | echo();
-
-# get events from a folder, read file contents and import them as json documents in a database.
-RuleFolder => <folder: name="/tmp", type="local"> | 
-	file() | 
-	elasticsearch(
-		address="http://localhost:9200/", 
-		username="user", 
-		password="pass", 
-		index="test_index", 
-		retries="10") | echo();
