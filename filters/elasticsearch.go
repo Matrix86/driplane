@@ -25,6 +25,7 @@ type ElasticSearch struct {
 	password string
 	index    string
 	retries  int
+	target   string
 
 	params map[string]string
 }
@@ -36,6 +37,7 @@ func NewElasticSearchFilter(p map[string]string) (Filter, error) {
 		client:  nil,
 		retries: 1,
 		address: "localhost:9200",
+		target:  "main",
 	}
 	f.cbFilter = f.DoFilter
 
@@ -53,6 +55,10 @@ func NewElasticSearchFilter(p map[string]string) (Filter, error) {
 
 	if v, ok := f.params["index"]; ok {
 		f.index = v
+	}
+
+	if v, ok := f.params["target"]; ok {
+		f.target = v
 	}
 
 	if v, ok := f.params["retries"]; ok {
@@ -108,7 +114,7 @@ func (f *ElasticSearch) DoFilter(msg *data.Message) (bool, error) {
 		}
 	}
 
-	rawJSON := msg.GetMessage().(string)
+	rawJSON := msg.GetTarget(f.target).(string)
 	// make the document id contents dependent so that if we have multiple
 	// events for the same object we're not going to create duplicate events
 	docID := fmt.Sprintf("%x", sha256.Sum256([]byte(rawJSON)))

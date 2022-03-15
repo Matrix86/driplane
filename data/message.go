@@ -12,7 +12,8 @@ import (
 type Message struct {
 	sync.RWMutex
 
-	fields map[string]interface{}
+	fields   map[string]interface{}
+	firstRun bool
 }
 
 // NewMessage creates a new Message struct with only the "main" data
@@ -75,6 +76,27 @@ func (d *Message) SetTarget(name string, value interface{}) {
 	d.fields[name] = value
 }
 
+// SetFirstRun set the firstRun flag
+func (d *Message) SetFirstRun() {
+	d.Lock()
+	defer d.Unlock()
+	d.firstRun = true
+}
+
+// ClearFirstRun clear the firstRun flag
+func (d *Message) ClearFirstRun() {
+	d.Lock()
+	defer d.Unlock()
+	d.firstRun = false
+}
+
+// IsFirstRun return the status of the firstRun flag
+func (d *Message) IsFirstRun() bool {
+	d.RLock()
+	defer d.RUnlock()
+	return d.firstRun
+}
+
 // GetTarget returns the value of a key in the Message struct. It can return also the "main" data
 func (d *Message) GetTarget(name string) interface{} {
 	d.RLock()
@@ -94,6 +116,8 @@ func (d *Message) Clone() *Message {
 	for k, v := range d.fields {
 		clone.fields[k] = v
 	}
+	clone.firstRun = d.firstRun
+
 	return clone
 }
 

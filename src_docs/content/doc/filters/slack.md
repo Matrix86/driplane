@@ -13,43 +13,43 @@ It can be used alone or with the Slack Feeder to create a simple Slack bot for e
 
 The following parameters are required from this filter:
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **action** | _STRING_ | "send_message" | action to perform: "send_message", "send_file", "download_file", "user_info" |
- | **token** | _STRING_ | "" | Slack bot Token |
+| Parameter  | Type     | Default        | Description                                                                  |
+|------------|----------|----------------|------------------------------------------------------------------------------|
+| **action** | _STRING_ | "send_message" | action to perform: "send_message", "send_file", "download_file", "user_info" |
+| **token**  | _STRING_ | ""             | Slack bot Token                                                              |
  
 Each `action` can use different parameters:
 
 #### action = send_message
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **to** | _STRING_ | "" | channel ID or User ID that should receive the message (supports [Golang templates](https://golang.org/pkg/text/template/)) |
- | **target** | _STRING_ | "main" | if `text` is not used you can choose which field of `Message` to use as text |
- | **text** | _STRING_ | "" | you can define the text of the message to send (supports [Golang templates](https://golang.org/pkg/text/template/)) | 
- | **blocks** | _BOOL_ | false | if true you can use the Slack template blocks ([block builder](https://api.slack.com/tools/block-kit-builder)) | 
+| Parameter  | Type     | Default | Description                                                                                                                |
+|------------|----------|---------|----------------------------------------------------------------------------------------------------------------------------|
+| **to**     | _STRING_ | ""      | channel ID or User ID that should receive the message (supports [Golang templates](https://golang.org/pkg/text/template/)) |
+| **target** | _STRING_ | "main"  | if `text` is not used you can choose which field of `Message` to use as text                                               |
+| **text**   | _STRING_ | ""      | you can define the text of the message to send (supports [Golang templates](https://golang.org/pkg/text/template/))        | 
+| **blocks** | _BOOL_   | false   | if true you can use the Slack template blocks ([block builder](https://api.slack.com/tools/block-kit-builder))             | 
 
 #### action = send_file
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **to** | _STRING_ | "" | channel ID or User ID that should receive the message (supports [Golang templates](https://golang.org/pkg/text/template/)) |
- | **target** | _STRING_ | "main" | if `filename` is not specified you can choose which field of `Message` has to be used as file content to send |
- | **filename** | _STRING_ | "" | path of the file to send (supports [Golang templates](https://golang.org/pkg/text/template/)) |
+| Parameter    | Type     | Default | Description                                                                                                                |
+|--------------|----------|---------|----------------------------------------------------------------------------------------------------------------------------|
+| **to**       | _STRING_ | ""      | channel ID or User ID that should receive the message (supports [Golang templates](https://golang.org/pkg/text/template/)) |
+| **target**   | _STRING_ | "main"  | if `filename` is not specified you can choose which field of `Message` has to be used as file content to send              |
+| **filename** | _STRING_ | ""      | path of the file to send (supports [Golang templates](https://golang.org/pkg/text/template/))                              |
 
 #### action = download_file
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **url** | _STRING_ | "" | it should contain the Slack private url for the file download (supports [Golang templates](https://golang.org/pkg/text/template/)) |
- | **target** | _STRING_ | "urlprivate" | if `url` is not specified you can choose which field of `Message` contains the Slack private url |
- | **filename** | _STRING_ | "" | path of where to save the downloaded file. If not specified the file content will be inserted in the `main` field (supports [Golang templates](https://golang.org/pkg/text/template/)) |
+| Parameter    | Type     | Default      | Description                                                                                                                                                                            |
+|--------------|----------|--------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **url**      | _STRING_ | ""           | it should contain the Slack private url for the file download (supports [Golang templates](https://golang.org/pkg/text/template/))                                                     |
+| **target**   | _STRING_ | "urlprivate" | if `url` is not specified you can choose which field of `Message` contains the Slack private url                                                                                       |
+| **filename** | _STRING_ | ""           | path of where to save the downloaded file. If not specified the file content will be inserted in the `main` field (supports [Golang templates](https://golang.org/pkg/text/template/)) |
  
 #### action = user_info
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **target** | _STRING_ | "user" | this field has to contain the USERID |
+| Parameter  | Type     | Default | Description                          |
+|------------|----------|---------|--------------------------------------|
+| **target** | _STRING_ | "user"  | this field has to contain the USERID |
  
 In the output Message you can find all the user information returned by Slack:
 

@@ -45,7 +45,7 @@ func NewWebFeeder(conf map[string]string) (Feeder, error) {
 		params:      conf,
 		checkStatus: 0,
 		stopChan:    make(chan bool),
-		dataPost: make(map[string]string),
+		dataPost:    make(map[string]string),
 		frequency:   60 * time.Second,
 		method:      "GET",
 		lastParsing: time.Time{},
@@ -143,7 +143,7 @@ func (f *Web) getBodyAsString(r *http.Response) string {
 	return string(body)
 }
 
-func (f *Web) parseURL() error {
+func (f *Web) parseURL(firstRun bool) error {
 	var txt string
 	extra := make(map[string]interface{})
 
@@ -190,6 +190,9 @@ func (f *Web) parseURL() error {
 	}
 
 	msg := data.NewMessageWithExtra(txt, extra)
+	if firstRun {
+		msg.SetFirstRun()
+	}
 	f.Propagate(msg)
 
 	f.lastParsing = time.Now()
@@ -203,7 +206,7 @@ func (f *Web) Start() {
 	f.ticker = time.NewTicker(f.frequency)
 	go func() {
 		// first start!
-		_ = f.parseURL()
+		_ = f.parseURL(true)
 
 		for {
 			select {
@@ -211,7 +214,7 @@ func (f *Web) Start() {
 				log.Debug("%s: stop arrived on the channel", f.Name())
 				return
 			case <-f.ticker.C:
-				_ = f.parseURL()
+				_ = f.parseURL(false)
 			}
 		}
 	}()

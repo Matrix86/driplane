@@ -1,0 +1,61 @@
+package apt
+
+import (
+	"compress/bzip2"
+	"compress/gzip"
+	"fmt"
+	"io"
+	"pault.ag/go/debian/control"
+)
+
+// Index contains the content of Packages files
+type Index struct {
+	Type     string
+	Binaries []BinaryPackage
+	// TODO: implement also the SourcePackages
+}
+
+// BinaryPackage represents all the entry of the Packages file
+type BinaryPackage struct {
+	// mandatory
+	Filename string
+	Size     string
+
+	// optional
+	BinaryPackage  string
+	MD5sum         string
+	SHA1           string
+	SHA256         string
+	DescriptionMD5 string
+	Depends        []string `delim:", " strip:"\n\r\t "`
+	InstalledSize  string   `control:"Installed-Size"`
+	Package        string
+	Architecture   string
+	Version        string
+	Section        string
+	Maintainer     string
+	Homepage       string
+	Description    string
+	Tag            string
+	Author         string
+	Name           string
+}
+
+// ParsePackageIndex parses the Packages file (also if compressed)
+func ParsePackageIndex(r io.Reader, mtype string) (*Index, error) {
+	reader := r
+	var err error
+	if mtype == "bz2" {
+		reader = bzip2.NewReader(r)
+	} else if mtype == "gz" {
+		reader, err = gzip.NewReader(r)
+		if err != nil {
+			return nil, fmt.Errorf("gzip error: %s", err)
+		}
+	}
+	p := &Index{Type: mtype}
+	if err := control.Unmarshal(&p.Binaries, reader); err != nil {
+		return nil, err
+	}
+	return p, nil
+}

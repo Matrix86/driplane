@@ -11,9 +11,9 @@ It supports [Golang templates](https://golang.org/pkg/text/template/) (only text
 
 ### Parameters
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **cmd** | _STRING_ | empty | command line to exec for each received Message (supports [Golang templates](https://golang.org/pkg/text/template/)) |
+| Parameter | Type     | Default | Description                                                                                                         |
+|-----------|----------|---------|---------------------------------------------------------------------------------------------------------------------|
+| **cmd**   | _STRING_ | empty   | command line to exec for each received Message (supports [Golang templates](https://golang.org/pkg/text/template/)) |
 
  
 {{< notice info "Example" >}} 

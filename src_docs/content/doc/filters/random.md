@@ -10,11 +10,11 @@ This filter is used to inject an extra field with a random number in the propaga
 
 ### Parameters
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **output** | _STRING_ | "main" | the field of the propagated `Message` that will contain the random number |
- | **min** | _STRING_ | "0" | the min value of the extracted number is `min` |
- | **max** | _STRING_ | "999999" | the max value of the extracted number is `max` |
+| Parameter  | Type     | Default  | Description                                                               |
+|------------|----------|----------|---------------------------------------------------------------------------|
+| **output** | _STRING_ | "main"   | the field of the propagated `Message` that will contain the random number |
+| **min**    | _STRING_ | "0"      | the min value of the extracted number is `min`                            |
+| **max**    | _STRING_ | "999999" | the max value of the extracted number is `max`                            |
 
 {{< notice info "Example" >}} 
 `... | random(output="random_field", min="9", max="90") | ...`

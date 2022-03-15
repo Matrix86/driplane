@@ -11,12 +11,12 @@ If the string is found, the condition is matched and the Message is propagated t
 
 ### Parameters
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **target** | _STRING_ | "main" | the field of the Message that should be used for the filter (it could be main or and extra field) |
- | **regexp** | _BOOL_ | false | the pattern field is a regular expression |
- | **extract** | _BOOL_ | "false" | if "true" the `main` field of the propagated Message will contain the extracted string (it can be used only if `regexp` parameter is set true) |
- | **pattern** | _STRING_ | empty |specifies the pattern that should be matched on the Message to check the condition |
+| Parameter   | Type     | Default | Description                                                                                                                                    |
+|-------------|----------|---------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| **target**  | _STRING_ | "main"  | the field of the Message that should be used for the filter (it could be main or and extra field)                                              |
+| **regexp**  | _BOOL_   | false   | the pattern field is a regular expression                                                                                                      |
+| **extract** | _BOOL_   | "false" | if "true" the `main` field of the propagated Message will contain the extracted string (it can be used only if `regexp` parameter is set true) |
+| **pattern** | _STRING_ | empty   | specifies the pattern that should be matched on the Message to check the condition                                                             |
 
  
 {{< notice info "Example" >}} 

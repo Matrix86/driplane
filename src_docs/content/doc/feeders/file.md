@@ -11,10 +11,10 @@ This feeder can create the stream starting from a file. Like the `tail -f` comma
 
 ### Parameters
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **filename** | _STRING_ | empty | the path of the file that it has to keep track |
- | **toend** | _BOOL_ | "false" | the feeder will start to create data messages only for new added lines |
+| Parameter    | Type     | Default | Description                                                            |
+|--------------|----------|---------|------------------------------------------------------------------------|
+| **filename** | _STRING_ | empty   | the path of the file that it has to keep track                         |
+| **toend**    | _BOOL_   | "false" | the feeder will start to create data messages only for new added lines |
  
 {{< notice info "Example" >}} 
 `... | <file: filename="path/of/the/file.txt", toend="false"> | ...`
@@ -28,8 +28,8 @@ The `main` field of the Message will contain the new read line.
 
 #### Extra
 
-| Name | Description |
-| --- | --- |
+| Name      | Description               |
+|-----------|---------------------------|
 | file_name | the name of the read file |
 
 ### Examples

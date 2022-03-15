@@ -10,9 +10,9 @@ This filter is used to remove all the HTML tags from a string.
 
 ### Parameters
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **target** | _STRING_ | "main" | the field of the Message that should be used for the filter (it could be main or an extra field) |
+| Parameter  | Type     | Default | Description                                                                                      |
+|------------|----------|---------|--------------------------------------------------------------------------------------------------|
+| **target** | _STRING_ | "main"  | the field of the Message that should be used for the filter (it could be main or an extra field) |
 
  
 {{< notice info "Example" >}} 

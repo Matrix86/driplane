@@ -11,9 +11,9 @@ This feeder trigger a pipeline every time the timer is fired.
 
 ### Parameters
 
-| Parameter | Type | Default | Description
- | --- | --- | --- | --- |
-| **freq** | _[DURATION](https://golang.org/pkg/time/#ParseDuration)_ | 60s | The intervals (in duration) on how often to execute the pipeline |
+| Parameter | Type                                                     | Default | Description                                                      |
+|-----------|----------------------------------------------------------|---------|------------------------------------------------------------------|
+| **freq**  | _[DURATION](https://golang.org/pkg/time/#ParseDuration)_ | 60s     | The intervals (in duration) on how often to execute the pipeline |
  
 
 {{< notice info "Example" >}}

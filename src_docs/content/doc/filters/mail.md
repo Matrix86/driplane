@@ -11,18 +11,18 @@ This behaviour can be handled with the parameters.
 
 ### Parameters
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **body** | _STRING_ | empty | the body of the e-mail (supports [Golang templates](https://golang.org/pkg/text/template/)) |
- | **username** | _STRING_ | empty | username for the host authentication |
- | **password** | _STRING_ | empty | password for the host authentication |
- | **host** | _STRING_ | empty | host server used to send the e-mail |
- | **port** | _STRING_ | empty | port of the host server |
- | **fromAddr** | _STRING_ | empty | source e-mail address |
- | **fromName** | _STRING_ | empty | source name address |
- | **to** | _STRING_ | empty | destination e-mail address (supports multi-destination, comma separated) |
- | **subject** | _STRING_ | empty | subject field of the e-mail to send |
- | **use_auth** | _BOOL_ | "false" | if "true" the sendmail server will receive the credentials specified in `username` and `password` fields |
+| Parameter    | Type     | Default | Description                                                                                              |
+|--------------|----------|---------|----------------------------------------------------------------------------------------------------------|
+| **body**     | _STRING_ | empty   | the body of the e-mail (supports [Golang templates](https://golang.org/pkg/text/template/))              |
+| **username** | _STRING_ | empty   | username for the host authentication                                                                     |
+| **password** | _STRING_ | empty   | password for the host authentication                                                                     |
+| **host**     | _STRING_ | empty   | host server used to send the e-mail                                                                      |
+| **port**     | _STRING_ | empty   | port of the host server                                                                                  |
+| **fromAddr** | _STRING_ | empty   | source e-mail address                                                                                    |
+| **fromName** | _STRING_ | empty   | source name address                                                                                      |
+| **to**       | _STRING_ | empty   | destination e-mail address (supports multi-destination, comma separated)                                 |
+| **subject**  | _STRING_ | empty   | subject field of the e-mail to send                                                                      |
+| **use_auth** | _BOOL_   | "false" | if "true" the sendmail server will receive the credentials specified in `username` and `password` fields |
  
  
 {{< notice info "Example" >}} 

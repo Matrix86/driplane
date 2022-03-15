@@ -11,12 +11,21 @@ import (
 // File is a filter that interprets the input Message as a file path, reads it and prints it.
 type File struct {
 	Base
+
+	target string
 }
 
 // NewFileFilter is the registered method to instantiate a File filter
-func NewFileFilter(p map[string]string) (Filter, error) {
-	f := File{}
+func NewFileFilter(params map[string]string) (Filter, error) {
+	f := File{
+		target: "main",
+	}
 	f.cbFilter = f.DoFilter
+
+	if v, ok := params["target"]; ok {
+		f.target = v
+	}
+
 	return &f, nil
 }
 
@@ -31,7 +40,7 @@ func (f *File) DoFilter(msg *data.Message) (bool, error) {
 			if err != nil {
 				return true, err
 			}
-			msg.SetMessage(string(readData))
+			msg.SetTarget(f.target, string(readData))
 			return true, nil
 		}
 		log.Debug("%s is not a file", path)
