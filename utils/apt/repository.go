@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// Repository is the object that represents an APT repository
 type Repository struct {
 	rootArchiveURL string
 	distribution   string
@@ -21,6 +22,7 @@ type Repository struct {
 	packagesFile *Index
 }
 
+// NewRepository creates a new Repository object
 func NewRepository(root string, suite string) (*Repository, error) {
 	_, err := url.Parse(root)
 	if err != nil {
@@ -39,24 +41,29 @@ func NewRepository(root string, suite string) (*Repository, error) {
 	return r, nil
 }
 
+// GetDistribution returns the distribution
 func (r *Repository) GetDistribution() string {
 	return r.distribution
 }
 
+// GetReleaseURL returns the URL of the Release file
 func (r *Repository) GetReleaseURL() string {
 	return r.releaseURL
 }
 
+// GetIndexURL returns the URL of the Packages file
 func (r *Repository) GetIndexURL() string {
 	return r.indexURL
 }
 
+// ForceIndexURL force the URL of the Packages file to parse bypassing the parsing of the Release
 func (r *Repository) ForceIndexURL(u string) {
 	b := true
 	r.isFlat = &b
 	r.indexURL = u
 }
 
+// GetArchitectures returns the architectures found in the Release file
 func (r *Repository) GetArchitectures() []string {
 	if r.releaseFile != nil {
 		return r.releaseFile.Architectures
@@ -64,7 +71,8 @@ func (r *Repository) GetArchitectures() []string {
 	return nil
 }
 
-func (r *Repository) SetArchitectures(arch string) error {
+// SetArchitecture sets the architecture to parse the corrispondent Packages file
+func (r *Repository) SetArchitecture(arch string) error {
 	if r.IsFlat() {
 		return nil
 	}
@@ -97,6 +105,7 @@ func getFileTo(url string, w io.Writer) error {
 	return err
 }
 
+// IsFlat returns true is the repository is a flat repo
 func (r *Repository) IsFlat() bool {
 	isFlat := false
 	if r.isFlat == nil {
@@ -123,14 +132,17 @@ func (r *Repository) IsFlat() bool {
 	return *r.isFlat
 }
 
+// GetIndex returns the parsed Index object
 func (r *Repository) GetIndex() *Index {
 	return r.packagesFile
 }
 
+// GetRelease returns the parsed Release object
 func (r *Repository) GetRelease() *Release {
 	return r.releaseFile
 }
 
+// ReloadPackages parses again the Packages file
 func (r *Repository) ReloadPackages() error {
 	err := r.findIndex()
 	if err != nil {
@@ -139,6 +151,7 @@ func (r *Repository) ReloadPackages() error {
 	return nil
 }
 
+// GetPackages returns the binary packages from the Packages file
 func (r *Repository) GetPackages() ([]BinaryPackage, error) {
 	if r.packagesFile == nil {
 		err := r.ReloadPackages()

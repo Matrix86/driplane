@@ -238,10 +238,10 @@ func TestRepository_SetArchitectures(t *testing.T) {
 	if err != nil {
 		t.Errorf("can't create repository: %s", err)
 	}
-	if repo.SetArchitectures("iphoneos-arm") != nil {
+	if repo.SetArchitecture("iphoneos-arm") != nil {
 		t.Errorf("the architecture hasn't been found")
 	}
-	if repo.SetArchitectures("fake-one") == nil {
+	if repo.SetArchitecture("fake-one") == nil {
 		t.Errorf("the function should return nil")
 	}
 }
@@ -266,7 +266,7 @@ func TestRepository_GetPackages(t *testing.T) {
 	if err != nil {
 		t.Errorf("can't create repository: %s", err)
 	}
-	err = repo.SetArchitectures("iphoneos-arm")
+	err = repo.SetArchitecture("iphoneos-arm")
 	if err != nil {
 		t.Errorf("set architecture: %s", err)
 	}

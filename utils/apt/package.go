@@ -8,12 +8,14 @@ import (
 	"pault.ag/go/debian/control"
 )
 
+// Index contains the content of Packages files
 type Index struct {
 	Type     string
 	Binaries []BinaryPackage
 	// TODO: implement also the SourcePackages
 }
 
+// BinaryPackage represents all the entry of the Packages file
 type BinaryPackage struct {
 	// mandatory
 	Filename string
@@ -39,6 +41,7 @@ type BinaryPackage struct {
 	Name           string
 }
 
+// ParsePackageIndex parses the Packages file (also if compressed)
 func ParsePackageIndex(r io.Reader, mtype string) (*Index, error) {
 	reader := r
 	var err error

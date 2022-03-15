@@ -111,7 +111,7 @@ func (f *Apt) parseFeed(firstRun bool) error {
 				log.Debug("arch not set, using %s", f.architecture)
 			}
 		}
-		err = repo.SetArchitectures(f.architecture)
+		err = repo.SetArchitecture(f.architecture)
 		if err != nil {
 			return fmt.Errorf("set arch: %s", err)
 		}

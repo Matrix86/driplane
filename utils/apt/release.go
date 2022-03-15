@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Release represents the Release file
 type Release struct {
 	// Optional
 	Description string `control:"Description"`
@@ -28,12 +29,14 @@ type Release struct {
 	SHA256       []IndexHash `control:"SHA256" delim:"\n" strip:"\n\r\t "`
 }
 
+// IndexHash contains hash and size of a Packages file
 type IndexHash struct {
 	Hash string
 	Size int64
 	Path string
 }
 
+// UnmarshalControl tells how to unmarshal the control files
 func (i *IndexHash) UnmarshalControl(data string) error {
 	splitter := func(r rune) bool {
 		return r == '\t' || r == ' '
@@ -41,18 +44,18 @@ func (i *IndexHash) UnmarshalControl(data string) error {
 	parts := strings.FieldsFunc(data, splitter)
 	if len(parts) != 3 {
 		return nil
-	} else {
-		i.Hash = parts[0]
-		s, err := strconv.ParseInt(parts[1], 10, 64)
-		if err != nil {
-			return fmt.Errorf("can't unmarshal size: %s", err)
-		}
-		i.Size = s
-		i.Path = parts[2]
 	}
+	i.Hash = parts[0]
+	s, err := strconv.ParseInt(parts[1], 10, 64)
+	if err != nil {
+		return fmt.Errorf("can't unmarshal size: %s", err)
+	}
+	i.Size = s
+	i.Path = parts[2]
 	return nil
 }
 
+// ParseRelease parses the Release file of a repository
 func ParseRelease(r io.Reader) (*Release, error) {
 	release := &Release{}
 	if err := control.Unmarshal(release, r); err != nil {
