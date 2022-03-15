@@ -94,8 +94,10 @@ func (f *Cache) DoFilter(msg *data.Message) (bool, error) {
 		text = msg.GetMessage()
 	} else if v, ok := msg.GetExtra()[f.target]; ok {
 		text = v
-	} else {
-		return false, nil
+	}
+
+	if text == nil {
+		return true, nil
 	}
 
 	hash := utils.MD5Sum(text)
