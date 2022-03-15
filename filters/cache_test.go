@@ -153,3 +153,42 @@ func TestCacheDoFilterWithGlobal(t *testing.T) {
 		t.Errorf("cannot cast to proper Filter...")
 	}
 }
+
+func TestCacheDoFilterFirstRun(t *testing.T) {
+	filter, err := NewCacheFilter(map[string]string{"target": "main"})
+	if err != nil {
+		t.Errorf("constructor returned '%s'", err)
+	}
+	if e, ok := filter.(*Cache); ok {
+		m := data.NewMessageWithExtra("main message", map[string]interface{}{"test": "1"})
+		m.SetFirstRun()
+		b, err := e.DoFilter(m)
+		if b != false {
+			t.Errorf("it should return false")
+		}
+		if err != nil {
+			t.Errorf("DoFilter cannot return an error '%s'", err)
+		}
+
+		m.ClearFirstRun()
+		b, err = e.DoFilter(m)
+		if b != false {
+			t.Errorf("it should return false")
+		}
+		if err != nil {
+			t.Errorf("DoFilter cannot return an error '%s'", err)
+		}
+
+		m.SetMessage("new message")
+		m.ClearFirstRun()
+		b, err = e.DoFilter(m)
+		if b != true {
+			t.Errorf("it should return true")
+		}
+		if err != nil {
+			t.Errorf("DoFilter cannot return an error '%s'", err)
+		}
+	} else {
+		t.Errorf("cannot cast to proper Filter...")
+	}
+}
