@@ -10,9 +10,9 @@ This filter is similar to the cache. It can only stop the propagation of the Mes
 
 ### Parameters
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **target** | _STRING_ | "main" | the field of the Message that should be used for the filter (it could be main or and extra field) |
+| Parameter  | Type     | Default | Description                                                                                       |
+|------------|----------|---------|---------------------------------------------------------------------------------------------------|
+| **target** | _STRING_ | "main"  | the field of the Message that should be used for the filter (it could be main or and extra field) |
  
 {{< notice info "Example" >}} 
 `... | changed(target="original_author") | ...`

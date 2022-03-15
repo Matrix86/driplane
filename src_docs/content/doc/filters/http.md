@@ -11,17 +11,17 @@ This behaviour can be handled with the parameters.
 
 ### Parameters
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **url** | _STRING_ | empty | URL of the web page. It is possible use the [Golang templates](https://golang.org/pkg/text/template/) to use fields of the `Message` |
- | **download_to** | _STRING_ | empty | path of where to download the file. It is possible use the [Golang templates](https://golang.org/pkg/text/template/) to use fields of the `Message` | 
- | **text_only** | _BOOL_ | "false" | if "true" it removes all the tags from the body response |
- | **method** | _STRING_ | "GET" | HTTP method to use on the request |
- | **headers** | _JSON_ | empty | Headers to use in the request |
- | **data** | _JSON_ | empty | POST fields to send with the request (it's not possible to use in combination with `rawData`) |
- | **rawData** | _STRING_ | empty | raw body of the request (it's not possible to use in combination with `data`) |
- | **status** | _STRING_ | empty | the filter will propagate the Message only if the returned status has the specified value |
- | **cookies** | _STRING_ | empty | Path of the JSON file containing the cookies to use |
+| Parameter       | Type     | Default | Description                                                                                                                                         |
+|-----------------|----------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| **url**         | _STRING_ | empty   | URL of the web page. It is possible use the [Golang templates](https://golang.org/pkg/text/template/) to use fields of the `Message`                |
+| **download_to** | _STRING_ | empty   | path of where to download the file. It is possible use the [Golang templates](https://golang.org/pkg/text/template/) to use fields of the `Message` | 
+| **text_only**   | _BOOL_   | "false" | if "true" it removes all the tags from the body response                                                                                            |
+| **method**      | _STRING_ | "GET"   | HTTP method to use on the request                                                                                                                   |
+| **headers**     | _JSON_   | empty   | Headers to use in the request                                                                                                                       |
+| **data**        | _JSON_   | empty   | POST fields to send with the request (it's not possible to use in combination with `rawData`)                                                       |
+| **rawData**     | _STRING_ | empty   | raw body of the request (it's not possible to use in combination with `data`)                                                                       |
+| **status**      | _STRING_ | empty   | the filter will propagate the Message only if the returned status has the specified value                                                           |
+| **cookies**     | _STRING_ | empty   | Path of the JSON file containing the cookies to use                                                                                                 |
 
  
 {{< notice info "Example" >}} 

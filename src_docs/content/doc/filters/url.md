@@ -13,13 +13,13 @@ Currently supported types of URLs are:
 
 ### Parameters
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **target** | _STRING_ | "main" | the field of the Message that should be used for the filter (it could be main or an extra field) |
- | **http** | _BOOL_ | "true" | if "false", `http` scheme urls are ignored |
- | **https** | _BOOL_ | "true" | if "false", `https` scheme urls are ignored |
- | **ftp** | _BOOL_ | "true" | if "false", `ftp` scheme urls are ignored |
- | **extract** | _BOOL_ | "true" | if "true", the `main` field of the propagated Message will contain the found URL |
+| Parameter   | Type     | Default | Description                                                                                      |
+|-------------|----------|---------|--------------------------------------------------------------------------------------------------|
+| **target**  | _STRING_ | "main"  | the field of the Message that should be used for the filter (it could be main or an extra field) |
+| **http**    | _BOOL_   | "true"  | if "false", `http` scheme urls are ignored                                                       |
+| **https**   | _BOOL_   | "true"  | if "false", `https` scheme urls are ignored                                                      |
+| **ftp**     | _BOOL_   | "true"  | if "false", `ftp` scheme urls are ignored                                                        |
+| **extract** | _BOOL_   | "true"  | if "true", the `main` field of the propagated Message will contain the found URL                 |
 
  
 {{< notice info "Example" >}} 

@@ -10,10 +10,10 @@ This filter allows you to change a field of a Message, before sending it to the 
 
 ### Parameters
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **name** | _STRING_ | empty | name of the field to change (supports [Golang templates](https://golang.org/pkg/text/template/)) |
- | **value** | _STRING_ | empty | new value to assign to the Message's field specified (supports [Golang templates](https://golang.org/pkg/text/template/)) |
+| Parameter | Type     | Default | Description                                                                                                               |
+|-----------|----------|---------|---------------------------------------------------------------------------------------------------------------------------|
+| **name**  | _STRING_ | empty   | name of the field to change (supports [Golang templates](https://golang.org/pkg/text/template/))                          |
+| **value** | _STRING_ | empty   | new value to assign to the Message's field specified (supports [Golang templates](https://golang.org/pkg/text/template/)) |
 
  
 {{< notice info "Example" >}} 

@@ -11,12 +11,12 @@ directory specified in the configuration file.
 
 ### Parameters
 
-| Parameter | Type | Default | Description
- | --- | --- | --- | --- |
-| **type** | _STRING_ | "text" | specify the type of template to use : `"text"` or `"html"` |
-| **template** | _STRING_ | empty | a template could be specified directly here, instead of load it from file |
-| **file** | _STRING_ | empty | load the template from file |
-| **target** | _STRING_ | "main" | the field of the Message that should be used for the filter (it could be main or an extra field) |
+| Parameter    | Type     | Default | Description                                                                                      |
+|--------------|----------|---------|--------------------------------------------------------------------------------------------------|
+| **type**     | _STRING_ | "text"  | specify the type of template to use : `"text"` or `"html"`                                       |
+| **template** | _STRING_ | empty   | a template could be specified directly here, instead of load it from file                        |
+| **file**     | _STRING_ | empty   | load the template from file                                                                      |
+| **target**   | _STRING_ | "main"  | the field of the Message that should be used for the filter (it could be main or an extra field) |
 
 In the template is allowed to use all the fields of the received Message: main or extra.
 
@@ -26,8 +26,8 @@ In the template is allowed to use all the fields of the received Message: main o
 
 ### Output
 
-The new formatted text is sent to the next filter in the `main` field of the Message. The extra fields do not undergo
-changes.
+The new formatted text is sent to the next filter in the `main` field of the Message if the `target` parameter is not specified. 
+The extra fields do not undergo changes.
 
 ### Examples
 

@@ -12,10 +12,10 @@ Defining a JS file with our custom logic, it is possible create a complex filter
 
 ### Parameters
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **path** | _STRING_ | empty | path of the Javascript file (it can contains multiple functions) |
- | **function** | _STRING_ | empty | name of the function in the JS file to call when a `Message` is received |
+| Parameter    | Type     | Default | Description                                                              |
+|--------------|----------|---------|--------------------------------------------------------------------------|
+| **path**     | _STRING_ | empty   | path of the Javascript file (it can contains multiple functions)         |
+| **function** | _STRING_ | empty   | name of the function in the JS file to call when a `Message` is received |
 
 {{< notice info "Example" >}} 
 `... | js(path="script.js", function="MyFunction") | ...`

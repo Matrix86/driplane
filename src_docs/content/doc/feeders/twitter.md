@@ -12,17 +12,17 @@ Based on [go-twitter](https://github.com/dghubble/go-twitter)
 
 ### Parameters
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **consumerKey** | _STRING_ | empty | [Twitter Auth](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide) |
- | **consumerSecret** | _STRING_ | empty | [Twitter Auth](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide) |
- | **accessToken** | _STRING_ | empty | [Twitter Auth](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide) |
- | **accessSecret** | _STRING_ | empty | [Twitter Auth](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide) |
- | **keywords** | _STRING_ | empty | comma separated keywords that should match on the tweets  |
- | **users** | _STRING_ | empty | comma separated users list |
- | **languages** | _STRING_ | empty | filter by language |
- | **disable_retweet** | _BOOL_ | "false" | don't include retweets in the stream  |
- | **disable_quoted** | _BOOL_ | "false" | don't include quoted tweets in the stream |
+| Parameter           | Type     | Default | Description                                                                             |
+|---------------------|----------|---------|-----------------------------------------------------------------------------------------|
+| **consumerKey**     | _STRING_ | empty   | [Twitter Auth](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide) |
+| **consumerSecret**  | _STRING_ | empty   | [Twitter Auth](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide) |
+| **accessToken**     | _STRING_ | empty   | [Twitter Auth](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide) |
+| **accessSecret**    | _STRING_ | empty   | [Twitter Auth](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide) |
+| **keywords**        | _STRING_ | empty   | comma separated keywords that should match on the tweets                                |
+| **users**           | _STRING_ | empty   | comma separated users list                                                              |
+| **languages**       | _STRING_ | empty   | filter by language                                                                      |
+| **disable_retweet** | _BOOL_   | "false" | don't include retweets in the stream                                                    |
+| **disable_quoted**  | _BOOL_   | "false" | don't include quoted tweets in the stream                                               |
  
 {{< notice info "Example" >}} 
 `... | <twitter: users="goofy, mickeymouse",keywords="movie, cartoon"> | ...`
@@ -40,17 +40,17 @@ The `main` field of the Message will contain:
 
 #### Extra
 
-| Name | Description |
-| --- | --- |
-| link | link to the tweet |
-| language | language used for the tweet |
-| username | author of the tweet |
-| quoted | "true" if the tweet if a quoted tweet, "false" otherwise |
-| retweet | "true" if the tweet if a retweeted tweet, "false" otherwise |
-| original_username | author of the original tweet if it is a retweet or quoted tweet |
+| Name              | Description                                                       |
+|-------------------|-------------------------------------------------------------------|
+| link              | link to the tweet                                                 |
+| language          | language used for the tweet                                       |
+| username          | author of the tweet                                               |
+| quoted            | "true" if the tweet if a quoted tweet, "false" otherwise          |
+| retweet           | "true" if the tweet if a retweeted tweet, "false" otherwise       |
+| original_username | author of the original tweet if it is a retweet or quoted tweet   |
 | original_language | language of the original tweet if it is a retweet or quoted tweet |
-| original_status | text of the original tweet if it is a retweet or quoted tweet |
-| original_link | link of the original tweet if it is a retweet or quoted tweet |
+| original_status   | text of the original tweet if it is a retweet or quoted tweet     |
+| original_link     | link of the original tweet if it is a retweet or quoted tweet     |
 
 {{< notice warning "ATTENTION" >}} 
 In some circumstances the extra field could be empty.

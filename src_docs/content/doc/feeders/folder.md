@@ -14,11 +14,11 @@ The feeder use [cloudwatcher](https://github.com/Matrix86/cloudwatcher) to keep 
 
 ### Parameters
 
-| Parameter | Type | Default | Description
- | --- | --- | --- | --- |
-| **name** | _STRING_ | empty | the path of the folder that it has to keep track |
-| **type** | _STRING_ | "local" | the type of service to use `local`, `dropbox`, `gdrive`, `s3` or `git` |
-| **freq** | _[DURATION](https://golang.org/pkg/time/#ParseDuration)_ | 2s | how often the directory should be checked for updates |
+| Parameter | Type                                                     | Default | Description                                                            |
+|-----------|----------------------------------------------------------|---------|------------------------------------------------------------------------|
+| **name**  | _STRING_                                                 | empty   | the path of the folder that it has to keep track                       |
+| **type**  | _STRING_                                                 | "local" | the type of service to use `local`, `dropbox`, `gdrive`, `s3` or `git` |
+| **freq**  | _[DURATION](https://golang.org/pkg/time/#ParseDuration)_ | 2s      | how often the directory should be checked for updates                  |
 
 {{< alert theme="warning" >}}
 Some services like Gdrive, S3 and Dropbox require additional configurations (you can check them from [here](https://github.com/Matrix86/cloudwatcher/blob/main/README.md)).
@@ -38,9 +38,9 @@ The `main` field of the Message will contain the filename while the `op` extra t
 
 #### Extra
 
-| Name | Description |
-| --- | --- |
-| op | type of event: `FileCreated`, `FileChanged`, `FileDeleted`, `TagsChanged` |
+| Name | Description                                                                |
+|------|----------------------------------------------------------------------------|
+| op   | type of event: `FileCreated`, `FileChanged`, `FileDeleted`, `TagsChanged`  |
 | size | for some events you can find the size of the file that triggered the event |
 
 ### Examples

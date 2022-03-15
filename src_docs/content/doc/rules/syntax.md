@@ -79,7 +79,7 @@ The main string is identified as `text` in the filters, whereas the extra data a
 
 There are fixed extra, created from `driplane` itself and other extras related to a feeder or filter.
 
-| Name | Description |
-| --- | --- |
-| source_feeder | the name of the feeder creates this Message |
-| rule_name | the name of the rule that contains this filter |
+| Name          | Description                                    |
+|---------------|------------------------------------------------|
+| source_feeder | the name of the feeder creates this Message    |
+| rule_name     | the name of the rule that contains this filter |

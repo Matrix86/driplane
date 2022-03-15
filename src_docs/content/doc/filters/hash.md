@@ -15,14 +15,14 @@ Supported types of hashes are:
 
 ### Parameters
 
- | Parameter | Type | Default | Description 
- | --- | --- | --- | --- |
- | **target** | _STRING_ | "main" | the field of the Message that should be used for the filter (it could be main or an extra field) |
- | **extract** | _BOOL_ | "false" | if `"true"` the main field of the output Message will be the extracted hash |
- | **md5** | _BOOL_ | "true" | if `"false"` md5 hashes will be ignored |
- | **sha1** | _BOOL_ | "true" | if `"false"` sha1 hashes will be ignored |
- | **sha256** | _BOOL_ | "true" | if `"false"` sha256 hashes will be ignored |
- | **sha512** | _BOOL_ | "true" | if `"false"` sha512 hashes will be ignored |
+| Parameter   | Type     | Default | Description                                                                                      |
+|-------------|----------|---------|--------------------------------------------------------------------------------------------------|
+| **target**  | _STRING_ | "main"  | the field of the Message that should be used for the filter (it could be main or an extra field) |
+| **extract** | _BOOL_   | "false" | if `"true"` the main field of the output Message will be the extracted hash                      |
+| **md5**     | _BOOL_   | "true"  | if `"false"` md5 hashes will be ignored                                                          |
+| **sha1**    | _BOOL_   | "true"  | if `"false"` sha1 hashes will be ignored                                                         |
+| **sha256**  | _BOOL_   | "true"  | if `"false"` sha256 hashes will be ignored                                                       |
+| **sha512**  | _BOOL_   | "true"  | if `"false"` sha512 hashes will be ignored                                                       |
 
  
 {{< notice info "Example" >}} 

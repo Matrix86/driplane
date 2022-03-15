@@ -11,9 +11,9 @@ This filter get as input the path of a local file, read it and return the conten
 
 ### Parameters
 
-| Parameter | Type | Default | Description
- | --- | --- | --- | --- |
-| **target** | _STRING_ | "main" | the field of the Message that should be used for filter's output (it could be main or an extra field) |
+| Parameter  | Type     | Default | Description                                                                                           |
+|------------|----------|---------|-------------------------------------------------------------------------------------------------------|
+| **target** | _STRING_ | "main"  | the field of the Message that should be used for filter's output (it could be main or an extra field) |
 
 {{< notice info "Example" >}}
 `... | file(target="file_content") | ...`
@@ -21,7 +21,7 @@ This filter get as input the path of a local file, read it and return the conten
 
 ### Output
 
-The output is not being changed. It will contain the file's content.
+The output will contain the content of the read file. Using the `target` parameter you can specify the output field's name.
 
 ### Examples
 
