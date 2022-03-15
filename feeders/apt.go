@@ -18,14 +18,14 @@ import (
 type Apt struct {
 	Base
 
-	url           string
-	distribution  string
-	indexURL      string
-	packageType   string
-	architecture  string
-	frequency     time.Duration
-	insecure      bool
-	repo          *apt.Repository
+	url          string
+	distribution string
+	indexURL     string
+	packageType  string
+	architecture string
+	frequency    time.Duration
+	insecure     bool
+	repo         *apt.Repository
 
 	stopChan chan bool
 	ticker   *time.Ticker
@@ -34,8 +34,9 @@ type Apt struct {
 // NewAptFeeder is the registered method to instantiate a AptFeeder
 func NewAptFeeder(conf map[string]string) (Feeder, error) {
 	f := &Apt{
-		stopChan:      make(chan bool),
-		frequency:     60 * time.Second,
+		stopChan:     make(chan bool),
+		frequency:    60 * time.Second,
+		distribution: "stable",
 	}
 
 	if val, ok := conf["apt.url"]; ok {
