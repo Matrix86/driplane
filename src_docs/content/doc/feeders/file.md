@@ -28,8 +28,8 @@ The `main` field of the Message will contain the new read line.
 
 #### Extra
 
-| Name | Description |
-| --- | --- |
+| Name      | Description               |
+|-----------|---------------------------|
 | file_name | the name of the read file |
 
 ### Examples
