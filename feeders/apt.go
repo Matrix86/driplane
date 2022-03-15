@@ -92,7 +92,7 @@ func (f *Apt) getExtraFromPackage(item *apt.BinaryPackage) map[string]interface{
 	return extra
 }
 
-func (f *Apt) parseFeed() error {
+func (f *Apt) parseFeed(firstRun bool) error {
 	var repo *apt.Repository
 	var err error
 	if f.indexURL != "" {
@@ -129,6 +129,10 @@ func (f *Apt) parseFeed() error {
 			main = item.Filename
 		}
 		msg := data.NewMessageWithExtra(main, extra)
+
+		if firstRun {
+			msg.SetFirstRun()
+		}
 		f.Propagate(msg)
 	}
 	return nil
@@ -139,7 +143,7 @@ func (f *Apt) Start() {
 	f.ticker = time.NewTicker(f.frequency)
 	go func() {
 		// first start!
-		err := f.parseFeed()
+		err := f.parseFeed(true)
 		if err != nil {
 			log.Error("apt feeder: %s", err)
 		}
@@ -150,7 +154,7 @@ func (f *Apt) Start() {
 				log.Debug("%s: stop arrived on the channel", f.Name())
 				return
 			case <-f.ticker.C:
-				err := f.parseFeed()
+				err := f.parseFeed(false)
 				if err != nil {
 					log.Error("apt feeder: %s", err)
 				}

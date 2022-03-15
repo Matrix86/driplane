@@ -13,15 +13,16 @@ Otherwise if the target of the Message is new to the cache, it is inserted in it
 
 ### Parameters
 
-| Parameter          | Type                                                     | Default | Description                                                                                       |
-|--------------------|----------------------------------------------------------|---------|---------------------------------------------------------------------------------------------------|
-| **target**         | _STRING_                                                 | "main"  | the field of the Message that should be used for the filter (it could be main or and extra field) |
-| **refresh_on_get** | _BOOL_                                                   | "true"  | the TTL is refreshed if the key has been looked up                                                |
-| **ttl**            | _[DURATION](https://golang.org/pkg/time/#ParseDuration)_ | 24h     | how long after the key will be deleted                                                            |
-| **sync_time**      | _[DURATION](https://golang.org/pkg/time/#ParseDuration)_ | 5m      | how often the sync on file should be called                                                       |
-| **global**         | _BOOL_                                                   | "false" | make this cache global                                                                            |
-| **file**           | _STRING_                                                 | ""      | enable cache persistence. It loads and writes the cache from a file                               |
- 
+| Parameter            | Type                                                     | Default | Description                                                                                                     |
+|----------------------|----------------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------|
+| **target**           | _STRING_                                                 | "main"  | the field of the Message that should be used for the filter (it could be main or and extra field)               |
+| **refresh_on_get**   | _BOOL_                                                   | "true"  | the TTL is refreshed if the key has been looked up                                                              |
+| **ttl**              | _[DURATION](https://golang.org/pkg/time/#ParseDuration)_ | 24h     | how long after the key will be deleted                                                                          |
+| **sync_time**        | _[DURATION](https://golang.org/pkg/time/#ParseDuration)_ | 5m      | how often the sync on file should be called                                                                     |
+| **global**           | _BOOL_                                                   | "false" | make this cache global                                                                                          |
+| **file**             | _STRING_                                                 | ""      | enable cache persistence. It loads and writes the cache from a file                                             |
+| **ignore_first_run** | _BOOL_                                                   | "false" | if `true` the messages that arrives to the cache with the firstRun flag enabled will be send to the next filter |
+
 {{< notice info "Example" >}} 
 `... | cache(ttl="24h", global="true") | ...`
 {{< /notice >}}

@@ -65,7 +65,7 @@ func getPublishDate(item *gofeed.Item) *time.Time {
 	return nil
 }
 
-func (f *RSS) parseFeed() error {
+func (f *RSS) parseFeed(firstRun bool) error {
 	var lastPubDate time.Time
 	log.Debug("Start RSS parsing: %s", f.url)
 	feed, err := f.parser.ParseURL(f.url)
@@ -129,6 +129,9 @@ func (f *RSS) parseFeed() error {
 			}
 
 			msg := data.NewMessageWithExtra(main, extra)
+			if firstRun {
+				msg.SetFirstRun()
+			}
 			f.Propagate(msg)
 		}
 
@@ -149,7 +152,7 @@ func (f *RSS) Start() {
 	f.ticker = time.NewTicker(f.frequency)
 	go func() {
 		// first start!
-		_ = f.parseFeed()
+		_ = f.parseFeed(true)
 
 		for {
 			select {
@@ -157,7 +160,7 @@ func (f *RSS) Start() {
 				log.Debug("%s: stop arrived on the channel", f.Name())
 				return
 			case <-f.ticker.C:
-				_ = f.parseFeed()
+				_ = f.parseFeed(false)
 			}
 		}
 	}()

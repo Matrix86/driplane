@@ -7,6 +7,8 @@ import (
 
 	"github.com/Matrix86/driplane/data"
 	"github.com/Matrix86/driplane/utils"
+
+	"github.com/evilsocket/islazy/log"
 )
 
 // Cache handles a cache usable in the rule
@@ -14,11 +16,12 @@ type Cache struct {
 	sync.Mutex
 	Base
 
-	target       string
-	ttl          time.Duration
-	refreshOnGet bool
-	global       bool
-	syncTime     time.Duration
+	target         string
+	ttl            time.Duration
+	refreshOnGet   bool
+	global         bool
+	syncTime       time.Duration
+	ignoreFirstRun bool
 
 	persistentFile string
 
@@ -29,12 +32,13 @@ type Cache struct {
 // NewCacheFilter is the registered method to instantiate a CacheFilter
 func NewCacheFilter(p map[string]string) (Filter, error) {
 	f := &Cache{
-		params:       p,
-		target:       "main",
-		refreshOnGet: true,
-		global:       false,
-		ttl:          24 * time.Hour,
-		syncTime:     5 * time.Minute,
+		params:         p,
+		target:         "main",
+		refreshOnGet:   true,
+		global:         false,
+		ttl:            24 * time.Hour,
+		syncTime:       5 * time.Minute,
+		ignoreFirstRun: false,
 	}
 	f.cbFilter = f.DoFilter
 
@@ -67,6 +71,10 @@ func NewCacheFilter(p map[string]string) (Filter, error) {
 		f.cache = utils.NewTTLMap(f.syncTime)
 	}
 
+	if v, ok := f.params["ignore_first_run"]; ok && v == "true" {
+		f.ignoreFirstRun = true
+	}
+
 	if v, ok := f.params["file"]; ok {
 		err := f.cache.SetPersistence(v)
 		if err != nil {
@@ -93,7 +101,13 @@ func (f *Cache) DoFilter(msg *data.Message) (bool, error) {
 	hash := utils.MD5Sum(text)
 	if _, ok := f.cache.Get(hash); !ok {
 		f.cache.Put(hash, true, int64(f.ttl.Seconds()))
-		return true, nil
+		if f.ignoreFirstRun {
+			log.Debug("ignoring first run")
+			return true, nil
+		}
+		log.Debug("caching '%s' firstRun:%v", text, msg.IsFirstRun())
+		// don't propagate the message is it is the first run
+		return !msg.IsFirstRun(), nil
 	} else if f.refreshOnGet {
 		f.cache.Put(hash, true, int64(f.ttl.Seconds()))
 	}
