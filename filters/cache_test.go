@@ -110,8 +110,8 @@ func TestCacheDoFilterIfExtraNotExist(t *testing.T) {
 	if e, ok := filter.(*Cache); ok {
 		m := data.NewMessageWithExtra("main message", map[string]interface{}{"test": "1"})
 		b, err := e.DoFilter(m)
-		if b != false {
-			t.Errorf("it should return false")
+		if b != true {
+			t.Errorf("it should return true")
 		}
 		if err != nil {
 			t.Errorf("DoFilter cannot return an error '%s'", err)
