@@ -174,7 +174,7 @@ func (r *Repository) findIndex() error {
 		if strings.HasSuffix(r.indexURL, ".bz2") {
 			mtype = "bz2"
 		} else if strings.HasSuffix(r.indexURL, ".gz") {
-			mtype = "bz2"
+			mtype = "gz"
 		}
 
 		p, err := ParsePackageIndex(buff, mtype)
@@ -213,7 +213,7 @@ func (r *Repository) findIndex() error {
 				if strings.HasSuffix(r.indexURL, ".bz2") {
 					mtype = "bz2"
 				} else if strings.HasSuffix(r.indexURL, ".gz") {
-					mtype = "bz2"
+					mtype = "gz"
 				}
 
 				p, err := ParsePackageIndex(buff, mtype)
