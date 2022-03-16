@@ -18,7 +18,7 @@ var ruleLexer = lexer.Must(lexer.Regexp(
 	`(?m)` +
 		`(\s+)` +
 		`|(^[#].*$)` +
-		`|(?P<Ident>[a-zA-Z][a-zA-Z_\d]*)` +
+		`|(?P<Ident>[a-zA-Z][a-zA-Z_\d-]*)` +
 		`|(?P<String>(?:(?:"(?:\\.|[^\"])*")|(?:'(?:\\.|[^'])*')))` +
 		`|(?P<Float>\d+(?:\.\d+)?)` +
 		`|(?P<Punct>[]["|,:;()=<>@"])` +
@@ -86,7 +86,7 @@ type Value struct {
 
 // Parser handles the parsing of the rules
 type Parser struct {
-	handle     *participle.Parser
+	handle *participle.Parser
 }
 
 // NewParser creates a new Parser struct
@@ -117,7 +117,7 @@ func (p *Parser) extractImports(content string, relativeTo string) []string {
 	return imports
 }
 
-func (p *Parser) parseFile(filename string, deps []string) (*AST, error){
+func (p *Parser) parseFile(filename string, deps []string) (*AST, error) {
 	for _, i := range deps {
 		if i == filename {
 			return nil, fmt.Errorf("cyclic dependency on %s", filename)
