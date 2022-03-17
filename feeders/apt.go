@@ -1,6 +1,7 @@
 package feeders
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net/http"
@@ -26,9 +27,12 @@ type Apt struct {
 	frequency    time.Duration
 	insecure     bool
 	repo         *apt.Repository
+	userAgent    string
 
 	stopChan chan bool
 	ticker   *time.Ticker
+	context  context.Context
+	cancel   context.CancelFunc
 }
 
 // NewAptFeeder is the registered method to instantiate a AptFeeder
@@ -38,6 +42,8 @@ func NewAptFeeder(conf map[string]string) (Feeder, error) {
 		frequency:    60 * time.Second,
 		distribution: "stable",
 	}
+
+	f.context, f.cancel = context.WithCancel(context.Background())
 
 	if val, ok := conf["apt.url"]; ok {
 		f.url = val
@@ -54,6 +60,9 @@ func NewAptFeeder(conf map[string]string) (Feeder, error) {
 	}
 	if val, ok := conf["apt.arch"]; ok {
 		f.architecture = val
+	}
+	if val, ok := conf["apt.useragent"]; ok {
+		f.userAgent = val
 	}
 	if val, ok := conf["apt.index"]; ok {
 		f.indexURL = val
@@ -97,10 +106,13 @@ func (f *Apt) parseFeed(firstRun bool) error {
 	var err error
 	if f.indexURL != "" {
 		// using directly the path
-		repo = &apt.Repository{}
+		repo, err = apt.NewRepository(f.context, "", "", f.userAgent)
+		if err != nil {
+			return fmt.Errorf("reading repo: %s", err)
+		}
 		repo.ForceIndexURL(f.indexURL)
 	} else {
-		repo, err = apt.NewRepository(f.url, f.distribution)
+		repo, err = apt.NewRepository(f.context, f.url, f.distribution, f.userAgent)
 		if err != nil {
 			return fmt.Errorf("reading repo: %s", err)
 		}
@@ -168,6 +180,7 @@ func (f *Apt) Start() {
 // Stop handles the Feeder shutdown
 func (f *Apt) Stop() {
 	log.Debug("feeder '%s' stream stop", f.Name())
+	f.cancel()
 	f.stopChan <- true
 	f.ticker.Stop()
 	f.isRunning = false

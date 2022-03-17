@@ -1,6 +1,7 @@
 package apt
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -124,17 +125,17 @@ func TestNewRepository(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	_, err := NewRepository(svr.URL, "stable")
+	_, err := NewRepository(context.Background(), svr.URL, "stable", "")
 	if err != nil {
 		t.Errorf("can't create repository: %s", err)
 	}
 
-	_, err = NewRepository("http://192.168.0.%31:8080/", "stable")
+	_, err = NewRepository(context.Background(), "http://192.168.0.%31:8080/", "stable", "")
 	if err == nil {
 		t.Errorf("error expected but it is nil")
 	}
 
-	_, err = NewRepository(svr.URL, "error")
+	_, err = NewRepository(context.Background(), svr.URL, "error", "")
 	if err == nil {
 		t.Errorf("error expected but it is nil")
 	}
@@ -154,7 +155,7 @@ func TestRepository_GetArchitectures(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	repo, err := NewRepository(svr.URL, "stable")
+	repo, err := NewRepository(context.Background(), svr.URL, "stable", "")
 	if err != nil {
 		t.Errorf("can't create repository: %s", err)
 	}
@@ -174,7 +175,7 @@ func TestRepository_GetDistribution(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	repo, err := NewRepository(svr.URL, "stable")
+	repo, err := NewRepository(context.Background(), svr.URL, "stable", "")
 	if err != nil {
 		t.Errorf("can't create repository: %s", err)
 	}
@@ -194,7 +195,7 @@ func TestRepository_GetReleaseURL(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	repo, err := NewRepository(svr.URL, "stable")
+	repo, err := NewRepository(context.Background(), svr.URL, "stable", "")
 	if err != nil {
 		t.Errorf("can't create repository: %s", err)
 	}
@@ -214,7 +215,7 @@ func TestRepository_GetRelease(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	repo, err := NewRepository(svr.URL, "stable")
+	repo, err := NewRepository(context.Background(), svr.URL, "stable", "")
 	if err != nil {
 		t.Errorf("can't create repository: %s", err)
 	}
@@ -234,7 +235,7 @@ func TestRepository_SetArchitectures(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	repo, err := NewRepository(svr.URL, "stable")
+	repo, err := NewRepository(context.Background(), svr.URL, "stable", "")
 	if err != nil {
 		t.Errorf("can't create repository: %s", err)
 	}
@@ -262,7 +263,7 @@ func TestRepository_GetPackages(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	repo, err := NewRepository(svr.URL, "stable")
+	repo, err := NewRepository(context.Background(), svr.URL, "stable", "")
 	if err != nil {
 		t.Errorf("can't create repository: %s", err)
 	}
@@ -296,7 +297,7 @@ func TestRepository_GetPackages2(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	repo, err := NewRepository(svr.URL, "stable")
+	repo, err := NewRepository(context.Background(), svr.URL, "stable", "")
 	if err != nil {
 		t.Errorf("can't create repository: %s", err)
 	}
@@ -329,7 +330,7 @@ func TestRepository_ForceIndexURL(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	repo, err := NewRepository(svr.URL, "stable")
+	repo, err := NewRepository(context.Background(), svr.URL, "stable", "")
 	if err != nil {
 		t.Errorf("can't create repository: %s", err)
 	}

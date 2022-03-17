@@ -2,6 +2,7 @@ package apt
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,13 +18,15 @@ type Repository struct {
 	indexURL       string
 	isFlat         *bool
 	architecture   string
+	userAgent      string
 
 	releaseFile  *Release
 	packagesFile *Index
+	context      context.Context
 }
 
 // NewRepository creates a new Repository object
-func NewRepository(root string, suite string) (*Repository, error) {
+func NewRepository(ctx context.Context, root string, suite string, userAgent string) (*Repository, error) {
 	_, err := url.Parse(root)
 	if err != nil {
 		return nil, err
@@ -32,8 +35,10 @@ func NewRepository(root string, suite string) (*Repository, error) {
 	r := &Repository{
 		rootArchiveURL: root,
 		distribution:   suite,
+		context:        ctx,
+		userAgent:      userAgent,
 	}
-	if !r.IsFlat() {
+	if root != "" && !r.IsFlat() {
 		if err := r.findRelease(); err != nil {
 			return nil, err
 		}
@@ -92,17 +97,44 @@ func (r *Repository) SetArchitecture(arch string) error {
 	return fmt.Errorf("architecture '%s' not found in the Release list: %v", arch, r.releaseFile.Architectures)
 }
 
-func getFileTo(url string, w io.Writer) error {
-	req, err := http.Get(url)
+func (r *Repository) getFileTo(url string, w io.Writer) error {
+	client := &http.Client{}
+	req, err := http.NewRequestWithContext(r.context, "GET", url, nil)
 	if err != nil {
 		return fmt.Errorf("cannot get %s: %s", url, err)
 	}
-	defer req.Body.Close()
-	if req.StatusCode != 200 {
-		return fmt.Errorf("cannot download %s: %v", url, req.Status)
+	if r.userAgent != "" {
+		req.Header.Set("User-Agent", r.userAgent)
 	}
-	_, err = io.Copy(w, req.Body)
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("cannot get %s: %s", url, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("cannot download %s: %v", url, resp.Status)
+	}
+	_, err = io.Copy(w, resp.Body)
 	return err
+}
+
+func (r *Repository) headRequest(url string) (int, error) {
+	client := &http.Client{}
+	req, err := http.NewRequestWithContext(r.context, "HEAD", url, nil)
+	if err != nil {
+		return -1, fmt.Errorf("cannot get %s: %s", url, err)
+	}
+	if r.userAgent != "" {
+		req.Header.Set("User-Agent", r.userAgent)
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return -1, fmt.Errorf("cannot get %s: %s", url, err)
+	}
+	defer resp.Body.Close()
+
+	return resp.StatusCode, nil
 }
 
 // IsFlat returns true is the repository is a flat repo
@@ -115,11 +147,11 @@ func (r *Repository) IsFlat() bool {
 			fmt.Sprintf("%s/Packages", r.rootArchiveURL),
 		}
 		for _, packageURL := range paths {
-			res, err := http.Head(packageURL)
+			statusCode, err := r.headRequest(packageURL)
 			if err != nil {
 				continue
 			}
-			if res.StatusCode == 200 {
+			if statusCode == 200 {
 				isFlat = true
 				r.indexURL = packageURL
 			} else {
@@ -165,7 +197,7 @@ func (r *Repository) GetPackages() ([]BinaryPackage, error) {
 func (r *Repository) findIndex() error {
 	if r.IsFlat() {
 		buff := bytes.NewBuffer(nil)
-		err := getFileTo(r.indexURL, buff)
+		err := r.getFileTo(r.indexURL, buff)
 		if err != nil {
 			return fmt.Errorf("can't download index file '%s': %s", r.indexURL, err)
 		}
@@ -203,7 +235,7 @@ func (r *Repository) findIndex() error {
 			if strings.HasSuffix(path, archPath) {
 				packagesURL := fmt.Sprintf("%s/dists/%s/%s", r.rootArchiveURL, r.distribution, path)
 				buff := bytes.NewBuffer(nil)
-				err := getFileTo(packagesURL, buff)
+				err := r.getFileTo(packagesURL, buff)
 				if err != nil {
 					continue
 				}
@@ -234,14 +266,14 @@ func (r *Repository) findRelease() error {
 	}
 
 	releaseURL := fmt.Sprintf("%s/dists/%s/Release", r.rootArchiveURL, r.distribution)
-	res, err := http.Head(releaseURL)
+	statusCode, err := r.headRequest(releaseURL)
 	if err != nil {
 		return err
 	}
-	if res.StatusCode == 200 {
+	if statusCode == 200 {
 		r.releaseURL = releaseURL
 		buf := bytes.NewBuffer(nil)
-		if err = getFileTo(releaseURL, buf); err != nil {
+		if err = r.getFileTo(releaseURL, buf); err != nil {
 			return fmt.Errorf("cannot download %s: %s", releaseURL, err)
 		}
 		release, err := ParseRelease(buf)
