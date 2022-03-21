@@ -22,6 +22,7 @@ type Cache struct {
 	global         bool
 	syncTime       time.Duration
 	ignoreFirstRun bool
+	cacheName      string
 
 	persistentFile string
 
@@ -34,6 +35,7 @@ func NewCacheFilter(p map[string]string) (Filter, error) {
 	f := &Cache{
 		params:         p,
 		target:         "main",
+		cacheName:      "global",
 		refreshOnGet:   true,
 		global:         false,
 		ttl:            24 * time.Hour,
@@ -66,7 +68,10 @@ func NewCacheFilter(p map[string]string) (Filter, error) {
 	}
 	if v, ok := f.params["global"]; ok && v == "true" {
 		f.global = true
-		f.cache = utils.GetGlobalTTLMapInstance(f.syncTime).Cache
+		f.cache = utils.GetNamedTTLMap("global", f.syncTime)
+	} else if v, ok := f.params["name"]; ok {
+		f.cacheName = v
+		f.cache = utils.GetNamedTTLMap(v, f.syncTime)
 	} else {
 		f.cache = utils.NewTTLMap(f.syncTime)
 	}

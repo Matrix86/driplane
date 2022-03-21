@@ -23,13 +23,13 @@ type CacheResponse struct {
 
 // Put add a new value in the cache
 func (c *CachePackage) Put(k, v string, ttl int64) {
-	cache := utils.GetGlobalTTLMapInstance(5 * time.Minute).Cache
+	cache := utils.GetNamedTTLMap("global", 5*time.Minute)
 	cache.Put(k, v, ttl)
 }
 
 // Get return a cache item if it exists
 func (c *CachePackage) Get(k string) *CacheResponse {
-	cache := utils.GetGlobalTTLMapInstance(5 * time.Minute).Cache
+	cache := utils.GetNamedTTLMap("global", 5*time.Minute)
 	v, ok := cache.Get(k)
 	if ok {
 		return &CacheResponse{
