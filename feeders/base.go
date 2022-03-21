@@ -18,8 +18,10 @@ type Feeder interface {
 	setName(name string)
 	setBus(bus EventBus.Bus)
 	setID(id int32)
+	setRuleName(name string)
 
 	Name() string
+	Rule() string
 	Start()
 	Stop()
 	IsRunning() bool
@@ -30,6 +32,7 @@ type Feeder interface {
 // Base is inherited from the feeders
 type Base struct {
 	name      string
+	rule      string
 	id        int32
 	isRunning bool
 	bus       EventBus.Bus
@@ -38,6 +41,7 @@ type Base struct {
 // Propagate sends the Message to the connected Filters
 func (f *Base) Propagate(data *data.Message) {
 	data.SetExtra("source_feeder", f.Name())
+	data.SetExtra("rule_name", f.Rule())
 	f.bus.Publish(f.GetIdentifier(), data)
 }
 
@@ -53,6 +57,10 @@ func (f *Base) setName(name string) {
 	f.name = name
 }
 
+func (f *Base) setRuleName(name string) {
+	f.rule = name
+}
+
 // GetIdentifier returns the Node identifier ID used in the bus
 func (f *Base) GetIdentifier() string {
 	return fmt.Sprintf("%s:%d", f.name, f.id)
@@ -63,10 +71,16 @@ func (f *Base) Name() string {
 	return f.name
 }
 
+// Rule returns the rule in which the Feeder is found
+func (f *Base) Rule() string {
+	return f.rule
+}
+
 // Start initializes the Node
 func (f *Base) Start() {}
+
 // Stop stops the Node
-func (f *Base) Stop()  {}
+func (f *Base) Stop() {}
 
 // IsRunning returns true if the Node is up and running
 func (f *Base) IsRunning() bool {
@@ -89,11 +103,12 @@ func init() {
 }
 
 // NewFeeder creates a new registered Feeder from it's name
-func NewFeeder(name string, conf map[string]string, bus EventBus.Bus, id int32) (Feeder, error) {
+func NewFeeder(rule string, name string, conf map[string]string, bus EventBus.Bus, id int32) (Feeder, error) {
 	if _, ok := feederFactories[name]; ok {
 		f, err := feederFactories[name](conf)
 		if err == nil && f != nil {
 			f.setName(name)
+			f.setRuleName(rule)
 			f.setBus(bus)
 			f.setID(id)
 		}

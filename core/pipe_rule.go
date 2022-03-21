@@ -198,7 +198,7 @@ func NewPipeRule(node *RuleNode, config *Configuration, filename string, deps []
 		}
 
 		rs := RuleSetInstance()
-		f, err := feeders.NewFeeder(node.Feeder.Name+"feeder", params, rs.bus, rs.lastID+1)
+		f, err := feeders.NewFeeder(rule.Name, node.Feeder.Name+"feeder", params, rs.bus, rs.lastID+1)
 		if err != nil {
 			log.Error("piperule.NewRule: %s", err)
 			return nil, err
@@ -212,8 +212,8 @@ func NewPipeRule(node *RuleNode, config *Configuration, filename string, deps []
 		if err := rule.addNode(next, f.GetIdentifier()); err != nil {
 			return nil, err
 		}
-		
-		// Adding the feeder node to the event bus 
+
+		// Adding the feeder node to the event bus
 		rs.bus.SubscribeAsync(data.EventTopicName, f.OnEvent, false)
 	} else { // It doesn't start with a feeder
 		if err := rule.addNode(node.First, ""); err != nil {
