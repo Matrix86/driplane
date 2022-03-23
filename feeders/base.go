@@ -41,6 +41,7 @@ type Base struct {
 // Propagate sends the Message to the connected Filters
 func (f *Base) Propagate(data *data.Message) {
 	data.SetExtra("source_feeder", f.Name())
+	data.SetExtra("source_feeder_rule", f.Rule())
 	data.SetExtra("rule_name", f.Rule())
 	f.bus.Publish(f.GetIdentifier(), data)
 }
