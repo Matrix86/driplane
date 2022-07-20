@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go v0.94.1 // indirect
 	github.com/Matrix86/cloudwatcher v1.1.7
 	github.com/ProtonMail/go-crypto v0.0.0-20210707164159-52430bf6b52c // indirect
+	github.com/PuerkitoBio/goquery v1.8.0 // indirect
 	github.com/alecthomas/participle v0.2.1
 	github.com/asaskevich/EventBus v0.0.0-20180315140547-d46933a94f05
 	github.com/cenkalti/backoff v2.1.1+incompatible // indirect
@@ -23,6 +24,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hpcloud/tail v1.0.0
 	github.com/json-iterator/go v1.1.11 // indirect
+	github.com/k0kubun/pp/v3 v3.1.0
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/ledongthuc/pdf v0.0.0-20200323191019-23c5852adbd2
@@ -38,9 +40,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
-	golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f
-	golang.org/x/sys v0.0.0-20210903071746-97244b99971b // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/net v0.0.0-20210916014120-12bc252f5db8
 	google.golang.org/api v0.56.0 // indirect
 	google.golang.org/genproto v0.0.0-20210903162649-d08c68adba83 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
