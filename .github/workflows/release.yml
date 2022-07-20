@@ -61,7 +61,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: release --rm-dist --release-notes .github/CHANGELOG.md
-          workdir: ./cmd/driplane
+          #workdir: ./cmd/driplane
 
       #- name: Create release on GitHub
       #  uses: docker://goreleaser/goreleaser:latest
