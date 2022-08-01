@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/evilsocket/islazy/tui"
 	ll "log"
 	"net/http"
 	"os"
@@ -16,6 +15,7 @@ import (
 
 	"github.com/Matrix86/driplane/data"
 	"github.com/evilsocket/islazy/log"
+	"github.com/evilsocket/islazy/tui"
 	"github.com/localtunnel/go-localtunnel"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
