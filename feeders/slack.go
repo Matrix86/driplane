@@ -19,13 +19,15 @@ import (
 	"github.com/localtunnel/go-localtunnel"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
+	"github.com/slack-go/slack/socketmode"
 )
 
 // Slack is a Feeder that get events from Slack
 type Slack struct {
 	Base
 
-	token             string
+	botToken          string
+	appToken          string
 	verificationToken string
 	addr              string
 	enableLocalTunnel bool
@@ -34,6 +36,8 @@ type Slack struct {
 	port              int
 	events            map[string]bool
 	ignoreBot         bool
+	socketModeEnabled bool
+	debug             bool
 
 	Team   string
 	User   string
@@ -41,10 +45,12 @@ type Slack struct {
 	UserID string
 	BotID  string
 
-	client *slack.Client
-	server *http.Server
-	wg     *sync.WaitGroup
-	tunnel *localtunnel.Listener
+	client    *slack.Client
+	smClient  *socketmode.Client
+	smHandler *socketmode.SocketmodeHandler
+	server    *http.Server
+	wg        *sync.WaitGroup
+	tunnel    *localtunnel.Listener
 }
 
 // NewSlackFeeder is the registered method to instantiate a SlackFeeder
@@ -74,10 +80,12 @@ func NewSlackFeeder(conf map[string]string) (Feeder, error) {
 		wg: &sync.WaitGroup{},
 	}
 
-	if val, ok := conf["slack.token"]; ok {
-		s.token = val
+	if val, ok := conf["slack.bot_token"]; ok {
+		s.botToken = val
 	}
-
+	if val, ok := conf["slack.app_token"]; ok {
+		s.appToken = val
+	}
 	if val, ok := conf["slack.verification_token"]; ok {
 		s.verificationToken = val
 	}
@@ -92,6 +100,12 @@ func NewSlackFeeder(conf map[string]string) (Feeder, error) {
 	}
 	if val, ok := conf["slack.lt_subdomain"]; ok {
 		s.ltSubdomain = val
+	}
+	if val, ok := conf["slack.socket_mode"]; ok && val == "true" {
+		s.socketModeEnabled = true
+	}
+	if val, ok := conf["slack.debug"]; ok && val == "true" {
+		s.debug = true
 	}
 	if val, ok := conf["slack.events"]; ok {
 		keywords := strings.Split(val, ",")
@@ -114,10 +128,19 @@ func NewSlackFeeder(conf map[string]string) (Feeder, error) {
 	s.port = i
 
 	s.client = slack.New(
-		s.token,
-		slack.OptionDebug(false),
+		s.botToken,
+		slack.OptionAppLevelToken(s.appToken),
+		slack.OptionDebug(s.debug),
 		slack.OptionLog(ll.New(os.Stdout, "slackfeeder: ", ll.Lshortfile|ll.LstdFlags)),
 	)
+
+	if s.socketModeEnabled {
+		s.smClient = socketmode.New(
+			s.client,
+			socketmode.OptionDebug(s.debug),
+			socketmode.OptionLog(ll.New(os.Stdout, "slackfeeder: ", ll.Lshortfile|ll.LstdFlags)),
+		)
+	}
 
 	return s, nil
 }
@@ -134,7 +157,7 @@ func (s *Slack) propagateFiles(msg string, extra map[string]interface{}, files [
 			extraf[k] = v
 		}
 		extraf["type"] = "file_shared"
-		extraf["slackfeeder.token"] = s.token
+		extraf["slackfeeder.botToken"] = s.botToken
 		fr := reflect.ValueOf(file)
 		for x := 0; x < fr.NumField(); x++ {
 			if fr.Field(x).CanInterface() {
@@ -152,192 +175,221 @@ func (s *Slack) propagateFiles(msg string, extra map[string]interface{}, files [
 	}
 }
 
+func (s *Slack) eventHandler(eventsAPIEvent slackevents.EventsAPIEvent) {
+	if eventsAPIEvent.Type == slackevents.CallbackEvent {
+		innerEvent := eventsAPIEvent.InnerEvent
+
+		//pp.Println(innerEvent.Data)
+		log.Debug("Slack event: %s :\n%#v", innerEvent.Type, innerEvent.Data)
+
+		if _, ok := s.events[innerEvent.Type]; ok && innerEvent.Type != "file_shared" {
+			propagate := true
+			txt := innerEvent.Type
+			extra := make(map[string]interface{})
+			extra["slackfeeder.botToken"] = s.botToken
+
+			switch ev := innerEvent.Data.(type) {
+			case *slackevents.AppMentionEvent:
+				if (s.ignoreBot && ev.BotID != "") || ev.BotID == s.BotID {
+					return
+				}
+				v := reflect.ValueOf(*ev)
+				txt = ev.Text
+				for i := 0; i < v.NumField(); i++ {
+					if v.Field(i).CanInterface() {
+						if str, ok := v.Field(i).Interface().(string); ok {
+							extra[strings.ToLower(v.Type().Field(i).Name)] = str
+						}
+					}
+				}
+			case *slackevents.MessageEvent:
+				if (s.ignoreBot && ev.BotID != "") || ev.BotID == s.BotID {
+					return
+				}
+				v := reflect.ValueOf(*ev)
+				txt = ev.Text
+				for i := 0; i < v.NumField(); i++ {
+					if v.Field(i).CanInterface() {
+						if str, ok := v.Field(i).Interface().(string); ok {
+							extra[strings.ToLower(v.Type().Field(i).Name)] = str
+						}
+					}
+				}
+				// propagate multiple messages, one for each shared file
+				if _, ok := s.events["file_shared"]; ok {
+					s.propagateFiles(txt, extra, ev.Files)
+				}
+			case *slackevents.MemberJoinedChannelEvent:
+				v := reflect.ValueOf(*ev)
+				for i := 0; i < v.NumField(); i++ {
+					if v.Field(i).CanInterface() {
+						if str, ok := v.Field(i).Interface().(string); ok {
+							extra[strings.ToLower(v.Type().Field(i).Name)] = str
+						}
+					}
+				}
+			case *slackevents.MemberLeftChannelEvent:
+				v := reflect.ValueOf(*ev)
+				for i := 0; i < v.NumField(); i++ {
+					if v.Field(i).CanInterface() {
+						if str, ok := v.Field(i).Interface().(string); ok {
+							extra[strings.ToLower(v.Type().Field(i).Name)] = str
+						}
+					}
+				}
+			case *slackevents.AppHomeOpenedEvent:
+				v := reflect.ValueOf(*ev)
+				for i := 0; i < v.NumField(); i++ {
+					if v.Field(i).CanInterface() {
+						if str, ok := v.Field(i).Interface().(string); ok {
+							extra[strings.ToLower(v.Type().Field(i).Name)] = str
+						}
+					}
+				}
+			case *slackevents.AppUninstalledEvent:
+				extra["type"] = ev.Type
+			case *slackevents.GridMigrationFinishedEvent:
+				extra["type"] = ev.Type
+				extra["enterprise_id"] = ev.EnterpriseID
+			case *slackevents.GridMigrationStartedEvent:
+				extra["type"] = ev.Type
+				extra["enterprise_id"] = ev.EnterpriseID
+			case *slackevents.LinkSharedEvent:
+				propagate = false
+				for _, link := range ev.Links {
+					ex := map[string]interface{}{}
+					ex["user"] = ev.User
+					ex["timestamp"] = ev.TimeStamp
+					ex["threadtimestamp"] = ev.ThreadTimeStamp
+					ex["domain"] = link.Domain
+					ex["link"] = link.URL
+					ex["type"] = "link_shared"
+					ex["slackfeeder.botToken"] = s.botToken
+					s.Propagate(data.NewMessageWithExtra(link.URL, ex))
+				}
+			case *slackevents.ReactionAddedEvent:
+				v := reflect.ValueOf(*ev)
+				for i := 0; i < v.NumField(); i++ {
+					if v.Field(i).CanInterface() {
+						extra[strings.ToLower(v.Type().Field(i).Name)] = v.Field(i).Interface()
+					}
+				}
+			case *slackevents.ReactionRemovedEvent:
+				v := reflect.ValueOf(*ev)
+				for i := 0; i < v.NumField(); i++ {
+					if v.Field(i).CanInterface() {
+						extra[strings.ToLower(v.Type().Field(i).Name)] = v.Field(i).Interface()
+					}
+				}
+			case *slackevents.PinAddedEvent:
+				v := reflect.ValueOf(*ev)
+				for i := 0; i < v.NumField(); i++ {
+					if v.Field(i).CanInterface() {
+						extra[strings.ToLower(v.Type().Field(i).Name)] = v.Field(i).Interface()
+					}
+				}
+			case *slackevents.PinRemovedEvent:
+				v := reflect.ValueOf(*ev)
+				for i := 0; i < v.NumField(); i++ {
+					if v.Field(i).CanInterface() {
+						extra[strings.ToLower(v.Type().Field(i).Name)] = v.Field(i).Interface()
+					}
+				}
+			case *slackevents.TokensRevokedEvent:
+				v := reflect.ValueOf(*ev)
+				for i := 0; i < v.NumField(); i++ {
+					if v.Field(i).CanInterface() {
+						if str, ok := v.Field(i).Interface().(string); ok {
+							extra[strings.ToLower(v.Type().Field(i).Name)] = str
+						}
+					}
+				}
+			}
+
+			if propagate {
+				s.Propagate(data.NewMessageWithExtra(txt, extra))
+			}
+		}
+	}
+}
+
 func (s *Slack) startEventsEndpoint() {
 	s.wg.Add(1)
-	s.server = &http.Server{Addr: s.addr}
 
-	http.HandleFunc("/events", func(w http.ResponseWriter, r *http.Request) {
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(r.Body)
-		body := buf.String()
-		eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: s.verificationToken}))
-		if e != nil {
-			log.Error("VerificationToken error: %s", e)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+	if s.socketModeEnabled {
+		s.smHandler = socketmode.NewSocketmodeHandler(s.smClient)
 
-		if eventsAPIEvent.Type == slackevents.URLVerification {
-			var r *slackevents.ChallengeResponse
-			err := json.Unmarshal([]byte(body), &r)
+		s.smHandler.HandleDefault(func(e *socketmode.Event, c *socketmode.Client) {
+			eventsAPIEvent, ok := e.Data.(slackevents.EventsAPIEvent)
+			if !ok {
+				log.Debug("Slack: ignoring %+v", e)
+				return
+			}
+
+			log.Debug("Slack: event received: %+v\n", eventsAPIEvent)
+
+			s.smClient.Ack(*e.Request)
+			s.eventHandler(eventsAPIEvent)
+		})
+
+		go func() {
+			err := s.smHandler.RunEventLoop()
 			if err != nil {
+				log.Fatal("Slack::socketmode handler error: %s", err)
+			}
+		}()
+	} else {
+		s.server = &http.Server{Addr: s.addr}
+
+		http.HandleFunc("/events", func(w http.ResponseWriter, r *http.Request) {
+			buf := new(bytes.Buffer)
+			buf.ReadFrom(r.Body)
+			body := buf.String()
+			eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: s.verificationToken}))
+			if e != nil {
+				log.Error("VerificationToken error: %s", e)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-			w.Header().Set("Content-Type", "text")
-			w.Write([]byte(r.Challenge))
-		}
 
-		if eventsAPIEvent.Type == slackevents.CallbackEvent {
-			innerEvent := eventsAPIEvent.InnerEvent
-
-			//pp.Println(innerEvent.Data)
-			log.Debug("Slack event: %s :\n%#v", innerEvent.Type, innerEvent.Data)
-
-			if _, ok := s.events[innerEvent.Type]; ok && innerEvent.Type != "file_shared" {
-				propagate := true
-				txt := innerEvent.Type
-				extra := make(map[string]interface{})
-				extra["slackfeeder.token"] = s.token
-
-				switch ev := innerEvent.Data.(type) {
-				case *slackevents.AppMentionEvent:
-					if (s.ignoreBot && ev.BotID != "") || ev.BotID == s.BotID {
-						return
-					}
-					v := reflect.ValueOf(*ev)
-					txt = ev.Text
-					for i := 0; i < v.NumField(); i++ {
-						if v.Field(i).CanInterface() {
-							if str, ok := v.Field(i).Interface().(string); ok {
-								extra[strings.ToLower(v.Type().Field(i).Name)] = str
-							}
-						}
-					}
-				case *slackevents.MessageEvent:
-					if (s.ignoreBot && ev.BotID != "") || ev.BotID == s.BotID {
-						return
-					}
-					v := reflect.ValueOf(*ev)
-					txt = ev.Text
-					for i := 0; i < v.NumField(); i++ {
-						if v.Field(i).CanInterface() {
-							if str, ok := v.Field(i).Interface().(string); ok {
-								extra[strings.ToLower(v.Type().Field(i).Name)] = str
-							}
-						}
-					}
-					// propagate multiple messages, one for each shared file
-					if _, ok := s.events["file_shared"]; ok {
-						s.propagateFiles(txt, extra, ev.Files)
-					}
-				case *slackevents.MemberJoinedChannelEvent:
-					v := reflect.ValueOf(*ev)
-					for i := 0; i < v.NumField(); i++ {
-						if v.Field(i).CanInterface() {
-							if str, ok := v.Field(i).Interface().(string); ok {
-								extra[strings.ToLower(v.Type().Field(i).Name)] = str
-							}
-						}
-					}
-				case *slackevents.MemberLeftChannelEvent:
-					v := reflect.ValueOf(*ev)
-					for i := 0; i < v.NumField(); i++ {
-						if v.Field(i).CanInterface() {
-							if str, ok := v.Field(i).Interface().(string); ok {
-								extra[strings.ToLower(v.Type().Field(i).Name)] = str
-							}
-						}
-					}
-				case *slackevents.AppHomeOpenedEvent:
-					v := reflect.ValueOf(*ev)
-					for i := 0; i < v.NumField(); i++ {
-						if v.Field(i).CanInterface() {
-							if str, ok := v.Field(i).Interface().(string); ok {
-								extra[strings.ToLower(v.Type().Field(i).Name)] = str
-							}
-						}
-					}
-				case *slackevents.AppUninstalledEvent:
-					extra["type"] = ev.Type
-				case *slackevents.GridMigrationFinishedEvent:
-					extra["type"] = ev.Type
-					extra["enterprise_id"] = ev.EnterpriseID
-				case *slackevents.GridMigrationStartedEvent:
-					extra["type"] = ev.Type
-					extra["enterprise_id"] = ev.EnterpriseID
-				case *slackevents.LinkSharedEvent:
-					propagate = false
-					for _, link := range ev.Links {
-						ex := map[string]interface{}{}
-						ex["user"] = ev.User
-						ex["timestamp"] = ev.TimeStamp
-						ex["threadtimestamp"] = ev.ThreadTimeStamp
-						ex["domain"] = link.Domain
-						ex["link"] = link.URL
-						ex["type"] = "link_shared"
-						ex["slackfeeder.token"] = s.token
-						s.Propagate(data.NewMessageWithExtra(link.URL, ex))
-					}
-				case *slackevents.ReactionAddedEvent:
-					v := reflect.ValueOf(*ev)
-					for i := 0; i < v.NumField(); i++ {
-						if v.Field(i).CanInterface() {
-							extra[strings.ToLower(v.Type().Field(i).Name)] = v.Field(i).Interface()
-						}
-					}
-				case *slackevents.ReactionRemovedEvent:
-					v := reflect.ValueOf(*ev)
-					for i := 0; i < v.NumField(); i++ {
-						if v.Field(i).CanInterface() {
-							extra[strings.ToLower(v.Type().Field(i).Name)] = v.Field(i).Interface()
-						}
-					}
-				case *slackevents.PinAddedEvent:
-					v := reflect.ValueOf(*ev)
-					for i := 0; i < v.NumField(); i++ {
-						if v.Field(i).CanInterface() {
-							extra[strings.ToLower(v.Type().Field(i).Name)] = v.Field(i).Interface()
-						}
-					}
-				case *slackevents.PinRemovedEvent:
-					v := reflect.ValueOf(*ev)
-					for i := 0; i < v.NumField(); i++ {
-						if v.Field(i).CanInterface() {
-							extra[strings.ToLower(v.Type().Field(i).Name)] = v.Field(i).Interface()
-						}
-					}
-				case *slackevents.TokensRevokedEvent:
-					v := reflect.ValueOf(*ev)
-					for i := 0; i < v.NumField(); i++ {
-						if v.Field(i).CanInterface() {
-							if str, ok := v.Field(i).Interface().(string); ok {
-								extra[strings.ToLower(v.Type().Field(i).Name)] = str
-							}
-						}
-					}
+			if eventsAPIEvent.Type == slackevents.URLVerification {
+				var r *slackevents.ChallengeResponse
+				err := json.Unmarshal([]byte(body), &r)
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					return
 				}
+				w.Header().Set("Content-Type", "text")
+				w.Write([]byte(r.Challenge))
+			}
 
-				if propagate {
-					s.Propagate(data.NewMessageWithExtra(txt, extra))
+			s.eventHandler(eventsAPIEvent)
+		})
+
+		go func() {
+			defer s.wg.Done() // let main know we are done cleaning up
+			if s.enableLocalTunnel {
+				opts := localtunnel.Options{
+					Subdomain: s.ltSubdomain,
 				}
+				if s.ltBaseURL != "" {
+					opts.BaseURL = s.ltBaseURL
+				}
+				tunnel, err := localtunnel.Listen(opts)
+				if err != nil {
+					log.Error("LocalTunnel: %s", err)
+					return
+				}
+				s.tunnel = tunnel
+				log.Info("Slack feeder tunnel started. Your URL is: %s", s.tunnel.URL())
 			}
-		}
-	})
 
-	go func() {
-		defer s.wg.Done() // let main know we are done cleaning up
-		if s.enableLocalTunnel {
-			opts := localtunnel.Options{
-				Subdomain: s.ltSubdomain,
+			log.Info("Slack endpoint server listening on: %s", s.addr)
+			if err := s.server.Serve(s.tunnel); err != http.ErrServerClosed {
+				log.Fatal("Slack::ListenAndServe(): %s", err)
 			}
-			if s.ltBaseURL != "" {
-				opts.BaseURL = s.ltBaseURL
-			}
-			tunnel, err := localtunnel.Listen(opts)
-			if err != nil {
-				log.Error("LocalTunnel: %s", err)
-				return
-			}
-			s.tunnel = tunnel
-			log.Info("Slack feeder tunnel started. Your URL is: %s", s.tunnel.URL())
-		}
-
-		log.Info("Slack endpoint server listening on: %s", s.addr)
-		if err := s.server.Serve(s.tunnel); err != http.ErrServerClosed {
-			log.Fatal("Slack::ListenAndServe(): %s", err)
-		}
-	}()
+		}()
+	}
 }
 
 func (s *Slack) getBotInfo() {
@@ -356,8 +408,14 @@ func (s *Slack) getBotInfo() {
 }
 
 func (s *Slack) stopEventsEndpoint() {
-	if err := s.server.Shutdown(context.Background()); err != nil {
-		log.Fatal("Slack::Shutdown(): %s", err)
+	if s.socketModeEnabled {
+		s.wg.Done()
+	} else {
+		if s.server != nil {
+			if err := s.server.Shutdown(context.Background()); err != nil {
+				log.Fatal("Slack::Shutdown(): %s", err)
+			}
+		}
 	}
 	s.wg.Wait()
 }

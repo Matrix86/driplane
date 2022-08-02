@@ -16,9 +16,11 @@ Based on [slack-go/slack](https://github.com/slack-go/slack)
 
 | Parameter              | Type     | Default                  | Description                                                                     |
 |------------------------|----------|--------------------------|---------------------------------------------------------------------------------|
-| **token**              | _STRING_ | empty                    | token Bot (starting with xoxb-*)                                                |
+| **bot_token**          | _STRING_ | empty                    | token Bot (starting with xoxb-*)                                                |
+| **app_token**          | _STRING_ | empty                    | App token (starting with xapp-*)                                                |
 | **verification_token** | _STRING_ | empty                    | token to verify the requests (you can find it in the Basic information section) |
 | **addr**               | _STRING_ | ":3000"                  | address and port in the form IP:PORT                                            |
+| **socket_mode**        | _BOOL_   | false                    | enable the Socket Mode                                                          |
 | **lt_enable**          | _BOOL_   | false                    | enable localtunnel for the server                                               |
 | **lt_baseurl**         | _STRING_ | "https://localtunnel.me" | URL to the Proxy server                                                         |
 | **lt_subdomain**       | _STRING_ | empty                    | specify a subdomain to use with localtunnel                                     |

@@ -23,7 +23,7 @@ type Slack struct {
 
 	action      string
 	target      string
-	token       string
+	botToken    string
 	blocks      bool
 	filename    *template.Template
 	downloadURL *template.Template
@@ -72,8 +72,8 @@ func NewSlackFilter(p map[string]string) (Filter, error) {
 	if v, ok := f.params["target"]; ok {
 		f.target = v
 	}
-	if v, ok := f.params["token"]; ok {
-		f.token = v
+	if v, ok := f.params["botToken"]; ok {
+		f.botToken = v
 	}
 	if v, ok := f.params["to"]; ok {
 		t, err := template.New("SlackToFilterTemplate").Parse(v)
@@ -187,18 +187,18 @@ func (f *Slack) DoFilter(msg *data.Message) (bool, error) {
 	var err error
 	var dst, token string
 
-	if f.token != "" {
-		token = f.token
+	if f.botToken != "" {
+		token = f.botToken
 	} else {
-		t := msg.GetTarget("slackfeeder.token")
+		t := msg.GetTarget("slackfeeder.botToken")
 		if v, ok := t.(string); ok {
 			token = v
 		} else {
-			return false, fmt.Errorf("slack bot token not found")
+			return false, fmt.Errorf("slack bot botToken not found")
 		}
 	}
 
-	// check if the token is known
+	// check if the botToken is known
 	client := slack.New(
 		token,
 		slack.OptionDebug(false),
@@ -333,7 +333,7 @@ func (f *Slack) DoFilter(msg *data.Message) (bool, error) {
 }
 
 // OnEvent is called when an event occurs
-func (f *Slack) OnEvent(event *data.Event){}
+func (f *Slack) OnEvent(event *data.Event) {}
 
 // Set the name of the filter
 func init() {

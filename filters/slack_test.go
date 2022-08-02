@@ -16,7 +16,7 @@ func TestNewSlackFilter(t *testing.T) {
 	}
 	tpl, _ := template.New("test").Parse("test")
 	tests := []Test{
-		{"ActionSendMessage", map[string]string{"action": "send_message", "target": "main", "token": "token", "text": "test", "to": "test", "filename": "test", "url": "test"}, &Slack{action: "send_message", target: "main", token: "token", to: tpl, filename: tpl, body: tpl, downloadURL: tpl}, ""},
+		{"ActionSendMessage", map[string]string{"action": "send_message", "target": "main", "botToken": "botToken", "text": "test", "to": "test", "filename": "test", "url": "test"}, &Slack{action: "send_message", target: "main", botToken: "botToken", to: tpl, filename: tpl, body: tpl, downloadURL: tpl}, ""},
 		{"ToNotSpecified", map[string]string{"action": "send_message"}, nil, "destination 'to' is mandatory with this action"},
 	}
 
@@ -44,8 +44,8 @@ func TestNewSlackFilter(t *testing.T) {
 					if v.ExpectedFilter.action != e.action {
 						t.Errorf("%s: wrong action: expected=%#v had=%#v", v.Name, v.ExpectedFilter.action, e.action)
 					}
-					if v.ExpectedFilter.token != e.token {
-						t.Errorf("%s: wrong token: expected=%#v had=%#v", v.Name, v.ExpectedFilter.token, e.token)
+					if v.ExpectedFilter.botToken != e.botToken {
+						t.Errorf("%s: wrong botToken: expected=%#v had=%#v", v.Name, v.ExpectedFilter.botToken, e.botToken)
 					}
 					if v.ExpectedFilter.filename != nil && reflect.DeepEqual(v.ExpectedFilter.filename, e.filename) {
 						t.Errorf("%s: wrong filename: expected=%#v had=%#v", v.Name, v.ExpectedFilter.filename, e.filename)
@@ -80,9 +80,9 @@ func TestSlack_DoFilter(t *testing.T) {
 		ExpectedError string
 	}
 	tests := []Test{
-		{"NotTokenFound", map[string]string{"action": "send_message", "to": "test"}, data.NewMessage(""), false, "slack bot token not found"},
-		{"SendMessageWithText", map[string]string{"action": "send_message", "to": "test", "text": "test", "token": "token"}, data.NewMessage(""), false, "sendMessage: slack returned: invalid_auth"},
-		{"SendMessageFromMain", map[string]string{"action": "send_message", "to": "test", "target": "main", "token": "token"}, data.NewMessage(""), false, "sendMessage: slack returned: invalid_auth"},
+		{"NotTokenFound", map[string]string{"action": "send_message", "to": "test"}, data.NewMessage(""), false, "slack bot botToken not found"},
+		{"SendMessageWithText", map[string]string{"action": "send_message", "to": "test", "text": "test", "botToken": "botToken"}, data.NewMessage(""), false, "sendMessage: slack returned: invalid_auth"},
+		{"SendMessageFromMain", map[string]string{"action": "send_message", "to": "test", "target": "main", "botToken": "botToken"}, data.NewMessage(""), false, "sendMessage: slack returned: invalid_auth"},
 	}
 
 	for _, v := range tests {
