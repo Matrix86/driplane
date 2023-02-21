@@ -1,10 +1,11 @@
 package core
 
 import (
-	"github.com/stretchr/testify/assert"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewParser(t *testing.T) {
@@ -20,12 +21,12 @@ func TestNewParser(t *testing.T) {
 func TestParser_ParseFile(t *testing.T) {
 	type Test struct {
 		Name          string
-		Filename1      string
-		CreateFile1    bool
-		FileContent1   string
-		Filename2      string
-		CreateFile2    bool
-		FileContent2   string
+		Filename1     string
+		CreateFile1   bool
+		FileContent1  string
+		Filename2     string
+		CreateFile2   bool
+		FileContent2  string
 		ExpectedAST   *AST
 		ExpectedError string
 	}
@@ -33,9 +34,9 @@ func TestParser_ParseFile(t *testing.T) {
 	v1, v2, v3 := "value1", "value2", "{'k':'v'}"
 
 	tests := []Test{
-		{"FileNotExist", path.Join(os.TempDir(), "notexist"), false, "", "", false, "",nil, "parsing '/tmp/notexist': open /tmp/notexist: no such file or directory"},
-		{"EmptyFile", path.Join(os.TempDir(), "test"), true, "", "", false, "", &AST{Dependencies:map[string]*AST{}, Rules:[]*RuleNode(nil)}, ""},
-		{"UnexpectedEOF", path.Join(os.TempDir(), "test"), true, "ident =>", "", false, "", nil, "<source>:0:0: unexpected \"<EOF>\" (expected <ident> ...)"},
+		{"FileNotExist", path.Join(os.TempDir(), "notexist"), false, "", "", false, "", nil, "parsing '/tmp/notexist': open /tmp/notexist: no such file or directory"},
+		{"EmptyFile", path.Join(os.TempDir(), "test"), true, "", "", false, "", &AST{Dependencies: map[string]*AST{}, Rules: []*RuleNode(nil)}, ""},
+		{"UnexpectedEOF", path.Join(os.TempDir(), "test"), true, "ident =>", "", false, "", nil, "1:9: unexpected token \"<EOF>\" (expected <ident>)"},
 		{"CyclicDep", path.Join(os.TempDir(), "test1"), true, "#import \"test1\"", path.Join(os.TempDir(), "test2"), true, "#import \"test2\"", nil, "can't parse import file '/tmp/test1': cyclic dependency on /tmp/test1"},
 		{
 			"ParseOk",
@@ -125,7 +126,7 @@ func TestParser_ParseFile(t *testing.T) {
 						},
 					},
 				},
-				Dependencies:map[string]*AST{},
+				Dependencies: map[string]*AST{},
 			},
 			"",
 		},
