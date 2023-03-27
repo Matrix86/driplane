@@ -230,7 +230,7 @@ func (t *Twitter) Start() {
 		log.Debug("TwitterFeeder: adding %d rules", len(t.rules))
 		searchStreamRules, err := t.client.TweetSearchStreamAddRule(context.Background(), rules, false)
 		if err != nil {
-			log.Fatal("TwitterFeeder: can't create a rule for Twitter stream: %s", err)
+			log.Error("TwitterFeeder: can't create a rule for Twitter stream: %s", err)
 		}
 
 		if searchStreamRules.Errors != nil && len(searchStreamRules.Errors) > 0 {
