@@ -8,21 +8,19 @@ draft: false
 ## Twitter
 
 This feeder creates a stream from tweets. It is possible to define the keywords, or the users to follow.
-Based on [go-twitter](https://github.com/dghubble/go-twitter)
+Based on [go-twitter](github.com/g8rswimmer/go-twitter/v2)
 
 ### Parameters
 
-| Parameter           | Type     | Default | Description                                                                             |
-|---------------------|----------|---------|-----------------------------------------------------------------------------------------|
-| **consumerKey**     | _STRING_ | empty   | [Twitter Auth](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide) |
-| **consumerSecret**  | _STRING_ | empty   | [Twitter Auth](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide) |
-| **accessToken**     | _STRING_ | empty   | [Twitter Auth](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide) |
-| **accessSecret**    | _STRING_ | empty   | [Twitter Auth](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide) |
-| **keywords**        | _STRING_ | empty   | comma separated keywords that should match on the tweets                                |
-| **users**           | _STRING_ | empty   | comma separated users list                                                              |
-| **languages**       | _STRING_ | empty   | filter by language                                                                      |
-| **disable_retweet** | _BOOL_   | "false" | don't include retweets in the stream                                                    |
-| **disable_quoted**  | _BOOL_   | "false" | don't include quoted tweets in the stream                                               |
+| Parameter           | Type     | Default | Description                                                                                                                        |
+|---------------------|----------|---------|------------------------------------------------------------------------------------------------------------------------------------|
+| **bearerToken**     | _STRING_ | empty   | [Twitter Auth](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide)                                            |
+| **keywords**        | _STRING_ | empty   | comma separated keywords that should match on the tweets                                                                           |
+| **users**           | _STRING_ | empty   | comma separated users list                                                                                                         |
+| **rule**            | _STRING_ | empty   | set a custom rule [documentation](https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/integrate/build-a-rule) |
+| **languages**       | _STRING_ | empty   | filter by language (comma separated languages)                                                                                     |
+| **disable_retweet** | _BOOL_   | "false" | don't include retweets in the stream                                                                                               |
+| **disable_quoted**  | _BOOL_   | "false" | don't include quoted tweets in the stream                                                                                          |
  
 {{< notice info "Example" >}} 
 `... | <twitter: users="goofy, mickeymouse",keywords="movie, cartoon"> | ...`
@@ -40,20 +38,19 @@ The `main` field of the Message will contain:
 
 #### Extra
 
-| Name              | Description                                                       |
-|-------------------|-------------------------------------------------------------------|
-| link              | link to the tweet                                                 |
-| language          | language used for the tweet                                       |
-| username          | author of the tweet                                               |
-| quoted            | "true" if the tweet if a quoted tweet, "false" otherwise          |
-| retweet           | "true" if the tweet if a retweeted tweet, "false" otherwise       |
-| original_username | author of the original tweet if it is a retweet or quoted tweet   |
-| original_language | language of the original tweet if it is a retweet or quoted tweet |
-| original_status   | text of the original tweet if it is a retweet or quoted tweet     |
-| original_link     | link of the original tweet if it is a retweet or quoted tweet     |
+| Name              | Description                                                            |
+|-------------------|------------------------------------------------------------------------|
+| link              | link to the tweet                                                      |
+| language          | language used for the tweet                                            |
+| username          | author of the tweet                                                    |
+| quoted            | "true" if the tweet is a quoted tweet, "false" otherwise               |
+| retweet           | "true" if the tweet is a retweeted tweet, "false" otherwise            |
+| response          | "true" if the tweet is a response for another tweet, "false" otherwise |
+| reply_for_user    | it contains the userID if the tweet is a reply for a user              |
+| original_link     | link of the original tweet if it is a retweet or quoted tweet          |
 
 {{< notice warning "ATTENTION" >}} 
-In some circumstances the extra field could be empty.
+In some cases the extra field could be empty.
 {{< /notice >}}
 
 ### Examples
