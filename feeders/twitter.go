@@ -231,16 +231,16 @@ func (t *Twitter) Start() {
 		searchStreamRules, err := t.client.TweetSearchStreamAddRule(context.Background(), rules, false)
 		if err != nil {
 			log.Error("TwitterFeeder: can't create a rule for Twitter stream: %s", err)
-		}
-
-		if searchStreamRules.Errors != nil && len(searchStreamRules.Errors) > 0 {
-			for _, e := range searchStreamRules.Errors {
-				log.Error("TwitterFeeder: error adding rule '%s': %s", e.Value, e.Title)
+		} else {
+			if searchStreamRules.Errors != nil && len(searchStreamRules.Errors) > 0 {
+				for _, e := range searchStreamRules.Errors {
+					log.Error("TwitterFeeder: error adding rule '%s': %s", e.Value, e.Title)
+				}
 			}
-		}
 
-		if searchStreamRules.Rules != nil {
-			log.Debug("TwitterFeeder: %d rules have been created", len(searchStreamRules.Rules))
+			if searchStreamRules.Rules != nil {
+				log.Debug("TwitterFeeder: %d rules have been created", len(searchStreamRules.Rules))
+			}
 		}
 	} else {
 		log.Info("TwitterFeeder: no rule found, waiting for rules specified externally")
