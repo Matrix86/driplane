@@ -17,13 +17,13 @@ Based on [go-twitter](github.com/g8rswimmer/go-twitter/v2)
 | **bearerToken**     | _STRING_ | empty   | [Twitter Auth](https://developer.twitter.com/en/docs/twitter-api/getting-started/guide)                                            |
 | **keywords**        | _STRING_ | empty   | comma separated keywords that should match on the tweets                                                                           |
 | **users**           | _STRING_ | empty   | comma separated users list                                                                                                         |
-| **rule**            | _STRING_ | empty   | set a custom rule [documentation](https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/integrate/build-a-rule) |
+| **rules**           | _STRING_ | empty   | set multiple custom rules separated by the char | and in the form tag_name:rule [documentation](https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/integrate/build-a-rule) |
 | **languages**       | _STRING_ | empty   | filter by language (comma separated languages)                                                                                     |
 | **disable_retweet** | _BOOL_   | "false" | don't include retweets in the stream                                                                                               |
 | **disable_quoted**  | _BOOL_   | "false" | don't include quoted tweets in the stream                                                                                          |
  
 {{< notice info "Example" >}} 
-`... | <twitter: users="goofy, mickeymouse",keywords="movie, cartoon"> | ...`
+`... | <twitter: users="goofy, mickeymouse",keywords="movie, cartoon", rules="rule1:movie OR cartoon|rule2:mickey mouse OR pluto"> | ...`
 {{< /notice >}}
 
 ### Output
@@ -52,6 +52,8 @@ The `main` field of the Message will contain:
 | original_username | username of the tweet linked to the current one                        |
 | original_name     | name of the author of the tweet linked to the current one              |
 | original_text     | text of the tweet linked to the current one                            |
+| original_userid   | ID of the original author of the tweet if it is a retweet or a quote   |
+| matched_rules     | list of the matched rules (tags) comma separated                       |
 
 {{< notice warning "ATTENTION" >}} 
 In some cases the extra field could be empty.
