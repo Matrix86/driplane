@@ -84,33 +84,27 @@ func (a authorize) Add(req *http.Request) {
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", a.Token))
 }
 
-func (t *Twitter) getUsernameFromIds(IDs []string) ([]string, error) {
-	res, err := t.client.UserLookup(context.Background(), IDs, twitter.UserLookupOpts{UserFields: []twitter.UserField{twitter.UserFieldUserName}})
-	if err != nil {
-		return nil, fmt.Errorf("can't retrieve info for userID %s : %s", strings.Join(IDs, ","), err)
+func (t *Twitter) getMapUserByID(objs []*twitter.UserObj) map[string]*twitter.UserObj {
+	m := make(map[string]*twitter.UserObj)
+	for i := range objs {
+		m[objs[i].ID] = objs[i]
 	}
-	if len(res.Raw.Users) != 0 {
-		names := make([]string, len(res.Raw.Users))
-		for idx, n := range res.Raw.Users {
-			names[idx] = n.UserName
-		}
-		return names, nil
+	return m
+}
+
+func (t *Twitter) getMapTweetByID(objs []*twitter.TweetObj) map[string]*twitter.TweetObj {
+	m := make(map[string]*twitter.TweetObj)
+	for i := range objs {
+		m[objs[i].ID] = objs[i]
 	}
-	return nil, fmt.Errorf("user not found")
+	return m
 }
 
 func (t *Twitter) handleTweet(tm *twitter.TweetMessage) {
+	var author *twitter.UserObj
+	var ok bool
+	//pp.Print(tm)
 	for _, tweet := range tm.Raw.Tweets {
-		ids := []string{tweet.AuthorID}
-		if tweet.InReplyToUserID != "" {
-			ids = append(ids, tweet.InReplyToUserID)
-		}
-		usernames, err := t.getUsernameFromIds(ids)
-		if err != nil {
-			log.Error("handleTweet couldn't handle the tweet: %s", err)
-			return
-		}
-
 		// skip if the filter by language is active
 		if len(t.languages) > 0 {
 			if _, ok := t.languages[tweet.Language]; !ok {
@@ -118,10 +112,21 @@ func (t *Twitter) handleTweet(tm *twitter.TweetMessage) {
 			}
 		}
 
+		// convert user and tweet array to map
+		users := t.getMapUserByID(tm.Raw.Includes.Users)
+		tweets := t.getMapTweetByID(tm.Raw.Includes.Tweets)
+
+		if author, ok = users[tweet.AuthorID]; !ok {
+			log.Error("couldn't find user by ID=%s in the includes", tweet.AuthorID)
+			continue
+		}
+
 		msg := data.NewMessageWithExtra(tweet.Text, map[string]interface{}{
-			"link":          fmt.Sprintf("https://twitter.com/%s/statuses/%s", usernames[0], tweet.ID),
+			"link":          fmt.Sprintf("https://twitter.com/%s/statuses/%s", author.UserName, tweet.ID),
 			"language":      tweet.Language,
-			"username":      usernames[0],
+			"username":      author.UserName,
+			"name":          author.Name,
+			"author_id":     author.ID,
 			"source_client": tweet.Source,
 			"quoted":        "false",
 			"retweet":       "false",
@@ -132,17 +137,36 @@ func (t *Twitter) handleTweet(tm *twitter.TweetMessage) {
 		extra := make(map[string]string)
 
 		if tweet.ReferencedTweets != nil && len(tweet.ReferencedTweets) != 0 {
+			var originalAuthor *twitter.UserObj
+			var originalTweet *twitter.TweetObj
 			for idx := range tweet.ReferencedTweets {
+				// getting the original tweet
+				if originalTweet, ok = tweets[tweet.ReferencedTweets[idx].ID]; !ok {
+					log.Error("couldn't find tweet by ID=%s in the includes", tweet.ReferencedTweets[idx].ID)
+					continue
+				}
+
+				// getting the original author
+				if originalAuthor, ok = users[originalTweet.AuthorID]; !ok {
+					log.Error("couldn't find original user by ID=%s in the includes", originalTweet.AuthorID)
+					continue
+				}
+
+				extra["original_link"] = fmt.Sprintf("https://twitter.com/%s/statuses/%s", originalAuthor.UserName, tweet.ReferencedTweets[idx].ID)
+				extra["original_username"] = originalAuthor.UserName
+				extra["original_name"] = originalAuthor.Name
+				extra["original_text"] = originalTweet.Text
+				extra["original_userid"] = originalAuthor.ID
+
 				if tweet.ReferencedTweets[idx].Type == "quoted" {
 					extra["quoted"] = "true"
-					extra["original_link"] = fmt.Sprintf("https://twitter.com/dummy/statuses/%s", tweet.ReferencedTweets[idx].ID)
 					isQuote = true
 				} else if tweet.ReferencedTweets[idx].Type == "replied_to" {
 					extra["response"] = "true"
-					extra["original_link"] = fmt.Sprintf("https://twitter.com/dummy/statuses/%s", tweet.ReferencedTweets[idx].ID)
 				} else if tweet.ReferencedTweets[idx].Type == "retweeted" {
 					extra["retweet"] = "true"
-					extra["original_link"] = fmt.Sprintf("https://twitter.com/dummy/statuses/%s", tweet.ReferencedTweets[idx].ID)
+					// if it is a retweet the text could be truncated and a "RT" word is added as prefix
+					extra["main"] = originalTweet.Text
 					isRetweet = true
 				}
 			}
@@ -255,6 +279,16 @@ func (t *Twitter) Start() {
 			twitter.TweetFieldSource,
 			twitter.TweetFieldInReplyToUserID,
 			twitter.TweetFieldReferencedTweets,
+		},
+		Expansions: []twitter.Expansion{
+			twitter.ExpansionAuthorID,
+			twitter.ExpansionInReplyToUserID,
+			twitter.ExpansionReferencedTweetsID,
+			twitter.ExpansionEntitiesMentionsUserName,
+		},
+		UserFields: []twitter.UserField{
+			twitter.UserFieldUserName,
+			twitter.UserFieldName,
 		},
 	}
 	tweetStream, err := t.client.TweetSearchStream(context.Background(), opts)

@@ -43,11 +43,15 @@ The `main` field of the Message will contain:
 | link              | link to the tweet                                                      |
 | language          | language used for the tweet                                            |
 | username          | author of the tweet                                                    |
+| author_id         | ID of the author of the tweet                                          |
 | quoted            | "true" if the tweet is a quoted tweet, "false" otherwise               |
 | retweet           | "true" if the tweet is a retweeted tweet, "false" otherwise            |
 | response          | "true" if the tweet is a response for another tweet, "false" otherwise |
 | reply_for_user    | it contains the userID if the tweet is a reply for a user              |
 | original_link     | link of the original tweet if it is a retweet or quoted tweet          |
+| original_username | username of the tweet linked to the current one                        |
+| original_name     | name of the author of the tweet linked to the current one              |
+| original_text     | text of the tweet linked to the current one                            |
 
 {{< notice warning "ATTENTION" >}} 
 In some cases the extra field could be empty.
