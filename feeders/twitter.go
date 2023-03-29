@@ -166,7 +166,7 @@ func (t *Twitter) handleTweet(tm *twitter.TweetMessage) {
 				} else if tweet.ReferencedTweets[idx].Type == "retweeted" {
 					extra["retweet"] = "true"
 					// if it is a retweet the text could be truncated and a "RT" word is added as prefix
-					extra["main"] = originalTweet.Text
+					msg.SetMessage(originalTweet.Text)
 					isRetweet = true
 				}
 			}
