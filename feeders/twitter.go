@@ -106,7 +106,7 @@ func (t *Twitter) handleTweet(tm *twitter.TweetMessage) {
 		tweets := tm.Raw.Includes.TweetsByID()
 
 		if author, ok = users[tweet.AuthorID]; !ok {
-			log.Error("couldn't find user by ID=%s in the includes", tweet.AuthorID)
+			log.Error("TwitterFeeder: couldn't find user by ID=%s in the includes", tweet.AuthorID)
 			continue
 		}
 
@@ -135,15 +135,15 @@ func (t *Twitter) handleTweet(tm *twitter.TweetMessage) {
 			var originalAuthor *twitter.UserObj
 			var originalTweet *twitter.TweetObj
 			for idx := range tweet.ReferencedTweets {
-				// getting the original tweet
+				// getting the original tweet if it is not protected
 				if originalTweet, ok = tweets[tweet.ReferencedTweets[idx].ID]; !ok {
-					log.Error("couldn't find tweet by ID=%s in the includes", tweet.ReferencedTweets[idx].ID)
+					log.Debug("TwitterFeeder: couldn't find tweet by ID=%s in the includes", tweet.ReferencedTweets[idx].ID)
 					continue
 				}
 
 				// getting the original author
 				if originalAuthor, ok = users[originalTweet.AuthorID]; !ok {
-					log.Error("couldn't find original user by ID=%s in the includes", originalTweet.AuthorID)
+					log.Debug("TwitterFeeder: couldn't find original user by ID=%s in the includes", originalTweet.AuthorID)
 					continue
 				}
 
@@ -189,7 +189,7 @@ func (t *Twitter) handleTweet(tm *twitter.TweetMessage) {
 func (t *Twitter) Start() {
 	var err error
 
-	log.Debug("Initialization of Twitter client")
+	log.Debug("TwitterFeeder: Initialization of Twitter client")
 	t.client = &twitter.Client{
 		Authorizer: authorize{
 			Token: t.bearerToken,
@@ -199,14 +199,14 @@ func (t *Twitter) Start() {
 	}
 
 	// Setup rules
-	log.Debug("Adding Twitter Rules")
+	log.Debug("TwitterFeeder: Adding Twitter Rules")
 	rules := []twitter.TweetSearchStreamRule{}
 	if t.keywords != "" {
 		keywords := strings.Split(t.keywords, ",")
 		for i, k := range keywords {
 			keywords[i] = strings.TrimSpace(k)
 		}
-		log.Debug("Setting keywords rule: '%s'", strings.Join(keywords, ","))
+		log.Debug("TwitterFeeder: Setting keywords rule: '%s'", strings.Join(keywords, ","))
 
 		keywordRule := twitter.TweetSearchStreamRule{
 			Value: strings.Join(keywords, " OR "),
@@ -221,7 +221,7 @@ func (t *Twitter) Start() {
 		for i, k := range users {
 			users[i] = fmt.Sprintf("@%s", strings.TrimSpace(k))
 		}
-		log.Debug("Setting users rule: '%s'", strings.Join(users, ","))
+		log.Debug("TwitterFeeder: Setting users rule: '%s'", strings.Join(users, ","))
 
 		userRule := twitter.TweetSearchStreamRule{
 			Value: strings.Join(users, " OR "),
@@ -232,7 +232,7 @@ func (t *Twitter) Start() {
 	}
 
 	if len(t.twitterRules) > 0 {
-		log.Debug("Setting custom rules:")
+		log.Debug("TwitterFeeder: Setting custom rules:")
 		for k, v := range t.twitterRules {
 			log.Debug("rule %s = %s", k, v)
 			rules = append(rules, twitter.TweetSearchStreamRule{
