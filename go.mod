@@ -13,7 +13,6 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.1
 	github.com/gofrs/flock v0.8.1
 	github.com/hpcloud/tail v1.0.0
-	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/ledongthuc/pdf v0.0.0-20220302134840-0c2507a12d80
 	github.com/localtunnel/go-localtunnel v0.0.0-20170326223115-8a804488f275
 	github.com/mmcdole/gofeed v1.2.0
@@ -51,12 +50,9 @@ require (
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/klauspost/compress v1.15.15 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/minio/minio-go/v7 v7.0.49 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect

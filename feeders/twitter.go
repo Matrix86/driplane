@@ -11,7 +11,6 @@ import (
 
 	"github.com/evilsocket/islazy/log"
 	twitter "github.com/g8rswimmer/go-twitter/v2"
-	"github.com/k0kubun/pp"
 )
 
 // Twitter is a Feeder that feeds a pipeline with tweets
@@ -308,26 +307,38 @@ func (t *Twitter) Start() {
 				log.Info("TwitterFeeder: System message received: %#v", sm)
 
 			case de := <-tweetStream.DisconnectionError():
-				log.Error("TwitterFeeder: disconnection error: %#v", pp.Sprint(de))
+				if len(de.Connections) > 0 {
+					for _, e := range de.Connections {
+						log.Debug("TwitterFeeder: connection error: Title='%s' ConnectionIssue='%s' Detail='%s' Type='%s'", e.Title, e.ConnectionIssue, e.Detail, e.Type)
+					}
+				} else if len(de.Disconnections) > 0 {
+					for _, e := range de.Disconnections {
+						log.Error("TwitterFeeder: disconnection error: Title='%s' DisconnectType='%s' Detail='%s' Type='%s'", e.Title, e.DisconnectType, e.Detail, e.Type)
+					}
+				}
 
 			case strErr := <-tweetStream.Err():
-				log.Error("TwitterFeeder: error on the stream: %#v", strErr)
+				log.Error("TwitterFeeder: error on the stream: %s", strErr)
 
 			default:
 			}
 			if !tweetStream.Connection() {
-				log.Error("Connection retry")
-				if t.retry > 0 {
-					t.retry--
-					time.Sleep(10 * time.Second)
-					t.Start()
-				} else {
-					log.Error("Connection retries finished...need to restart the app")
+				log.Error("TwitterFeeder: disconnection detected")
+				for ; t.retry > 0 && !tweetStream.Connection(); t.retry-- {
+					waitTime := time.Duration(2*(10-t.retry)) * time.Second
+					log.Error("TwitterFeeder: connection retry...waiting %d", waitTime.Seconds())
+					time.Sleep(waitTime)
+					tweetStream, err = t.client.TweetSearchStream(context.Background(), opts)
+					if err != nil {
+						log.Error("TwitterFeeder: stream connection error: %s", err)
+					} else {
+						t.retry = 10
+					}
+				}
+				if t.retry == 0 {
+					log.Fatal("TwitterFeeder: too many connection retries. Closing")
 				}
 				return
-			} else {
-				// resetting the retries
-				t.retry = 10
 			}
 		}
 	}()
