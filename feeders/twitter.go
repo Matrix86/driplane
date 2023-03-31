@@ -11,7 +11,6 @@ import (
 
 	"github.com/evilsocket/islazy/log"
 	twitter "github.com/g8rswimmer/go-twitter/v2"
-	"github.com/k0kubun/pp"
 )
 
 // Twitter is a Feeder that feeds a pipeline with tweets
@@ -21,7 +20,7 @@ type Twitter struct {
 	bearerToken string
 
 	keywords      string
-	twitterRule   string
+	twitterRules  map[string]string
 	users         string
 	languages     map[string]bool
 	retweet       bool
@@ -31,8 +30,8 @@ type Twitter struct {
 
 	retry int
 
-	rules  []string
-	client *twitter.Client
+	ruleIDs []twitter.TweetSearchStreamRuleID
+	client  *twitter.Client
 }
 
 // NewTwitterFeeder is the registered method to instantiate a TwitterFeeder
@@ -43,8 +42,9 @@ func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
 		retweet:       true,
 		quoted:        true,
 		closeChan:     make(chan int),
-		rules:         make([]string, 0),
+		ruleIDs:       make([]twitter.TweetSearchStreamRuleID, 0),
 		languages:     make(map[string]bool),
+		twitterRules:  make(map[string]string),
 		retry:         10,
 	}
 
@@ -54,8 +54,14 @@ func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
 	if val, ok := conf["twitter.keywords"]; ok {
 		t.keywords = val
 	}
-	if val, ok := conf["twitter.rule"]; ok {
-		t.twitterRule = val
+	if val, ok := conf["twitter.rules"]; ok {
+		// rules are separated by | char and in the form tag:rule
+		rules := strings.Split(val, "|")
+		for _, rule := range rules {
+			if tag, value, found := strings.Cut(rule, ":"); found {
+				t.twitterRules[tag] = value
+			}
+		}
 	}
 	if val, ok := conf["twitter.users"]; ok {
 		t.users = val
@@ -84,26 +90,9 @@ func (a authorize) Add(req *http.Request) {
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", a.Token))
 }
 
-func (t *Twitter) getMapUserByID(objs []*twitter.UserObj) map[string]*twitter.UserObj {
-	m := make(map[string]*twitter.UserObj)
-	for i := range objs {
-		m[objs[i].ID] = objs[i]
-	}
-	return m
-}
-
-func (t *Twitter) getMapTweetByID(objs []*twitter.TweetObj) map[string]*twitter.TweetObj {
-	m := make(map[string]*twitter.TweetObj)
-	for i := range objs {
-		m[objs[i].ID] = objs[i]
-	}
-	return m
-}
-
 func (t *Twitter) handleTweet(tm *twitter.TweetMessage) {
 	var author *twitter.UserObj
 	var ok bool
-	//pp.Print(tm)
 	for _, tweet := range tm.Raw.Tweets {
 		// skip if the filter by language is active
 		if len(t.languages) > 0 {
@@ -113,12 +102,17 @@ func (t *Twitter) handleTweet(tm *twitter.TweetMessage) {
 		}
 
 		// convert user and tweet array to map
-		users := t.getMapUserByID(tm.Raw.Includes.Users)
-		tweets := t.getMapTweetByID(tm.Raw.Includes.Tweets)
+		users := tm.Raw.Includes.UsersByID()
+		tweets := tm.Raw.Includes.TweetsByID()
 
 		if author, ok = users[tweet.AuthorID]; !ok {
 			log.Error("couldn't find user by ID=%s in the includes", tweet.AuthorID)
 			continue
+		}
+
+		matching := []string{}
+		for _, m := range tm.Raw.MatchingRules {
+			matching = append(matching, m.Tag)
 		}
 
 		msg := data.NewMessageWithExtra(tweet.Text, map[string]interface{}{
@@ -131,6 +125,7 @@ func (t *Twitter) handleTweet(tm *twitter.TweetMessage) {
 			"quoted":        "false",
 			"retweet":       "false",
 			"response":      "false",
+			"matched_rules": strings.Join(matching, ","),
 		})
 
 		isQuote, isRetweet := false, false
@@ -218,7 +213,6 @@ func (t *Twitter) Start() {
 			Tag:   "keywords_rule",
 		}
 
-		t.rules = append(t.rules, strings.Join(keywords, " OR "))
 		rules = append(rules, keywordRule)
 	}
 
@@ -234,24 +228,22 @@ func (t *Twitter) Start() {
 			Tag:   "users_rule",
 		}
 
-		t.rules = append(t.rules, strings.Join(users, " OR "))
 		rules = append(rules, userRule)
 	}
 
-	if t.twitterRule != "" {
-		log.Debug("Setting custom rule: '%s'", t.twitterRule)
-
-		customRule := twitter.TweetSearchStreamRule{
-			Value: t.twitterRule,
-			Tag:   "custom_rule",
+	if len(t.twitterRules) > 0 {
+		log.Debug("Setting custom rules:")
+		for k, v := range t.twitterRules {
+			log.Debug("rule %s = %s", k, v)
+			rules = append(rules, twitter.TweetSearchStreamRule{
+				Value: v,
+				Tag:   k,
+			})
 		}
-
-		t.rules = append(t.rules, t.twitterRule)
-		rules = append(rules, customRule)
 	}
 
 	if len(rules) > 0 {
-		log.Debug("TwitterFeeder: adding %d rules", len(t.rules))
+		log.Debug("TwitterFeeder: adding rules")
 		searchStreamRules, err := t.client.TweetSearchStreamAddRule(context.Background(), rules, false)
 		if err != nil {
 			log.Error("TwitterFeeder: can't create a rule for Twitter stream: %s", err)
@@ -265,7 +257,12 @@ func (t *Twitter) Start() {
 			if searchStreamRules.Rules != nil {
 				log.Debug("TwitterFeeder: %d rules have been created", len(searchStreamRules.Rules))
 			}
+
+			for _, r := range searchStreamRules.Rules {
+				t.ruleIDs = append(t.ruleIDs, r.ID)
+			}
 		}
+
 	} else {
 		log.Info("TwitterFeeder: no rule found, waiting for rules specified externally")
 	}
@@ -310,26 +307,38 @@ func (t *Twitter) Start() {
 				log.Info("TwitterFeeder: System message received: %#v", sm)
 
 			case de := <-tweetStream.DisconnectionError():
-				log.Error("TwitterFeeder: disconnection error: %#v", pp.Sprint(de))
+				if len(de.Connections) > 0 {
+					for _, e := range de.Connections {
+						log.Debug("TwitterFeeder: connection error: Title='%s' ConnectionIssue='%s' Detail='%s' Type='%s'", e.Title, e.ConnectionIssue, e.Detail, e.Type)
+					}
+				} else if len(de.Disconnections) > 0 {
+					for _, e := range de.Disconnections {
+						log.Error("TwitterFeeder: disconnection error: Title='%s' DisconnectType='%s' Detail='%s' Type='%s'", e.Title, e.DisconnectType, e.Detail, e.Type)
+					}
+				}
 
 			case strErr := <-tweetStream.Err():
-				log.Error("TwitterFeeder: error on the stream: %#v", strErr)
+				log.Error("TwitterFeeder: error on the stream: %s", strErr)
 
 			default:
 			}
 			if !tweetStream.Connection() {
-				log.Error("Connection retry")
-				if t.retry > 0 {
-					t.retry--
-					time.Sleep(10 * time.Second)
-					t.Start()
-				} else {
-					log.Error("Connection retries finished...need to restart the app")
+				log.Error("TwitterFeeder: disconnection detected")
+				for ; t.retry > 0 && !tweetStream.Connection(); t.retry-- {
+					waitTime := time.Duration(2*(10-t.retry)) * time.Second
+					log.Error("TwitterFeeder: connection retry...waiting %f", waitTime.Seconds())
+					time.Sleep(waitTime)
+					tweetStream, err = t.client.TweetSearchStream(context.Background(), opts)
+					if err != nil {
+						log.Error("TwitterFeeder: stream connection error: %s", err)
+					} else {
+						t.retry = 10
+					}
+				}
+				if t.retry == 0 {
+					log.Fatal("TwitterFeeder: too many connection retries. Closing")
 				}
 				return
-			} else {
-				// resetting the retries
-				t.retry = 10
 			}
 		}
 	}()
@@ -338,9 +347,9 @@ func (t *Twitter) Start() {
 
 // Stop handles the Feeder shutdown
 func (t *Twitter) Stop() {
-	if len(t.rules) > 0 {
-		log.Debug("TwitterFeeder: removing %d rules", len(t.rules))
-		_, err := t.client.TweetSearchStreamDeleteRuleByValue(context.Background(), t.rules, false)
+	if len(t.ruleIDs) > 0 {
+		log.Debug("TwitterFeeder: removing %d rules", len(t.ruleIDs))
+		_, err := t.client.TweetSearchStreamDeleteRuleByID(context.Background(), t.ruleIDs, false)
 		if err != nil {
 			log.Error("twitterFeeder: couldn't delete the rules: %s", err)
 		}
