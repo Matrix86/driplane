@@ -290,7 +290,8 @@ func (t *Twitter) Start() {
 	}
 	tweetStream, err := t.client.TweetSearchStream(context.Background(), opts)
 	if err != nil {
-		log.Fatal("can't start Twitter stream: %s", err)
+		defer t.cleanRules()
+		log.Fatal("TwitterFeeder: can't start Twitter stream: %s", err)
 	}
 
 	go func() {
@@ -336,6 +337,7 @@ func (t *Twitter) Start() {
 					}
 				}
 				if t.retry == 0 {
+					defer t.cleanRules()
 					log.Fatal("TwitterFeeder: too many connection retries. Closing")
 				}
 				return
@@ -345,8 +347,7 @@ func (t *Twitter) Start() {
 	t.isRunning = true
 }
 
-// Stop handles the Feeder shutdown
-func (t *Twitter) Stop() {
+func (t *Twitter) cleanRules() {
 	if len(t.ruleIDs) > 0 {
 		log.Debug("TwitterFeeder: removing %d rules", len(t.ruleIDs))
 		_, err := t.client.TweetSearchStreamDeleteRuleByID(context.Background(), t.ruleIDs, false)
@@ -354,6 +355,12 @@ func (t *Twitter) Stop() {
 			log.Error("twitterFeeder: couldn't delete the rules: %s", err)
 		}
 	}
+	t.ruleIDs = []twitter.TweetSearchStreamRuleID{}
+}
+
+// Stop handles the Feeder shutdown
+func (t *Twitter) Stop() {
+	t.cleanRules()
 
 	log.Debug("feeder '%s' stream stop", t.Name())
 	close(t.closeChan)
