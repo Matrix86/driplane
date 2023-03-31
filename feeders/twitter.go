@@ -326,7 +326,7 @@ func (t *Twitter) Start() {
 				log.Error("TwitterFeeder: disconnection detected")
 				for ; t.retry > 0 && !tweetStream.Connection(); t.retry-- {
 					waitTime := time.Duration(2*(10-t.retry)) * time.Second
-					log.Error("TwitterFeeder: connection retry...waiting %d", waitTime.Seconds())
+					log.Error("TwitterFeeder: connection retry...waiting %f", waitTime.Seconds())
 					time.Sleep(waitTime)
 					tweetStream, err = t.client.TweetSearchStream(context.Background(), opts)
 					if err != nil {
