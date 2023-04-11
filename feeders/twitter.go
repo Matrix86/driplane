@@ -329,10 +329,12 @@ func (t *Twitter) Start() {
 					waitTime := time.Duration(2*(10-t.retry)) * time.Second
 					log.Error("TwitterFeeder: connection retry...waiting %f", waitTime.Seconds())
 					time.Sleep(waitTime)
+
 					tweetStream, err = t.client.TweetSearchStream(context.Background(), opts)
 					if err != nil {
 						log.Error("TwitterFeeder: stream connection error: %s", err)
 					} else {
+						// we manage to re-connect
 						t.retry = 10
 					}
 				}
@@ -340,7 +342,6 @@ func (t *Twitter) Start() {
 					defer t.cleanRules()
 					log.Fatal("TwitterFeeder: too many connection retries. Closing")
 				}
-				return
 			}
 		}
 	}()
