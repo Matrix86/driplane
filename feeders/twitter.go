@@ -59,6 +59,9 @@ func NewTwitterFeeder(conf map[string]string) (Feeder, error) {
 		rules := strings.Split(val, "|")
 		for _, rule := range rules {
 			if tag, value, found := strings.Cut(rule, ":"); found {
+				if len(value) > 512 {
+					return nil, fmt.Errorf("each Twitter's rule can be 512 characters long at most")
+				}
 				t.twitterRules[tag] = value
 			}
 		}
