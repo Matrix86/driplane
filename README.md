@@ -169,11 +169,13 @@ The rules and the JS plugins allows you to create very complex custom logics.
 ## Usage
 
 ```
-Usage of driplane:
+Usage of ./bin/driplane:
   -config string
     	Set configuration file.
   -debug
     	Enable debug logs.
+  -dry-run
+    	Only test the rules syntax.
   -help
     	This help.
   -js string
