@@ -27,10 +27,7 @@ general:
 > For the twitter feeder we can set the keys one time.
 ```yaml
 twitter:
-  consumerKey: "consumerKey",
-  consumerSecret: "consumerSecret",
-  accessToken: "accessToken",
-  accessSecret: "accessSecret",
+  bearerToken: "token",
   keywords: "#italy #coding #malware something",
   stallWarnings: "true"
 ```  
