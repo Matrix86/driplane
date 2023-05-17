@@ -18,6 +18,7 @@ import (
 var (
 	helpFlag   bool
 	debugFlag  bool
+	dryRunFlag bool
 	rulePath   string
 	jsPath     string
 	configFile string
@@ -46,6 +47,7 @@ func main() {
 	flag.StringVar(&jsPath, "js", "", "Path of the js plugins.")
 	flag.BoolVar(&helpFlag, "help", false, "This help.")
 	flag.BoolVar(&debugFlag, "debug", false, "Enable debug logs.")
+	flag.BoolVar(&dryRunFlag, "dry-run", false, "Only test the rules syntax.")
 	flag.Parse()
 
 	appName := fmt.Sprintf("%s v%s", core.Name, core.Version)
@@ -81,7 +83,7 @@ func main() {
 	}
 
 	if rulePath != "" {
-		if utils.DirExists(rulePath) == false {
+		if !utils.DirExists(rulePath) {
 			log.Fatal("rules directory not found: '%s'", rulePath)
 		}
 		config.Set("general.rules_path", rulePath)
@@ -115,6 +117,10 @@ func main() {
 	o, err := core.NewOrchestrator(config)
 	if err != nil {
 		log.Fatal("%s", err)
+	}
+
+	if dryRunFlag {
+		os.Exit(0)
 	}
 
 	go Signal(&o)
