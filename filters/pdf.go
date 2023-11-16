@@ -50,12 +50,10 @@ func (f *PDF) DoFilter(msg *data.Message) (bool, error) {
 		}
 
 		h, r, err := pdf.Open(text)
-		// remember close file
-		defer h.Close()
-
 		if err != nil {
 			return false, err
 		}
+		defer h.Close()
 
 		var buf bytes.Buffer
 		b, err := r.GetPlainText()
@@ -96,7 +94,7 @@ func (f *PDF) DoFilter(msg *data.Message) (bool, error) {
 }
 
 // OnEvent is called when an event occurs
-func (f *PDF) OnEvent(event *data.Event){}
+func (f *PDF) OnEvent(event *data.Event) {}
 
 // Set the name of the filter
 func init() {
