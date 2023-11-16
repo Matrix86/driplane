@@ -18,7 +18,7 @@ lint:
 
 build: clean
 	@mkdir -p bin
-	go build -o bin/driplane -v -ldflags=${LDFLAGS} cmd/driplane/main.go
+	go build -buildvcs=false -o bin/driplane -trimpath -v -ldflags=${LDFLAGS} cmd/driplane/main.go
 
 install: build
 	go install -ldflags=${LDFLAGS} ./cmd/driplane
