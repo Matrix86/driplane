@@ -199,6 +199,7 @@ func (f *Imap) fetchMessages() error {
 	if err := <-done; err != nil {
 		return fmt.Errorf("fetching: %s", err)
 	}
+	f.lastCheck = time.Now()
 
 	return nil
 }
