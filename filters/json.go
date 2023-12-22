@@ -73,11 +73,16 @@ func (f *JSON) DoFilter(msg *data.Message) (bool, error) {
 		}
 
 		if doc, err := jsonquery.Parse(strings.NewReader(jsonData)); err == nil {
+			atLeastOne := false
 			for _, node := range jsonquery.Find(doc, f.selector) {
+				atLeastOne = true
 				clone := msg.Clone()
 				clone.SetMessage(node.Value())
 				f.Propagate(clone)
 			}
+
+			return atLeastOne, nil
+
 		} else {
 			log.Debug("'%v' could not be parsed as JSON: %v", text, err)
 			return false, nil
