@@ -26,6 +26,8 @@ require (
 )
 
 require (
+	github.com/antchfx/jsonquery v1.3.3 // indirect
+	github.com/antchfx/xpath v1.2.5 // indirect
 	github.com/emersion/go-sasl v0.0.0-20231106173351-e73c9f7bad43 // indirect
 	github.com/emersion/go-textwrapper v0.0.0-20200911093747-65d896831594 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
