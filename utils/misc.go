@@ -69,7 +69,9 @@ func Md5File(filename string) (string, error) {
 // FlatStruct tries to flat a struct object in a map[string]string
 func FlatStruct(s interface{}) map[string]string {
 	flatten := make(map[string]string)
-	flatType(s, "", flatten)
+	if s != nil {
+		flatType(s, "", flatten)
+	}
 	return flatten
 }
 
@@ -79,6 +81,9 @@ func flatType(s interface{}, prefix string, flatten map[string]string) {
 	if kind == reflect.Ptr || kind == reflect.Interface {
 		v = reflect.Indirect(v)
 		kind = v.Kind()
+		if kind == reflect.Invalid {
+			return
+		}
 	}
 	t := v.Type()
 
