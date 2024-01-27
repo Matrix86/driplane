@@ -13,6 +13,10 @@ test-coverage:
 	@go test -short -coverprofile cover.out -covermode=atomic ${PKG_LIST}
 	@cat cover.out >> coverage.txt
 
+test-coverage-html:
+	@go test -short -coverprofile cover.out -covermode=atomic ${PKG_LIST}
+	@go tool cover -html=cover.out
+
 lint:
 	@golint -set_exit_status ${PKG_LIST}
 

@@ -3,12 +3,10 @@ package filters
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"strings"
 
 	"github.com/Matrix86/driplane/data"
 	"github.com/antchfx/jsonquery"
-	"github.com/evilsocket/islazy/fs"
 	"github.com/evilsocket/islazy/log"
 	"github.com/evilsocket/islazy/str"
 )
@@ -18,14 +16,16 @@ type JSON struct {
 	Base
 
 	selector string
+	target   string
 
 	params map[string]string
 }
 
-// NewJSONFilter is the registered method to instantiate a HtmlFilter
+// NewJSONFilter is the registered method to instantiate a JSONFilter
 func NewJSONFilter(p map[string]string) (Filter, error) {
 	f := &JSON{
 		params:   p,
+		target:   "main",
 		selector: "",
 	}
 	f.cbFilter = f.DoFilter
@@ -37,6 +37,9 @@ func NewJSONFilter(p map[string]string) (Filter, error) {
 	if f.selector == "" {
 		return nil, errors.New("no selector specified for JSON filter")
 	}
+	if v, ok := f.params["target"]; ok {
+		f.target = v
+	}
 
 	return f, nil
 }
@@ -46,8 +49,10 @@ func (f *JSON) DoFilter(msg *data.Message) (bool, error) {
 	//var err error
 	var text string
 
-	if v, ok := msg.GetTarget("main").(string); ok {
+	if v, ok := msg.GetTarget(f.target).(string); ok {
 		text = str.Trim(v)
+	} else if v, ok := msg.GetTarget(f.target).([]byte); ok {
+		text = string(v)
 	} else {
 		// ERROR this filter can't be used with different types
 		return false, fmt.Errorf("received data is not a string")
@@ -59,16 +64,8 @@ func (f *JSON) DoFilter(msg *data.Message) (bool, error) {
 		if text[0] == '{' {
 			// json text
 			jsonData = str.Trim(text)
-		} else if fs.Exists(text) {
-			// json file
-			if data, err := ioutil.ReadFile(text); err == nil {
-				jsonData = str.Trim(string(data))
-			} else {
-				log.Debug("could not open %v for reading: %v", text, err)
-				return false, nil
-			}
 		} else {
-			log.Debug("'%v' is not a json document or a file path", text)
+			log.Error("'%v' is not a json document", text)
 			return false, nil
 		}
 
