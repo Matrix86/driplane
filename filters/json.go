@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Matrix86/driplane/data"
+
 	"github.com/antchfx/jsonquery"
 	"github.com/evilsocket/islazy/log"
 	"github.com/evilsocket/islazy/str"
