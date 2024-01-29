@@ -18,7 +18,7 @@ It is possible to use XPath query for JSON specifying a selector to search in th
 
 
 {{< notice info "Example" >}}
-`... | html(selector="id", target="doc") | ...`
+`... | json(selector="id", target="doc") | ...`
 {{< /notice >}}
 
 ### Output
