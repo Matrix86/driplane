@@ -22,10 +22,10 @@ type Orchestrator struct {
 }
 
 // NewOrchestrator create a new instance of the Orchestrator
-func NewOrchestrator(config *Configuration) (Orchestrator, error) {
-	o := Orchestrator{
+func NewOrchestrator(config *Configuration) (*Orchestrator, error) {
+	o := &Orchestrator{
 		config: config,
-		asts: make(map[string]*AST),
+		asts:   make(map[string]*AST),
 	}
 
 	parser, _ := NewParser()

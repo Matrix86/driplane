@@ -123,7 +123,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	go Signal(&o)
+	go Signal(o)
 
 	log.Debug("Trying to start orchestrator")
 	o.StartFeeders()
@@ -131,6 +131,4 @@ func main() {
 
 	log.Debug("Stopping")
 	o.StopFeeders()
-
-	return
 }
