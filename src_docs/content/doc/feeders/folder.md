@@ -1,5 +1,4 @@
 ---
-weight: 0
 title: "Folder"
 date: 2021-02-01T13:38:02+02:00
 draft: false

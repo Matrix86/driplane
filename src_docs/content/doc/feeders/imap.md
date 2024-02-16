@@ -1,5 +1,4 @@
 ---
-weight: 5
 title: "Imap"
 date: 2023-11-16T20:08:45+02:00
 draft: false

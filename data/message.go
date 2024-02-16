@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	html "html/template"
+	"strings"
 	"sync"
 	text "text/template"
 )
@@ -62,6 +63,10 @@ func (d *Message) GetExtra() map[string]interface{} {
 	for key, value := range d.fields {
 		if key == "main" {
 			// Ignoring main content
+			continue
+		}
+		if strings.HasPrefix(key, "_") {
+			// ignore keys that starts with _
 			continue
 		}
 		clone[key] = value

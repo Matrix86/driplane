@@ -25,7 +25,7 @@ type Orchestrator struct {
 func NewOrchestrator(config *Configuration) (Orchestrator, error) {
 	o := Orchestrator{
 		config: config,
-		asts: make(map[string]*AST),
+		asts:   make(map[string]*AST),
 	}
 
 	parser, _ := NewParser()
