@@ -215,6 +215,11 @@ func (t *Telegram) onMessage(ctx context.Context, e tg.Entities, pts int, msg *t
 	}
 	extra["_telegram_api"] = t.api
 
+	tm := time.Unix(int64(msg.Date), 0)
+	extra["msg_timestamp"] = msg.Date
+	extra["msg_date"] = tm.Format(time.DateOnly)
+	extra["msg_time"] = tm.Format(time.TimeOnly)
+
 	t.updateMaps(e)
 
 	if chatPeer, ok := msg.GetPeerID().(*tg.PeerChat); ok {

@@ -3,6 +3,8 @@ package filters
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 	"text/template"
 	"time"
@@ -71,7 +73,7 @@ func NewTelegramFilter(p map[string]string) (Filter, error) {
 	}
 
 	if f.action == "download_file" && f.downloadPath == nil {
-		return nil, fmt.Errorf("param 'download_path' is mandatory with this action")
+		return nil, fmt.Errorf("param 'filename' is mandatory with this action")
 	}
 
 	if f.action == "send_message" {
@@ -178,6 +180,16 @@ func (f *Telegram) DoFilter(msg *data.Message) (bool, error) {
 							return false, err
 						}
 
+						log.Debug("downloading image file to : %s", downloadPath)
+
+						folder := filepath.Dir(downloadPath)
+						if folder != "" {
+							if _, err := os.Stat(folder); os.IsNotExist(err) {
+								log.Debug("folder %s doesn't exist...creating it", folder)
+								os.MkdirAll(folder, 0700)
+							}
+						}
+
 						if _, err := d.Download(tgClient, loc).ToPath(context.Background(), downloadPath); err == nil {
 							log.Debug("telegramFilter: document downloaded to %s", downloadPath)
 							return true, nil
@@ -222,6 +234,16 @@ func (f *Telegram) DoFilter(msg *data.Message) (bool, error) {
 						downloadPath, err := msg.ApplyPlaceholder(f.downloadPath)
 						if err != nil {
 							return false, err
+						}
+
+						log.Debug("downloading image file to : %s", downloadPath)
+
+						folder := filepath.Dir(downloadPath)
+						if folder != "" {
+							if _, err := os.Stat(folder); os.IsNotExist(err) {
+								log.Debug("folder %s doesn't exist...creating it", folder)
+								os.MkdirAll(folder, os.ModeDir)
+							}
 						}
 
 						d := downloader.NewDownloader()
