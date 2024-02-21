@@ -16,6 +16,8 @@ import (
 	"github.com/gotd/td/tg"
 )
 
+const dateLayout = "2006-01-02_15-04-05"
+
 type Telegram struct {
 	Base
 
@@ -200,6 +202,90 @@ func (t *Telegram) retrieveEntities(pts int, e *tg.Entities) {
 	t.updateMaps(*e)
 }
 
+func (f *Telegram) getDocFilename(doc *tg.Document) (string, string) {
+	var filename, ext string
+	for _, attr := range doc.Attributes {
+		switch v := attr.(type) {
+		case *tg.DocumentAttributeImageSize:
+			switch doc.MimeType {
+			case "image/png":
+				ext = ".png"
+			case "image/webp":
+				ext = ".webp"
+			case "image/tiff":
+				ext = ".tif"
+			default:
+				ext = ".jpg"
+			}
+		case *tg.DocumentAttributeAnimated:
+			ext = ".gif"
+		case *tg.DocumentAttributeSticker:
+			ext = ".webp"
+		case *tg.DocumentAttributeVideo:
+			switch doc.MimeType {
+			case "video/mpeg":
+				ext = ".mpeg"
+			case "video/webm":
+				ext = ".webm"
+			case "video/ogg":
+				ext = ".ogg"
+			default:
+				ext = ".mp4"
+			}
+		case *tg.DocumentAttributeAudio:
+			switch doc.MimeType {
+			case "audio/webm":
+				ext = ".webm"
+			case "audio/aac":
+				ext = ".aac"
+			case "audio/ogg":
+				ext = ".ogg"
+			default:
+				ext = ".mp3"
+			}
+		case *tg.DocumentAttributeFilename:
+			filename = v.FileName
+		}
+	}
+
+	if filename == "" {
+		filename = fmt.Sprintf(
+			"doc%d_%s%s", doc.GetID(),
+			time.Unix(int64(doc.Date), 0).Format(dateLayout),
+			ext,
+		)
+	}
+
+	if ext == "" {
+		ext = filepath.Ext(filename)
+	}
+
+	return filename, ext
+}
+
+func (t *Telegram) getMediaInfo(mediaClass tg.MessageMediaClass) (string, string) {
+	switch media := mediaClass.(type) {
+	case *tg.MessageMediaDocument:
+		if docClass, ok := media.GetDocument(); ok {
+			if d, ok := docClass.AsNotEmpty(); ok {
+				return t.getDocFilename(d)
+			}
+		}
+
+	case *tg.MessageMediaPhoto:
+		if photoClass, ok := media.GetPhoto(); ok {
+			if photo, ok := photoClass.AsNotEmpty(); ok {
+				return fmt.Sprintf(
+					"photo%d_%s.jpg", photo.GetID(),
+					time.Unix(int64(photo.Date), 0).Format(dateLayout),
+				), "jpg"
+			}
+		}
+	}
+
+	return "", ""
+}
+
 func (t *Telegram) onMessage(ctx context.Context, e tg.Entities, pts int, msg *tg.Message, edit bool, media tg.MessageMediaClass) error {
 	var err error
 	var chat *tg.Chat
@@ -212,6 +298,9 @@ func (t *Telegram) onMessage(ctx context.Context, e tg.Entities, pts int, msg *t
 	if media != nil {
 		extra["msg_hasmedia"] = true
 		extra["_msg_media"] = media
+		fname, ext := t.getMediaInfo(media)
+		extra["msg_medianame"] = fname
+		extra["msg_mediaext"] = ext
 	}
 	extra["_telegram_api"] = t.api
 
@@ -259,6 +348,9 @@ func (t *Telegram) onChannelMessage(ctx context.Context, e tg.Entities, pts int,
 	if media != nil {
 		extra["msg_hasmedia"] = "true"
 		extra["_msg_media"] = media
+		fname, ext := t.getMediaInfo(media)
+		extra["msg_medianame"] = fname
+		extra["msg_mediaext"] = ext
 	}
 	extra["_telegram_api"] = t.api
 

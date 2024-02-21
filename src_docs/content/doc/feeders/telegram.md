@@ -36,14 +36,16 @@ Every propagated Message will have a `type` extra field with the name of the eve
 #### Event chat_message
 
 We received a message from a group or a user.
-The `main` field of the Message contain the `text` of the message.
+The `main` field of the Message contains the `text` of the message.
 
 | Name | Description |
 | --- | --- |
-| type | it contain `channel_message` for this event |
+| type | it contains `channel_message` for this event |
 | msg_edited | "true" if it is an edit event of a message |
 | text | text of the message |
 | msg_hasmedia | "true" if the message contains a media (photo or doc) |
+| msg_medianame | name of the file sent |
+| msg_mediaext | extension of the file sent |
 | chat_callactive | "true" if there is a call active |
 | chat_creator | "true" if the user is the creator |
 | chat_deactivated | "true" if the chat has been deactivated |
@@ -74,7 +76,7 @@ The `main` field of the Message contain the `text` of the message.
 
 | Name | Description |
 | --- | --- |
-| type | it contain `channel_message` for this event |
+| type | it contains `channel_message` for this event |
 | msg_edited | "true" if it is an edit event of a message |
 | text | text of the message |
 | msg_hasmedia | "true" if the message contains a media (photo or doc) |
