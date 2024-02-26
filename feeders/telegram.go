@@ -263,27 +263,44 @@ func (f *Telegram) getDocFilename(doc *tg.Document) (string, string) {
 	return filename, ext
 }
 
-func (t *Telegram) getMediaInfo(mediaClass tg.MessageMediaClass) (string, string) {
+func (t *Telegram) getMediaInfo(mediaClass tg.MessageMediaClass) (string, string, int64) {
 	switch media := mediaClass.(type) {
 	case *tg.MessageMediaDocument:
 		if docClass, ok := media.GetDocument(); ok {
 			if d, ok := docClass.AsNotEmpty(); ok {
-				return t.getDocFilename(d)
+				name, ext := t.getDocFilename(d)
+				size := d.GetSize()
+				return name, ext, size
 			}
 		}
 
 	case *tg.MessageMediaPhoto:
 		if photoClass, ok := media.GetPhoto(); ok {
 			if photo, ok := photoClass.AsNotEmpty(); ok {
+				maxH := 0
+				maxW := 0
+				size := 0
+
+				// Get the biggest picture
+				for _, g := range photo.Sizes {
+					if sz, ok := g.(*tg.PhotoSize); ok {
+						if sz.GetH() > maxH || sz.GetW() > maxW {
+							maxH = sz.GetH()
+							maxW = sz.GetW()
+							size = sz.GetSize()
+						}
+					}
+				}
+
 				return fmt.Sprintf(
 					"photo%d_%s.jpg", photo.GetID(),
 					time.Unix(int64(photo.Date), 0).Format(dateLayout),
-				), "jpg"
+				), "jpg", int64(size)
 			}
 		}
 	}
 
-	return "", ""
+	return "", "", -1
 }
 
 func (t *Telegram) onMessage(ctx context.Context, e tg.Entities, pts int, msg *tg.Message, edit bool, media tg.MessageMediaClass) error {
@@ -298,9 +315,10 @@ func (t *Telegram) onMessage(ctx context.Context, e tg.Entities, pts int, msg *t
 	if media != nil {
 		extra["msg_hasmedia"] = true
 		extra["_msg_media"] = media
-		fname, ext := t.getMediaInfo(media)
+		fname, ext, size := t.getMediaInfo(media)
 		extra["msg_medianame"] = fname
 		extra["msg_mediaext"] = ext
+		extra["msg_mediasize"] = size
 	}
 	extra["_telegram_api"] = t.api
 
@@ -348,11 +366,17 @@ func (t *Telegram) onChannelMessage(ctx context.Context, e tg.Entities, pts int,
 	if media != nil {
 		extra["msg_hasmedia"] = "true"
 		extra["_msg_media"] = media
-		fname, ext := t.getMediaInfo(media)
+		fname, ext, size := t.getMediaInfo(media)
 		extra["msg_medianame"] = fname
 		extra["msg_mediaext"] = ext
+		extra["msg_mediasize"] = size
 	}
 	extra["_telegram_api"] = t.api
+
+	tm := time.Unix(int64(msg.Date), 0)
+	extra["msg_timestamp"] = msg.Date
+	extra["msg_date"] = tm.Format(time.DateOnly)
+	extra["msg_time"] = tm.Format(time.TimeOnly)
 
 	t.updateMaps(e)
 
