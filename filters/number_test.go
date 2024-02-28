@@ -66,8 +66,16 @@ func TestNumber_DoFilter(t *testing.T) {
 	}
 	tests := []Test{
 		{"TypeNotSupported", map[string]string{}, data.NewMessage([]int{1}), false, false, fmt.Errorf("received data is not a string"), nil},
+		{"TypeNotSupported2", map[string]string{}, data.NewMessage([]byte("aaaa")), false, false, fmt.Errorf("received data is not a numeric value: strconv.ParseFloat: parsing \"aaaa\": invalid syntax"), nil},
 		{"TypeString", map[string]string{}, data.NewMessage("10.6"), false, true, nil, []*data.Message{data.NewMessage("10.6")}},
 		{"TypeByte", map[string]string{}, data.NewMessage([]byte("8")), false, true, nil, []*data.Message{data.NewMessage([]byte("8"))}},
+		{"TypeInt", map[string]string{}, data.NewMessage(8), false, true, nil, []*data.Message{data.NewMessage(8)}},
+		{"TypeInt8", map[string]string{}, data.NewMessage(int8(8)), false, true, nil, []*data.Message{data.NewMessage(int8(8))}},
+		{"TypeInt16", map[string]string{}, data.NewMessage(int16(8)), false, true, nil, []*data.Message{data.NewMessage(int16(8))}},
+		{"TypeInt32", map[string]string{}, data.NewMessage(int32(8)), false, true, nil, []*data.Message{data.NewMessage(int32(8))}},
+		{"TypeInt64", map[string]string{}, data.NewMessage(int64(8)), false, true, nil, []*data.Message{data.NewMessage(int64(8))}},
+		{"TypeFloat32", map[string]string{}, data.NewMessage(float32(1.1)), false, true, nil, []*data.Message{data.NewMessage(float32(1.1))}},
+		{"TypeFloat64", map[string]string{}, data.NewMessage(float64(1.2)), false, true, nil, []*data.Message{data.NewMessage(float64(1.2))}},
 		{"TypeNotCastable", map[string]string{}, data.NewMessage("not a number"), false, false, fmt.Errorf("received data is not a numeric value: strconv.ParseFloat: parsing \"not a number\": invalid syntax"), nil},
 		{"TargetNotFound", map[string]string{"target": "none", "value": "10"}, data.NewMessage("9"), false, false, nil, nil},
 		{"OpGreaterTrue", map[string]string{"op": ">", "value": "10"}, data.NewMessage("20"), false, true, nil, []*data.Message{data.NewMessage("20")}},

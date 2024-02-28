@@ -60,26 +60,48 @@ func NewNumberFilter(p map[string]string) (Filter, error) {
 // DoFilter is the mandatory method used to "filter" the input data.Message
 func (f *Number) DoFilter(msg *data.Message) (bool, error) {
 	var text string
+	var currentValue float64
+
 	target := msg.GetTarget(f.target)
 	if target == nil {
 		return false, nil
 	}
 
-	if v, ok := target.(string); ok {
+	switch v := target.(type) {
+	case string:
 		text = v
-	} else if v, ok := target.([]byte); ok {
+		if value, err := strconv.ParseFloat(text, 64); err != nil {
+			return false, fmt.Errorf("received data is not a numeric value: %s", err)
+		} else {
+			currentValue = value
+		}
+
+	case []byte:
 		text = string(v)
-	} else {
+		if value, err := strconv.ParseFloat(text, 64); err != nil {
+			return false, fmt.Errorf("received data is not a numeric value: %s", err)
+		} else {
+			currentValue = value
+		}
+
+	case int:
+		currentValue = float64(v)
+	case int8:
+		currentValue = float64(v)
+	case int16:
+		currentValue = float64(v)
+	case int32:
+		currentValue = float64(v)
+	case int64:
+		currentValue = float64(v)
+	case float32:
+		currentValue = float64(v)
+	case float64:
+		currentValue = float64(v)
+
+	default:
 		// ERROR this filter can't be used with different types
 		return false, fmt.Errorf("received data is not a string")
-	}
-
-	var currentValue float64
-
-	if value, err := strconv.ParseFloat(text, 64); err != nil {
-		return false, fmt.Errorf("received data is not a numeric value: %s", err)
-	} else {
-		currentValue = value
 	}
 
 	switch f.operator {
