@@ -318,7 +318,7 @@ func (t *Telegram) onMessage(ctx context.Context, e tg.Entities, pts int, msg *t
 		fname, ext, size := t.getMediaInfo(media)
 		extra["msg_medianame"] = fname
 		extra["msg_mediaext"] = ext
-		extra["msg_mediasize"] = size
+		extra["msg_mediasize"] = fmt.Sprintf("%d", size)
 	}
 	extra["_telegram_api"] = t.api
 
@@ -369,7 +369,7 @@ func (t *Telegram) onChannelMessage(ctx context.Context, e tg.Entities, pts int,
 		fname, ext, size := t.getMediaInfo(media)
 		extra["msg_medianame"] = fname
 		extra["msg_mediaext"] = ext
-		extra["msg_mediasize"] = size
+		extra["msg_mediasize"] = fmt.Sprintf("%d", size)
 	}
 	extra["_telegram_api"] = t.api
 
