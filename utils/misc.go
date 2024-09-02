@@ -2,6 +2,9 @@ package utils
 
 import (
 	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/hex"
 	"flag"
 	"fmt"
@@ -60,6 +63,51 @@ func Md5File(filename string) (string, error) {
 	defer f.Close()
 
 	h := md5.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(h.Sum(nil)[:]), nil
+}
+
+// Sha1File calculate the SHA1 Hash of a file
+func Sha1File(filename string) (string, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	h := sha1.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(h.Sum(nil)[:]), nil
+}
+
+// Sha256File calculate the SHA256 Hash of a file
+func Sha256File(filename string) (string, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(h.Sum(nil)[:]), nil
+}
+
+// Sha512File calculate the SHA512 Hash of a file
+func Sha512File(filename string) (string, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	h := sha512.New()
 	if _, err := io.Copy(h, f); err != nil {
 		return "", err
 	}
