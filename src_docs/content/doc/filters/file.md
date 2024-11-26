@@ -1,5 +1,4 @@
 ---
-weight: 1
 title: "File"
 date: 2022-03-12T15:33:42+01:00
 draft: false

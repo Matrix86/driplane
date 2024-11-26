@@ -1,5 +1,4 @@
 ---
-weight: 1
 title: "Elasticsearch"
 date: 2022-03-12T15:40:23+01:00
 draft: false

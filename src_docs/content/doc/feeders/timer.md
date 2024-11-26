@@ -1,5 +1,4 @@
 ---
-weight: 0
 title: "Timer"
 date: 2021-02-20T18:06:02+02:00
 draft: false
