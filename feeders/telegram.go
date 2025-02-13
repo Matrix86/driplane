@@ -411,6 +411,34 @@ func (t *Telegram) onChannelMessage(ctx context.Context, e tg.Entities, pts int,
 	return nil
 }
 
+func (t *Telegram) getDialogs() {
+	log.Debug("getting dialogs")
+	req := &tg.MessagesGetDialogsRequest{
+		OffsetPeer: &tg.InputPeerEmpty{},
+	}
+
+	dialogsRaw, err := t.api.MessagesGetDialogs(context.Background(), req)
+	if err != nil {
+		log.Error("getting dialogs: %s", err)
+		return
+	}
+
+	dialogs, ok := dialogsRaw.(*tg.MessagesDialogs)
+	if !ok {
+		log.Error("getting dialogs: %s", err)
+		return
+	}
+
+	for _, chat := range dialogs.Chats {
+		switch c := chat.(type) {
+		case *tg.Chat:
+			t.chatMap[c.ID] = c
+		case *tg.Channel:
+			t.channelMap[c.ID] = c
+		}
+	}
+}
+
 // Start propagates a message every time a new tweet is published
 func (t *Telegram) Start() {
 	log.Debug("Initialization of Telegram")
@@ -545,6 +573,14 @@ func (t *Telegram) Start() {
 				IsBot: self.Bot,
 				OnStart: func(ctx context.Context) {
 					log.Info("Telegram: update recovery initialized and started, listening for events")
+					// initializing the maps and printing on debug mode
+					t.getDialogs()
+					for _, c := range t.channelMap {
+						log.Debug("Telegram: Channel: ID=%d AccessHash=%d Title=%s", c.ID, c.AccessHash, c.Title)
+					}
+					for _, c := range t.chatMap {
+						log.Debug("Telegram: Channel: ID=%d Title=%s", c.ID, c.Title)
+					}
 				},
 			})
 		}); err != nil {
