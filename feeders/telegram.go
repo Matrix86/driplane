@@ -311,6 +311,7 @@ func (t *Telegram) onMessage(ctx context.Context, e tg.Entities, pts int, msg *t
 
 	extra["type"] = "chat_message"
 	extra["msg_edited"] = strconv.FormatBool(edit)
+	extra["text"] = msg.Message
 	extra["msg_hasmedia"] = false
 	if media != nil {
 		extra["msg_hasmedia"] = true
@@ -326,6 +327,7 @@ func (t *Telegram) onMessage(ctx context.Context, e tg.Entities, pts int, msg *t
 	extra["msg_timestamp"] = msg.Date
 	extra["msg_date"] = tm.Format(time.DateOnly)
 	extra["msg_time"] = tm.Format(time.TimeOnly)
+	extra["msg_id"] = msg.ID
 
 	t.updateMaps(e)
 
@@ -362,6 +364,7 @@ func (t *Telegram) onChannelMessage(ctx context.Context, e tg.Entities, pts int,
 	extra := make(map[string]interface{})
 	extra["type"] = "channel_message"
 	extra["msg_edited"] = strconv.FormatBool(edit)
+	extra["text"] = msg.Message
 	extra["msg_hasmedia"] = false
 	if media != nil {
 		extra["msg_hasmedia"] = "true"
@@ -377,6 +380,7 @@ func (t *Telegram) onChannelMessage(ctx context.Context, e tg.Entities, pts int,
 	extra["msg_timestamp"] = msg.Date
 	extra["msg_date"] = tm.Format(time.DateOnly)
 	extra["msg_time"] = tm.Format(time.TimeOnly)
+	extra["msg_id"] = msg.ID
 
 	t.updateMaps(e)
 
@@ -576,10 +580,10 @@ func (t *Telegram) Start() {
 					// initializing the maps and printing on debug mode
 					t.getDialogs()
 					for _, c := range t.channelMap {
-						log.Debug("Telegram: Channel: ID=%d AccessHash=%d Title=%s", c.ID, c.AccessHash, c.Title)
+						log.Debug("Telegram: Channel: ID=%d AccessHash=%d Username=%s Title=%s ", c.ID, c.AccessHash, c.Username, c.Title)
 					}
 					for _, c := range t.chatMap {
-						log.Debug("Telegram: Channel: ID=%d Title=%s", c.ID, c.Title)
+						log.Debug("Telegram: Chat: ID=%d Title=%s", c.ID, c.Title)
 					}
 				},
 			})

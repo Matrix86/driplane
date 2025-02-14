@@ -40,12 +40,17 @@ The `main` field of the Message contains the `text` of the message.
 
 | Name | Description |
 | --- | --- |
-| type | it contains `channel_message` for this event |
+| type | it contains `chat_message` for this event |
 | msg_edited | "true" if it is an edit event of a message |
 | text | text of the message |
 | msg_hasmedia | "true" if the message contains a media (photo or doc) |
 | msg_medianame | name of the file sent |
 | msg_mediaext | extension of the file sent |
+| msg_mediasize | size of the file sent |
+| msg_timestamp | timestamp of the message |
+| msg_date | only the date of when the message has been received |
+| msg_time | only the time of when the message has been received |
+| msg_id | ID of the message |
 | chat_callactive | "true" if there is a call active |
 | chat_creator | "true" if the user is the creator |
 | chat_deactivated | "true" if the chat has been deactivated |
@@ -80,6 +85,13 @@ The `main` field of the Message contain the `text` of the message.
 | msg_edited | "true" if it is an edit event of a message |
 | text | text of the message |
 | msg_hasmedia | "true" if the message contains a media (photo or doc) |
+| msg_medianame | name of the file sent |
+| msg_mediaext | extension of the file sent |
+| msg_mediasize | size of the file sent |
+| msg_timestamp | timestamp of the message |
+| msg_date | only the date of when the message has been received |
+| msg_time | only the time of when the message has been received |
+| msg_id | ID of the message |
 | chan_broadcast | "true" if it is a broadcast channel |
 | chan_callactive | "true" if there is a call active |
 | chan_creator | "true" if the user is the creator |
