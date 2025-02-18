@@ -20,6 +20,9 @@ general:
   js_path: "js" # path of the js plugins
   templates_path: "templates" # path of templates
   debug: false # if true enable the debug logs
+
+update:
+  enable: "false" # if true it reloads the rules every time a file is updated
 ```
 
 <ins>In the configuration it is possible to define default params for _Feeders_ and _Filters_.</ins> In this way we don't need to specify that configuration in the rules.

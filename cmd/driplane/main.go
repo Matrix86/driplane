@@ -7,7 +7,9 @@ import (
 	"os/signal"
 	"runtime"
 	"syscall"
+	"time"
 
+	"github.com/Matrix86/cloudwatcher"
 	"github.com/Matrix86/driplane/core"
 	"github.com/Matrix86/driplane/utils"
 
@@ -22,11 +24,13 @@ var (
 	rulePath   string
 	jsPath     string
 	configFile string
+
+	mainOrchestrator *core.Orchestrator
+	quitSignal       = false
 )
 
 // Signal stops feeders on SIGINT or SIGTERM signal interception
-func Signal(o *core.Orchestrator) {
-
+func Signal() {
 	sChan := make(chan os.Signal, 1)
 	signal.Notify(sChan, syscall.SIGINT, syscall.SIGTERM)
 
@@ -35,8 +39,51 @@ func Signal(o *core.Orchestrator) {
 		switch s {
 		case os.Interrupt, syscall.SIGTERM:
 			log.Debug("CTRL-C detected")
-			o.StopFeeders()
+			if mainOrchestrator != nil {
+				quitSignal = true
+				mainOrchestrator.StopFeeders()
+			}
 			return
+		}
+	}
+}
+
+func Update(cfg *core.Configuration) {
+	log.Debug("Auto-update enabled")
+	s, err := cloudwatcher.New("local", cfg.Get("general.rules_path"), time.Second)
+	if err != nil {
+		log.Error("AutoUpdate: %s", err)
+		return
+	}
+
+	config := map[string]string{
+		"disable_fsnotify": "false",
+	}
+
+	err = s.SetConfig(config)
+	if err != nil {
+		log.Error("AutoUpdate: %s", err)
+		return
+	}
+
+	err = s.Start()
+	if err != nil {
+		log.Error("AutoUpdate: %s\n", err)
+		return
+	}
+
+	defer s.Close()
+	for {
+		select {
+		case v := <-s.GetEvents():
+			log.Info("Event '%s' on File '%s'...restarting", v.TypeString(), v.Key)
+			if mainOrchestrator != nil {
+				log.Debug("Stopping")
+				mainOrchestrator.StopFeeders()
+			}
+
+		case e := <-s.GetErrors():
+			log.Error("AutoUpdate: %s\n", e)
 		}
 	}
 }
@@ -114,21 +161,30 @@ func main() {
 		}
 	}
 
-	o, err := core.NewOrchestrator(config)
-	if err != nil {
-		log.Fatal("%s", err)
+	if config.Get("update.enable") == "true" {
+		log.Debug("Auto-update enabled")
+		go Update(config)
+	} else {
+		log.Debug("Auto-update disabled")
 	}
 
-	if dryRunFlag {
-		os.Exit(0)
+	go Signal()
+
+	for !quitSignal {
+		mainOrchestrator, err = core.NewOrchestrator(config)
+		if err != nil {
+			log.Fatal("%s", err)
+		}
+
+		if dryRunFlag {
+			os.Exit(0)
+		}
+
+		log.Debug("Trying to start orchestrator")
+		mainOrchestrator.StartFeeders()
+		mainOrchestrator.WaitFeeders()
+
+		log.Debug("Stopping")
+		mainOrchestrator.StopFeeders()
 	}
-
-	go Signal(o)
-
-	log.Debug("Trying to start orchestrator")
-	o.StartFeeders()
-	o.WaitFeeders()
-
-	log.Debug("Stopping")
-	o.StopFeeders()
 }
