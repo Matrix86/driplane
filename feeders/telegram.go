@@ -30,8 +30,8 @@ type Telegram struct {
 	cancelContext context.CancelFunc
 
 	userMap    sync.Map
-	channelMap map[int64]*tg.Channel
-	chatMap    map[int64]*tg.Chat
+	channelMap sync.Map
+	chatMap    sync.Map
 
 	api *tg.Client
 }
@@ -43,8 +43,8 @@ func NewTelegramFeeder(conf map[string]string) (Feeder, error) {
 		context:       context,
 		cancelContext: cancel,
 		userMap:       sync.Map{},
-		channelMap:    make(map[int64]*tg.Channel),
-		chatMap:       make(map[int64]*tg.Chat),
+		channelMap:    sync.Map{},
+		chatMap:       sync.Map{},
 	}
 
 	if val, ok := conf["telegram.phone_number"]; ok {
@@ -82,11 +82,11 @@ func (t *Telegram) updateMaps(e tg.Entities) {
 	}
 
 	for channelID, channel := range e.Channels {
-		t.channelMap[channelID] = channel
+		t.channelMap.Store(channelID, channel)
 	}
 
 	for chatID, chat := range e.Chats {
-		t.chatMap[chatID] = chat
+		t.chatMap.Store(chatID, chat)
 	}
 }
 
@@ -101,16 +101,22 @@ func (t *Telegram) getUserByID(id int64) (*tg.User, error) {
 }
 
 func (t *Telegram) getChannelByID(id int64) (*tg.Channel, error) {
-	if channel, ok := t.channelMap[id]; ok {
+	value, ok := t.channelMap.Load(id)
+	if ok {
+		channel := value.(*tg.Channel)
 		return channel, nil
 	}
+
 	return nil, fmt.Errorf("channel not found")
 }
 
 func (t *Telegram) getChatByID(id int64) (*tg.Chat, error) {
-	if chat, ok := t.chatMap[id]; ok {
+	value, ok := t.chatMap.Load(id)
+	if ok {
+		chat := value.(*tg.Chat)
 		return chat, nil
 	}
+
 	return nil, fmt.Errorf("chat not found")
 }
 
@@ -440,9 +446,9 @@ func (t *Telegram) getDialogs() {
 	for _, chat := range dialogs.Chats {
 		switch c := chat.(type) {
 		case *tg.Chat:
-			t.chatMap[c.ID] = c
+			t.chatMap.Store(c.ID, c)
 		case *tg.Channel:
-			t.channelMap[c.ID] = c
+			t.channelMap.Store(c.ID, c)
 		}
 	}
 }
@@ -583,12 +589,26 @@ func (t *Telegram) Start() {
 					log.Info("Telegram: update recovery initialized and started, listening for events")
 					// initializing the maps and printing on debug mode
 					t.getDialogs()
-					for _, c := range t.channelMap {
+					t.channelMap.Range(func(key, value interface{}) bool {
+						c, ok := value.(*tg.Channel)
+						if !ok {
+							log.Error("Telegram: not able to get channel from the Map")
+							return true
+						}
 						log.Debug("Telegram: Channel: ID=%d AccessHash=%d Username=%s Title=%s ", c.ID, c.AccessHash, c.Username, c.Title)
-					}
-					for _, c := range t.chatMap {
+						return true
+					})
+
+					t.chatMap.Range(func(key, value interface{}) bool {
+						c, ok := value.(*tg.Chat)
+						if !ok {
+							log.Error("Telegram: not able to get chat from the Map")
+							return true
+						}
 						log.Debug("Telegram: Chat: ID=%d Title=%s", c.ID, c.Title)
-					}
+
+						return true
+					})
 				},
 			})
 		}); err != nil {
