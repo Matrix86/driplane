@@ -2,7 +2,7 @@ package utils
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -33,7 +33,7 @@ func ParseCookieFile(filename string) ([]*http.Cookie, error) {
 	}
 	defer jsonFile.Close()
 
-	byteValue, _ := ioutil.ReadAll(jsonFile)
+	byteValue, _ := io.ReadAll(jsonFile)
 	err = json.Unmarshal(byteValue, &cookies)
 	if err != nil {
 		return nil, err
@@ -45,13 +45,13 @@ func ParseCookieFile(filename string) ([]*http.Cookie, error) {
 		nsecs := int64((c.ExpirationDate - float64(secs)) * 1e9)
 
 		httpCookies[i] = &http.Cookie{
-			Name:       c.Name,
-			Value:      c.Value,
-			Path:       c.Path,
-			Domain:     c.Domain,
-			Expires:    time.Unix(secs, nsecs),
-			Secure:     c.Secure,
-			HttpOnly:   c.HTTPOnly,
+			Name:     c.Name,
+			Value:    c.Value,
+			Path:     c.Path,
+			Domain:   c.Domain,
+			Expires:  time.Unix(secs, nsecs),
+			Secure:   c.Secure,
+			HttpOnly: c.HTTPOnly,
 		}
 	}
 

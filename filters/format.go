@@ -3,7 +3,7 @@ package filters
 import (
 	"fmt"
 	html "html/template"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	text "text/template"
 
@@ -66,7 +66,7 @@ func NewFormatFilter(p map[string]string) (Filter, error) {
 		} else {
 			fpath = filepath.Join(v, fpath)
 		}
-		content, err := ioutil.ReadFile(fpath)
+		content, err := os.ReadFile(fpath)
 		if err != nil {
 			return nil, err
 		}

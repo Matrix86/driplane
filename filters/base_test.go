@@ -2,7 +2,6 @@ package filters
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -84,7 +83,7 @@ func TestBase_Log(t *testing.T) {
 	expected := fmt.Sprintf("[%s::%s] this is %s\n", b.rule, b.name, b.name)
 
 	b.Log(msg)
-	dat, _ := ioutil.ReadFile(logfile)
+	dat, _ := os.ReadFile(logfile)
 	if string(dat) != expected {
 		t.Errorf("wrong error: expected=%#v had=%#v", expected, string(dat))
 	}
@@ -155,7 +154,7 @@ func TestBase_Pipe(t *testing.T) {
 			cbFilter: v.Callback,
 		}
 		b.Pipe(v.ExpectedMessage)
-		dat, _ := ioutil.ReadFile(logfile)
+		dat, _ := os.ReadFile(logfile)
 		if string(dat) != v.ExpectedLog {
 			t.Errorf("%s : wrong error: expected=%#v had=%#v", v.Name, v.ExpectedLog, string(dat))
 		}

@@ -1,7 +1,6 @@
 package plugins
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -274,7 +273,7 @@ func TestFilePackage_AppendString(t *testing.T) {
 			t.Errorf("%s: wrong result: expected=%#v had=%#v", v.Name, v.ExpectedError, had.Error.Error())
 		}
 		if v.ExpectedStatus {
-			content, err := ioutil.ReadFile(v.Filename)
+			content, err := os.ReadFile(v.Filename)
 			if err != nil {
 				t.Errorf("%s: cannot read the file '%s'", v.Name, v.Filename)
 			}

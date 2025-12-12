@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -88,7 +87,7 @@ func (c *HTTPPackage) Request(method string, uri string, headers interface{}, da
 	}
 	defer resp.Body.Close()
 
-	raw, err := ioutil.ReadAll(resp.Body)
+	raw, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return HTTPResponse{Error: err, Status: false}
 	}
@@ -202,7 +201,7 @@ func (c *HTTPPackage) UploadFile(filename string, fieldname string, method strin
 	}
 	defer resp.Body.Close()
 
-	raw, err := ioutil.ReadAll(resp.Body)
+	raw, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return HTTPResponse{Error: err, Status: false}
 	}

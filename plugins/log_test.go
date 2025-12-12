@@ -2,7 +2,6 @@ package plugins
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -25,7 +24,7 @@ func TestLogPackage_Debug(t *testing.T) {
 	expected := fmt.Sprintf("%s\n", message)
 	l.Debug("%s", message)
 
-	dat, _ := ioutil.ReadFile(logfile)
+	dat, _ := os.ReadFile(logfile)
 	if string(dat) != expected {
 		t.Errorf("wrong string: expected=%#v had=%#v", expected, string(dat))
 	}
@@ -45,12 +44,11 @@ func TestLogPackage_Info(t *testing.T) {
 	expected := fmt.Sprintf("%s\n", message)
 	l.Info("%s", message)
 
-	dat, _ := ioutil.ReadFile(logfile)
+	dat, _ := os.ReadFile(logfile)
 	if string(dat) != expected {
 		t.Errorf("wrong string: expected=%#v had=%#v", expected, string(dat))
 	}
 }
-
 
 func TestLogPackage_Error(t *testing.T) {
 	l := GetLog()
@@ -67,7 +65,7 @@ func TestLogPackage_Error(t *testing.T) {
 	expected := fmt.Sprintf("%s\n", message)
 	l.Error("%s", message)
 
-	dat, _ := ioutil.ReadFile(logfile)
+	dat, _ := os.ReadFile(logfile)
 	if string(dat) != expected {
 		t.Errorf("wrong string: expected=%#v had=%#v", expected, string(dat))
 	}

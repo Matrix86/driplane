@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -18,7 +17,7 @@ func TestIsFlagPassed(t *testing.T) {
 }
 
 func TestFileExists(t *testing.T) {
-	file, err := ioutil.TempFile(os.TempDir(), "prefix")
+	file, err := os.CreateTemp(os.TempDir(), "prefix")
 	if err != nil {
 		t.Errorf("cannot create a temporary file")
 	}
