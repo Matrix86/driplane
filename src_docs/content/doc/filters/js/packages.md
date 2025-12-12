@@ -143,3 +143,26 @@ The return value will be a JS object containing the following fields:
 |------------------------------------------------|---------------------------------------------------------------------------------------------|
 | cache.Put(key string, value string, ttl int64) | add the `value` in the cache using the key `key` and it will be deleted after `ttl` seconds |
 | cache.Get(key string)                          | get the value stored in the cache with the key `key`                                        |
+
+
+### Exec COmmand
+
+This package contains functions for executing system commands and handling system interactions.
+
+#### Return
+
+The return value will be a JS object containing the following fields:
+
+| Name   | Type     | Description                                              |
+|--------|----------|----------------------------------------------------------|
+| Status | _BOOL_   | if true the operation was successful                     |
+| Error  | _STRING_ | if status is false it contains the reason of the failure |
+| Value  | _STRING_ | if status is true it contains the standard output        |
+
+#### Functions
+
+| Prototype                                                 | Description                                                                                  |
+|-----------------------------------------------------------|----------------------------------------------------------------------------------------------|
+| util.ExecCommand(commandParts []string, inputData string) | Executes the system command defined in `commandParts`. <br> - `commandParts[0]` is the       |
+|                                                           | executable. <br> - `commandParts[1:]` are the arguments. <br> -  inputData` is written to the| 
+|                                                           | Standard Input (stdin) of the command.                                                       |
