@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	ll "log"
 	"os"
 	"path/filepath"
@@ -137,12 +136,18 @@ func (f *Slack) sendFile(client *slack.Client, dst string, filename string) erro
 	if err != nil {
 		return fmt.Errorf("sendFile: file '%s': %s", filename, err)
 	}
+	fi, err := file.Stat()
+	if err != nil {
+		return fmt.Errorf("sendFile: file '%s': %s", filename, err)
+	}
 
-	params := slack.FileUploadParameters{
+	params := slack.UploadFileV2Parameters{
 		Filename: filepath.Base(filename),
+		FileSize: int(fi.Size()),
 		Reader:   file,
-		Channels: []string{dst}}
-	if _, err := client.UploadFile(params); err != nil {
+		Channel:  dst,
+	}
+	if _, err := client.UploadFileV2(params); err != nil {
 		return fmt.Errorf("sendFile: file '%s': %s", filename, err)
 	}
 	return nil
@@ -151,11 +156,12 @@ func (f *Slack) sendFile(client *slack.Client, dst string, filename string) erro
 func (f *Slack) sendFileFromBuffer(client *slack.Client, dst string, filename string, buffer []byte) error {
 	log.Debug("Slack: send file to %s", dst)
 	r := bytes.NewReader(buffer)
-	params := slack.FileUploadParameters{
+	params := slack.UploadFileV2Parameters{
 		Filename: filepath.Base(filename),
+		FileSize: int(r.Size()),
 		Reader:   r,
-		Channels: []string{dst}}
-	if _, err := client.UploadFile(params); err != nil {
+		Channel:  dst}
+	if _, err := client.UploadFileV2(params); err != nil {
 		return fmt.Errorf("sendFile: file '%s': %s", filename, err)
 	}
 	return nil
@@ -170,7 +176,7 @@ func (f *Slack) downloadFile(client *slack.Client, url string, filename string) 
 	}
 	// write to file
 	if filename != "" {
-		err = ioutil.WriteFile(filename, buffer.Bytes(), 0644)
+		err = os.WriteFile(filename, buffer.Bytes(), 0644)
 		if err != nil {
 			return nil, fmt.Errorf("writing file '%s': %s", filename, err)
 		}
