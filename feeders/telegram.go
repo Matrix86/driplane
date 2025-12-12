@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/Matrix86/driplane/data"
@@ -28,7 +29,7 @@ type Telegram struct {
 	context       context.Context
 	cancelContext context.CancelFunc
 
-	userMap    map[int64]*tg.User
+	userMap    sync.Map
 	channelMap map[int64]*tg.Channel
 	chatMap    map[int64]*tg.Chat
 
@@ -41,7 +42,7 @@ func NewTelegramFeeder(conf map[string]string) (Feeder, error) {
 	t := &Telegram{
 		context:       context,
 		cancelContext: cancel,
-		userMap:       make(map[int64]*tg.User),
+		userMap:       sync.Map{},
 		channelMap:    make(map[int64]*tg.Channel),
 		chatMap:       make(map[int64]*tg.Chat),
 	}
@@ -77,7 +78,7 @@ func NewTelegramFeeder(conf map[string]string) (Feeder, error) {
 
 func (t *Telegram) updateMaps(e tg.Entities) {
 	for userID, user := range e.Users {
-		t.userMap[userID] = user
+		t.userMap.Store(userID, user)
 	}
 
 	for channelID, channel := range e.Channels {
@@ -90,9 +91,12 @@ func (t *Telegram) updateMaps(e tg.Entities) {
 }
 
 func (t *Telegram) getUserByID(id int64) (*tg.User, error) {
-	if user, ok := t.userMap[id]; ok {
+	value, ok := t.userMap.Load(id)
+	if ok {
+		user := value.(*tg.User)
 		return user, nil
 	}
+
 	return nil, fmt.Errorf("user not found")
 }
 
