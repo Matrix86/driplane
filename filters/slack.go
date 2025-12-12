@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	ll "log"
 	"os"
 	"path/filepath"
@@ -170,7 +169,7 @@ func (f *Slack) downloadFile(client *slack.Client, url string, filename string) 
 	}
 	// write to file
 	if filename != "" {
-		err = ioutil.WriteFile(filename, buffer.Bytes(), 0644)
+		err = os.WriteFile(filename, buffer.Bytes(), 0644)
 		if err != nil {
 			return nil, fmt.Errorf("writing file '%s': %s", filename, err)
 		}

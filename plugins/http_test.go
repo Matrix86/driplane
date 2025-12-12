@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -124,7 +123,7 @@ func TestHTTPPackage_DownloadFile(t *testing.T) {
 			t.Errorf("%s: wrong error: expected=%#v had=%#v", v.Name, res.Error, v.ExpectedResponse.Error)
 		}
 		if v.ExpectedResponse.Status {
-			dat, _ := ioutil.ReadFile(v.Filepath)
+			dat, _ := os.ReadFile(v.Filepath)
 			if string(dat) != msg {
 				t.Errorf("%s : wrong file content: expected=%#v had=%#v", v.Name, msg, string(dat))
 			}
@@ -184,7 +183,7 @@ func TestHTTPPackage_UploadFile(t *testing.T) {
 			t.Errorf("%s: wrong error: expected=%#v had=%#v", v.Name, v.ExpectedResponse.Error, res.Error)
 		}
 		if v.ExpectedResponse.Status {
-			dat, _ := ioutil.ReadFile(v.Filepath)
+			dat, _ := os.ReadFile(v.Filepath)
 			if string(dat) != msg {
 				t.Errorf("%s : wrong file content: expected=%#v had=%#v", v.Name, msg, string(dat))
 			}

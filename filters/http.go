@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
+
 	//"net/http/httputil"
 	"net/url"
 	"strconv"
@@ -222,7 +222,7 @@ func (f *HTTP) DoFilter(msg *data.Message) (bool, error) {
 }
 
 func (f *HTTP) readBody(r *http.Response) interface{} {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return ""
 	}
@@ -230,7 +230,7 @@ func (f *HTTP) readBody(r *http.Response) interface{} {
 }
 
 // OnEvent is called when an event occurs
-func (f *HTTP) OnEvent(event *data.Event){}
+func (f *HTTP) OnEvent(event *data.Event) {}
 
 // Set the name of the filter
 func init() {

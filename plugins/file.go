@@ -3,7 +3,6 @@ package plugins
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
@@ -26,7 +25,7 @@ type FileResponse struct {
 func (c *FilePackage) Read(fileName string) FileResponse {
 	resp := FileResponse{}
 
-	resp.Binary, resp.Error = ioutil.ReadFile(fileName)
+	resp.Binary, resp.Error = os.ReadFile(fileName)
 	resp.Status = resp.Error == nil
 	resp.String = string(resp.Binary)
 
@@ -36,7 +35,7 @@ func (c *FilePackage) Read(fileName string) FileResponse {
 func (c *FilePackage) Write(fileName string, data []byte) FileResponse {
 	resp := FileResponse{}
 
-	resp.Error = ioutil.WriteFile(fileName, data, os.ModePerm)
+	resp.Error = os.WriteFile(fileName, data, os.ModePerm)
 	resp.Status = resp.Error == nil
 
 	return resp

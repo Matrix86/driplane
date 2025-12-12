@@ -2,7 +2,7 @@ package core
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"reflect"
 	"sync"
@@ -29,7 +29,7 @@ func LoadConfiguration(path string) (*Configuration, error) {
 		return configuration, fmt.Errorf("loading configuration: file opening: %s", err)
 	}
 
-	bytes, _ := ioutil.ReadAll(file)
+	bytes, _ := io.ReadAll(file)
 
 	var cc map[interface{}]interface{}
 

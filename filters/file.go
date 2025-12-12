@@ -1,7 +1,6 @@
 package filters
 
 import (
-	"io/ioutil"
 	"os"
 
 	"github.com/Matrix86/driplane/data"
@@ -36,7 +35,7 @@ func (f *File) DoFilter(msg *data.Message) (bool, error) {
 		// if the path exists and it's a file
 		if stat, err := os.Stat(path); err == nil && !stat.IsDir() {
 			log.Debug("path='%s' size=%d extra=%v", path, stat.Size(), msg.GetExtra())
-			readData, err := ioutil.ReadFile(path)
+			readData, err := os.ReadFile(path)
 			if err != nil {
 				return true, err
 			}
