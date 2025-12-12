@@ -2,6 +2,8 @@ package plugins
 
 import (
 	"os"
+	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -128,4 +130,77 @@ func TestUtilPluginSha512Method(t *testing.T) {
 	if res.Value != expected {
 		t.Errorf("Value has a bad value: expected=%s had=%s", expected, res.Value)
 	}
+}
+
+func TestUtilPluginExecCommandMethod(t *testing.T) {
+	u := GetUtil()
+
+	var echoCmd []string
+	expectedOutput := "hello world"
+	if runtime.GOOS == "windows" {
+		echoCmd = []string{"cmd", "/C", "echo", expectedOutput}
+	} else {
+		echoCmd = []string{"echo", expectedOutput}
+	}
+
+	tests := []struct {
+		name           string   // test name
+		cmdParts       []string // command
+		inputData      string   // stdin
+		expectedStatus bool     // status field of the response
+		expectError    bool     // Error field of the response
+		expectedValue  string   // returned value of the command
+	}{
+		{
+			name:           "Error: no command ",
+			cmdParts:       []string{},
+			inputData:      "",
+			expectedStatus: false,
+			expectError:    true,
+			expectedValue:  "",
+		},
+		{
+			name:           "Success: Simple Echo command",
+			cmdParts:       echoCmd,
+			inputData:      "",
+			expectedStatus: true,
+			expectError:    false,
+			expectedValue:  expectedOutput,
+		},
+		{
+			name:           "Error: Command not exist",
+			cmdParts:       []string{"not_existing_command_12345"},
+			inputData:      "",
+			expectedStatus: false,
+			expectError:    true,
+			expectedValue:  "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			response := u.ExecCommand(tt.cmdParts, tt.inputData)
+
+			if response.Status != tt.expectedStatus {
+				t.Errorf("Wrong status: expected %v, obtained %v", tt.expectedStatus, response.Status)
+			}
+
+			if tt.expectError && response.Error == nil {
+				t.Errorf("Expected error but obtained nil")
+			}
+			if !tt.expectError && response.Error != nil {
+				t.Errorf("Error not expected but obtained: %v", response.Error)
+			}
+
+			cleanOutput := strings.TrimSpace(response.Value)
+
+			if tt.expectedValue != "" {
+
+				if !strings.Contains(cleanOutput, tt.expectedValue) {
+					t.Errorf("Wrong output. \n Expected: %q\n Obtained: %q", tt.expectedValue, cleanOutput)
+				}
+			}
+		})
+	}
+
 }
