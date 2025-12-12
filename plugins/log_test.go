@@ -44,7 +44,7 @@ func TestLogPackage_Info(t *testing.T) {
 	expected := fmt.Sprintf("%s\n", message)
 	l.Info("%s", message)
 
-	dat, _ := o.ReadFile(logfile)
+	dat, _ := os.ReadFile(logfile)
 	if string(dat) != expected {
 		t.Errorf("wrong string: expected=%#v had=%#v", expected, string(dat))
 	}
