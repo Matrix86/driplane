@@ -1,9 +1,12 @@
 package plugins
 
 import (
-	"github.com/Matrix86/driplane/utils"
+	"encoding/base64"
+	"encoding/hex"
 	"os"
 	"time"
+
+	"github.com/Matrix86/driplane/utils"
 )
 
 // UtilPackage contains useful generic methods
@@ -104,5 +107,58 @@ func (c *UtilPackage) Sha512File(filename string) UtilResponse {
 		Error:  nil,
 		Status: true,
 		Value:  hash,
+	}
+}
+
+// Base64Decode decodes a base64 encoded string
+func (c *UtilPackage) Base64Decode(str string) UtilResponse {
+	decoded, err := base64.StdEncoding.DecodeString(str)
+	if err != nil {
+		return UtilResponse{
+			Error:  err,
+			Status: false,
+			Value:  "",
+		}
+	}
+	return UtilResponse{
+		Error:  nil,
+		Status: true,
+		Value:  string(decoded),
+	}
+}
+
+func (c *UtilPackage) Base64Encode(str string) UtilResponse {
+	encoded := base64.StdEncoding.EncodeToString([]byte(str))
+	return UtilResponse{
+		Error:  nil,
+		Status: true,
+		Value:  encoded,
+	}
+}
+
+// HexDecode decodes a hex encoded string
+func (c *UtilPackage) HexDecode(str string) UtilResponse {
+	decoded, err := hex.DecodeString(str)
+	if err != nil {
+		return UtilResponse{
+			Error:  err,
+			Status: false,
+			Value:  "",
+		}
+	}
+	return UtilResponse{
+		Error:  nil,
+		Status: true,
+		Value:  string(decoded),
+	}
+}
+
+// HexEncode encodes a string to hex
+func (c *UtilPackage) HexEncode(str string) UtilResponse {
+	encoded := hex.EncodeToString([]byte(str))
+	return UtilResponse{
+		Error:  nil,
+		Status: true,
+		Value:  encoded,
 	}
 }
