@@ -3,7 +3,10 @@ package plugins
 import (
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"os"
+	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/Matrix86/driplane/utils"
@@ -107,6 +110,44 @@ func (c *UtilPackage) Sha512File(filename string) UtilResponse {
 		Error:  nil,
 		Status: true,
 		Value:  hash,
+	}
+}
+
+// Ecexute shell command
+func (c *UtilPackage) ExecCommand(commandParts []string, inputData string) UtilResponse {
+	if len(commandParts) == 0 {
+		return UtilResponse{
+			Error:  errors.New("no command provided"),
+			Status: false,
+			Value:  "",
+		}
+	}
+
+	executable := commandParts[0]
+	args := commandParts[1:]
+
+	cmd := exec.Command(executable, args...)
+
+	// If inputData is provided, write it to the command's Stdin
+	// This replaces '<<EOF'
+	if inputData != "" {
+		cmd.Stdin = strings.NewReader(inputData)
+	}
+
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		return UtilResponse{
+			Error:  err,
+			Status: false,
+			Value:  string(output),
+		}
+	}
+
+	return UtilResponse{
+		Error:  nil,
+		Status: true,
+		Value:  string(output),
 	}
 }
 

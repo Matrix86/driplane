@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -136,7 +135,7 @@ func (f *Web) prepareRequest() (*http.Request, error) {
 }
 
 func (f *Web) getBodyAsString(r *http.Response) string {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return ""
 	}

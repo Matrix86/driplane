@@ -2,10 +2,11 @@ package core
 
 import (
 	"fmt"
-	"github.com/evilsocket/islazy/log"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
+
+	"github.com/evilsocket/islazy/log"
 
 	"github.com/alecthomas/participle"
 	"github.com/alecthomas/participle/lexer"
@@ -126,7 +127,7 @@ func (p *Parser) parseFile(filename string, deps []string) (*AST, error) {
 
 	ast := &AST{}
 	log.Debug("parsing %s", filename)
-	content, err := ioutil.ReadFile(filename)
+	content, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("parsing '%s': %s", filename, err)
 	}
