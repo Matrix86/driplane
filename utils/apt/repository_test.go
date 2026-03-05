@@ -120,7 +120,7 @@ func TestNewRepository(t *testing.T) {
 			w.WriteHeader(404)
 			_, _ = w.Write([]byte("not found"))
 		} else {
-			_, _ = fmt.Fprintf(w, releaseFile)
+			_, _ = fmt.Fprintf(w, "%s", releaseFile)
 		}
 	}))
 	defer svr.Close()
@@ -150,7 +150,7 @@ func TestRepository_GetArchitectures(t *testing.T) {
 			w.WriteHeader(404)
 			_, _ = w.Write([]byte("not found"))
 		} else {
-			_, _ = fmt.Fprintf(w, releaseFile)
+			_, _ = fmt.Fprintf(w, "%s", releaseFile)
 		}
 	}))
 	defer svr.Close()
@@ -170,7 +170,7 @@ func TestRepository_GetDistribution(t *testing.T) {
 			w.WriteHeader(404)
 			_, _ = w.Write([]byte("not found"))
 		} else {
-			_, _ = fmt.Fprintf(w, releaseFile)
+			_, _ = fmt.Fprintf(w, "%s", releaseFile)
 		}
 	}))
 	defer svr.Close()
@@ -190,7 +190,7 @@ func TestRepository_GetReleaseURL(t *testing.T) {
 			w.WriteHeader(404)
 			_, _ = w.Write([]byte("not found"))
 		} else {
-			_, _ = fmt.Fprintf(w, releaseFile)
+			_, _ = fmt.Fprintf(w, "%s", releaseFile)
 		}
 	}))
 	defer svr.Close()
@@ -210,7 +210,7 @@ func TestRepository_GetRelease(t *testing.T) {
 			w.WriteHeader(404)
 			_, _ = w.Write([]byte("not found"))
 		} else {
-			_, _ = fmt.Fprintf(w, releaseFile)
+			_, _ = fmt.Fprintf(w, "%s", releaseFile)
 		}
 	}))
 	defer svr.Close()
@@ -230,7 +230,7 @@ func TestRepository_SetArchitectures(t *testing.T) {
 			w.WriteHeader(404)
 			_, _ = w.Write([]byte("not found"))
 		} else {
-			_, _ = fmt.Fprintf(w, releaseFile)
+			_, _ = fmt.Fprintf(w, "%s", releaseFile)
 		}
 	}))
 	defer svr.Close()
@@ -250,12 +250,12 @@ func TestRepository_SetArchitectures(t *testing.T) {
 func TestRepository_GetPackages(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.String(), "binary-iphoneos-arm/Packages") {
-			_, _ = fmt.Fprintf(w, packageFile)
+			_, _ = fmt.Fprintf(w, "%s", packageFile)
 		} else if strings.HasSuffix(r.URL.String(), "/Packages") {
 			w.WriteHeader(404)
 			_, _ = w.Write([]byte("not found"))
 		} else if strings.HasSuffix(r.URL.String(), "stable/Release") {
-			_, _ = fmt.Fprintf(w, releaseFile)
+			_, _ = fmt.Fprintf(w, "%s", releaseFile)
 		} else {
 			w.WriteHeader(404)
 			_, _ = w.Write([]byte("not found"))
@@ -287,9 +287,9 @@ func TestRepository_GetPackages(t *testing.T) {
 func TestRepository_GetPackages2(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.String(), "/Packages") {
-			_, _ = fmt.Fprintf(w, packageFile)
+			_, _ = fmt.Fprintf(w, "%s", packageFile)
 		} else if strings.HasSuffix(r.URL.String(), "stable/Release") {
-			_, _ = fmt.Fprintf(w, releaseFile)
+			_, _ = fmt.Fprintf(w, "%s", releaseFile)
 		} else {
 			w.WriteHeader(404)
 			_, _ = w.Write([]byte("not found"))
@@ -320,9 +320,9 @@ func TestRepository_GetPackages2(t *testing.T) {
 func TestRepository_ForceIndexURL(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.String(), "/Packages") {
-			_, _ = fmt.Fprintf(w, packageFile)
+			_, _ = fmt.Fprintf(w, "%s", packageFile)
 		} else if strings.HasSuffix(r.URL.String(), "stable/Release") {
-			_, _ = fmt.Fprintf(w, releaseFile)
+			_, _ = fmt.Fprintf(w, "%s", releaseFile)
 		} else {
 			w.WriteHeader(404)
 			_, _ = w.Write([]byte("not found"))
