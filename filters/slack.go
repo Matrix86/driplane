@@ -141,13 +141,13 @@ func (f *Slack) sendFile(client *slack.Client, dst string, filename string) erro
 		return fmt.Errorf("sendFile: file '%s': %s", filename, err)
 	}
 
-	params := slack.UploadFileV2Parameters{
+	params := slack.UploadFileParameters{
 		Filename: filepath.Base(filename),
 		FileSize: int(fi.Size()),
 		Reader:   file,
 		Channel:  dst,
 	}
-	if _, err := client.UploadFileV2(params); err != nil {
+	if _, err := client.UploadFile(params); err != nil {
 		return fmt.Errorf("sendFile: file '%s': %s", filename, err)
 	}
 	return nil
@@ -156,12 +156,12 @@ func (f *Slack) sendFile(client *slack.Client, dst string, filename string) erro
 func (f *Slack) sendFileFromBuffer(client *slack.Client, dst string, filename string, buffer []byte) error {
 	log.Debug("Slack: send file to %s", dst)
 	r := bytes.NewReader(buffer)
-	params := slack.UploadFileV2Parameters{
+	params := slack.UploadFileParameters{
 		Filename: filepath.Base(filename),
 		FileSize: int(r.Size()),
 		Reader:   r,
 		Channel:  dst}
-	if _, err := client.UploadFileV2(params); err != nil {
+	if _, err := client.UploadFile(params); err != nil {
 		return fmt.Errorf("sendFile: file '%s': %s", filename, err)
 	}
 	return nil

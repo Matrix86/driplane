@@ -80,11 +80,12 @@ func (f *WebRSS) scrape(firstRun bool) {
 	c := colly.NewCollector()
 
 	c.OnResponse(func(r *colly.Response) {
-		fmt.Println("got response", r.StatusCode, r.Headers.Get("Content-Type"))
+		log.Debug("got response %d: %s", r.StatusCode, r.Headers.Get("Content-Type"))
 	})
 
 	c.OnHTML("body", func(e *colly.HTMLElement) {
 		e.ForEach(f.itemSelector, func(_ int, el *colly.HTMLElement) {
+			fmt.Printf("element: %#v\n", el)
 			var link string
 			if f.linkSelector == "" || f.linkSelector == "self" {
 				link = el.Request.AbsoluteURL(el.Attr(f.linkAttr))
@@ -111,6 +112,7 @@ func (f *WebRSS) scrape(firstRun bool) {
 			}
 
 			if title == "" {
+				log.Debug("Title not found")
 				return
 			}
 
@@ -138,14 +140,12 @@ func (f *WebRSS) scrape(firstRun bool) {
 	if err := c.Visit(f.url); err != nil {
 		log.Error("[WebRSSFeeder] visit error: %v", err)
 	}
-	log.Debug("runned!!!")
 }
 
 // Start propagates a message every time a new article is found
 func (f *WebRSS) Start() {
 	f.ticker = time.NewTicker(f.frequency)
 	go func() {
-		log.Debug("starting first run")
 		f.scrape(true)
 
 		for {
