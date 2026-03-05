@@ -150,7 +150,7 @@ func (s *Slack) GetClient() *slack.Client {
 	return s.client
 }
 
-func (s *Slack) propagateFiles(msg string, extra map[string]interface{}, files []slackevents.File) {
+func (s *Slack) propagateFiles(msg string, extra map[string]interface{}, files []slack.File) {
 	for _, file := range files {
 		extraf := make(map[string]interface{})
 		for k, v := range extra {
@@ -217,7 +217,7 @@ func (s *Slack) eventHandler(eventsAPIEvent slackevents.EventsAPIEvent) {
 				}
 				// propagate multiple messages, one for each shared file
 				if _, ok := s.events["file_shared"]; ok {
-					s.propagateFiles(txt, extra, ev.Files)
+					s.propagateFiles(txt, extra, ev.Message.Files)
 				}
 			case *slackevents.MemberJoinedChannelEvent:
 				v := reflect.ValueOf(*ev)
