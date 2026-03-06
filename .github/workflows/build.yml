@@ -1,14 +1,6 @@
 name: Build and Test
 
-# This workflow will run on master branch and on any pull requests targeting master
 on:
-  push:
-    branches:
-      - master
-    paths-ignore:
-      - 'docs/**'
-      - 'src_docs/**'
-      - '.github/**'
   pull_request:
 
 concurrency:
@@ -16,34 +8,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  #lint:
-  #  name: Lint
-  #  runs-on: ubuntu-latest
-  #  steps:
-  #    - name: Set up Go
-  #      uses: actions/setup-go@v2
-  #      with:
-  #        go-version: 1.18
-#
-  #    - name: Check out code
-  #      uses: actions/checkout@v2
-#
-  #    - name: Lint Go Code
-  #      run: |
-  #        go get -u golang.org/x/lint/golint
-  #        make lint
-
   test:
     name: Test
     runs-on: ubuntu-latest
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v5
         with:
           go-version: '1.25'
-
-      - name: Check out code
-        uses: actions/checkout@v6
 
       - name: Run Unit tests.
         run: make test-coverage
@@ -60,13 +35,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test]
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v5
         with:
           go-version: '1.25'
-
-      - name: Check out code
-        uses: actions/checkout@v6
 
       - name: Build
         run: make build
