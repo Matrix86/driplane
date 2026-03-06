@@ -103,6 +103,78 @@ func TestMd5File(t *testing.T) {
 	}
 }
 
+func TestSha1File(t *testing.T) {
+	// Test with non-existent file
+	_, err := Sha1File(path.Join(os.TempDir(), "notexist_sha1"))
+	if err == nil {
+		t.Errorf("expected error for non-existent file")
+	}
+
+	// Test with valid file
+	filename := path.Join(os.TempDir(), "testsha1")
+	if err := os.WriteFile(filename, []byte("This is a test!"), 0644); err != nil {
+		t.Fatalf("cannot create test file: %v", err)
+	}
+	defer os.Remove(filename)
+
+	had, err := Sha1File(filename)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	expected := "8b6ccb43dca2040c3cfbcd7bfff0b387d4538c33"
+	if had != expected {
+		t.Errorf("wrong hash: expected=%s had=%s", expected, had)
+	}
+}
+
+func TestSha256File(t *testing.T) {
+	// Test with non-existent file
+	_, err := Sha256File(path.Join(os.TempDir(), "notexist_sha256"))
+	if err == nil {
+		t.Errorf("expected error for non-existent file")
+	}
+
+	// Test with valid file
+	filename := path.Join(os.TempDir(), "testsha256")
+	if err := os.WriteFile(filename, []byte("This is a test!"), 0644); err != nil {
+		t.Fatalf("cannot create test file: %v", err)
+	}
+	defer os.Remove(filename)
+
+	had, err := Sha256File(filename)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	expected := "54ba1fdce5a89e0d3eee6e4c587497833bc38c3586ff02057dd6451fd2d6b640"
+	if had != expected {
+		t.Errorf("wrong hash: expected=%s had=%s", expected, had)
+	}
+}
+
+func TestSha512File(t *testing.T) {
+	// Test with non-existent file
+	_, err := Sha512File(path.Join(os.TempDir(), "notexist_sha512"))
+	if err == nil {
+		t.Errorf("expected error for non-existent file")
+	}
+
+	// Test with valid file
+	filename := path.Join(os.TempDir(), "testsha512")
+	if err := os.WriteFile(filename, []byte("This is a test!"), 0644); err != nil {
+		t.Fatalf("cannot create test file: %v", err)
+	}
+	defer os.Remove(filename)
+
+	had, err := Sha512File(filename)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	expected := "d4d6331e89ced845639272bc64ca3ef4e94a57c88431c61aef91f4399e30c6ada32c042f72cedad9cb1c7cfaf04d92e06ad044b557ca16f554f1c6d66b06d0e0"
+	if had != expected {
+		t.Errorf("wrong hash: expected=%s had=%s", expected, had)
+	}
+}
+
 func TestFlatStruct(t *testing.T) {
 	type SubTest struct {
 		Map    map[string]string
@@ -164,5 +236,30 @@ func TestFlatStruct(t *testing.T) {
 		} else if vv != v {
 			t.Errorf("bad value key '%s': expected=%#v had=%#v", k, v, vv)
 		}
+	}
+}
+
+func TestFlatStructNil(t *testing.T) {
+	flat := FlatStruct(nil)
+	if len(flat) != 0 {
+		t.Errorf("expected empty map for nil input, got %d entries", len(flat))
+	}
+}
+
+func TestFlatStructPointerToNil(t *testing.T) {
+	var ptr *struct{ Name string }
+	flat := FlatStruct(ptr)
+	if len(flat) != 0 {
+		t.Errorf("expected empty map for nil pointer, got %d entries", len(flat))
+	}
+}
+
+func TestFlatStructMapWithIntKeys(t *testing.T) {
+	// Map with non-string keys should not crash
+	m := map[int]string{1: "one", 2: "two"}
+	flat := FlatStruct(m)
+	// Non-string key maps are skipped, so flat should be empty
+	if len(flat) != 0 {
+		t.Errorf("expected empty map for int-keyed map, got %d entries", len(flat))
 	}
 }

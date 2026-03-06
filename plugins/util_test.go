@@ -132,6 +132,137 @@ func TestUtilPluginSha512Method(t *testing.T) {
 	}
 }
 
+func TestUtilPluginBase64EncodeMethod(t *testing.T) {
+	u := GetUtil()
+
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"EmptyString", "", ""},
+		{"SimpleString", "hello world", "aGVsbG8gd29ybGQ="},
+		{"BinaryLike", "\x00\x01\x02", "AAEC"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res := u.Base64Encode(tt.input)
+			if !res.Status {
+				t.Errorf("Status should be true")
+			}
+			if res.Error != nil {
+				t.Errorf("Error should be nil, got: %v", res.Error)
+			}
+			if res.Value != tt.expected {
+				t.Errorf("wrong value: expected=%s had=%s", tt.expected, res.Value)
+			}
+		})
+	}
+}
+
+func TestUtilPluginBase64DecodeMethod(t *testing.T) {
+	u := GetUtil()
+
+	tests := []struct {
+		name        string
+		input       string
+		expected    string
+		expectError bool
+	}{
+		{"ValidBase64", "aGVsbG8gd29ybGQ=", "hello world", false},
+		{"EmptyString", "", "", false},
+		{"InvalidBase64", "not-valid-base64!!!", "", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res := u.Base64Decode(tt.input)
+			if tt.expectError {
+				if res.Status {
+					t.Errorf("Status should be false")
+				}
+				if res.Error == nil {
+					t.Errorf("Error should not be nil")
+				}
+			} else {
+				if !res.Status {
+					t.Errorf("Status should be true")
+				}
+				if res.Value != tt.expected {
+					t.Errorf("wrong value: expected=%s had=%s", tt.expected, res.Value)
+				}
+			}
+		})
+	}
+}
+
+func TestUtilPluginHexEncodeMethod(t *testing.T) {
+	u := GetUtil()
+
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"EmptyString", "", ""},
+		{"SimpleString", "hello", "68656c6c6f"},
+		{"BinaryLike", "\x00\x01\xff", "0001ff"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res := u.HexEncode(tt.input)
+			if !res.Status {
+				t.Errorf("Status should be true")
+			}
+			if res.Error != nil {
+				t.Errorf("Error should be nil, got: %v", res.Error)
+			}
+			if res.Value != tt.expected {
+				t.Errorf("wrong value: expected=%s had=%s", tt.expected, res.Value)
+			}
+		})
+	}
+}
+
+func TestUtilPluginHexDecodeMethod(t *testing.T) {
+	u := GetUtil()
+
+	tests := []struct {
+		name        string
+		input       string
+		expected    string
+		expectError bool
+	}{
+		{"ValidHex", "68656c6c6f", "hello", false},
+		{"EmptyString", "", "", false},
+		{"InvalidHex", "zzzz", "", true},
+		{"OddLength", "abc", "", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res := u.HexDecode(tt.input)
+			if tt.expectError {
+				if res.Status {
+					t.Errorf("Status should be false")
+				}
+				if res.Error == nil {
+					t.Errorf("Error should not be nil")
+				}
+			} else {
+				if !res.Status {
+					t.Errorf("Status should be true")
+				}
+				if res.Value != tt.expected {
+					t.Errorf("wrong value: expected=%s had=%s", tt.expected, res.Value)
+				}
+			}
+		})
+	}
+}
+
 func TestUtilPluginExecCommandMethod(t *testing.T) {
 	u := GetUtil()
 

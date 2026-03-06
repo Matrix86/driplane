@@ -52,3 +52,88 @@ SHA256:
 		t.Errorf("wrong num of paths")
 	}
 }
+
+func TestParseReleaseSHA1Only(t *testing.T) {
+	txt := `Origin: Test
+Label: Test
+Suite: stable
+Codename: test
+Architectures: amd64
+Components: main
+SHA1:
+ aabbccdd11223344556677889900aabbccddeeff   12345 main/binary-amd64/Packages
+ 1122334455667788990011223344556677889900   67890 main/binary-amd64/Packages.gz`
+
+	r := strings.NewReader(txt)
+	release, err := ParseRelease(r)
+	if err != nil {
+		t.Fatalf("error received: %s", err)
+	}
+	if len(release.MD5Sum) != 0 {
+		t.Errorf("MD5Sum should be empty")
+	}
+	if len(release.SHA1) != 2 {
+		t.Errorf("wrong num of SHA1: expected=2 had=%d", len(release.SHA1))
+	}
+	if len(release.PackagePaths) != 2 {
+		t.Errorf("wrong num of paths: expected=2 had=%d", len(release.PackagePaths))
+	}
+}
+
+func TestParseReleaseSHA256Only(t *testing.T) {
+	txt := `Origin: Test
+Label: Test
+Suite: stable
+Codename: test
+Architectures: amd64
+Components: main
+SHA256:
+ aabbccdd11223344556677889900aabbccddeeff11223344556677889900aabb   12345 main/binary-amd64/Packages`
+
+	r := strings.NewReader(txt)
+	release, err := ParseRelease(r)
+	if err != nil {
+		t.Fatalf("error received: %s", err)
+	}
+	if len(release.SHA256) != 1 {
+		t.Errorf("wrong num of SHA256: expected=1 had=%d", len(release.SHA256))
+	}
+	if len(release.PackagePaths) != 1 {
+		t.Errorf("wrong num of paths: expected=1 had=%d", len(release.PackagePaths))
+	}
+}
+
+func TestUnmarshalControlEdgeCases(t *testing.T) {
+	ih := &IndexHash{}
+
+	// Not enough parts - should be a no-op
+	err := ih.UnmarshalControl("justonepart")
+	if err != nil {
+		t.Errorf("expected no error for single part, got: %v", err)
+	}
+	if ih.Hash != "" {
+		t.Errorf("expected empty hash, got: %s", ih.Hash)
+	}
+
+	// Invalid size
+	err = ih.UnmarshalControl("abc notanumber path/to/file")
+	if err == nil {
+		t.Error("expected error for invalid size")
+	}
+
+	// Valid input
+	ih2 := &IndexHash{}
+	err = ih2.UnmarshalControl("abc123 12345 main/binary-amd64/Packages")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if ih2.Hash != "abc123" {
+		t.Errorf("wrong hash: expected=abc123 had=%s", ih2.Hash)
+	}
+	if ih2.Size != 12345 {
+		t.Errorf("wrong size: expected=12345 had=%d", ih2.Size)
+	}
+	if ih2.Path != "main/binary-amd64/Packages" {
+		t.Errorf("wrong path: expected=main/binary-amd64/Packages had=%s", ih2.Path)
+	}
+}

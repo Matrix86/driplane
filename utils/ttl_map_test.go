@@ -7,7 +7,7 @@ import (
 )
 
 func TestNewTTLMap(t *testing.T) {
-	gc := 1*time.Second
+	gc := 1 * time.Second
 	m := NewTTLMap(gc)
 	if m.gcdelay != gc {
 		t.Errorf("'gc' parameter is wrong")
@@ -15,11 +15,11 @@ func TestNewTTLMap(t *testing.T) {
 }
 
 func TestDeleteOnGC(t *testing.T) {
-	gc := 1*time.Second
+	gc := 1 * time.Second
 	m := NewTTLMap(gc)
 	m.Put("key", "value", 0)
 	l := len(m.dict)
-	time.Sleep(1010*time.Millisecond)
+	time.Sleep(1010 * time.Millisecond)
 	if _, ok := m.dict["key"]; ok {
 		t.Errorf("the expired key has not been removed")
 	}
@@ -29,7 +29,7 @@ func TestDeleteOnGC(t *testing.T) {
 }
 
 func TestDeleteOnGet(t *testing.T) {
-	gc := 10*time.Second
+	gc := 10 * time.Second
 	m := NewTTLMap(gc)
 	m.dict["key"] = &item{
 		Value:      "value",
@@ -46,11 +46,11 @@ func TestDeleteOnGet(t *testing.T) {
 }
 
 func TestTTLMap_Get(t *testing.T) {
-	gc := 10*time.Second
+	gc := 10 * time.Second
 	m := NewTTLMap(gc)
 	m.dict["key"] = &item{
 		Value:      "value",
-		Expiration: time.Now().Unix() -1,
+		Expiration: time.Now().Unix() - 1,
 	}
 	if _, ok := m.dict["key"]; !ok {
 		t.Errorf("key should be still here")
@@ -61,7 +61,7 @@ func TestTTLMap_Get(t *testing.T) {
 
 	m.dict["key"] = &item{
 		Value:      "value",
-		Expiration: time.Now().Unix() +2,
+		Expiration: time.Now().Unix() + 2,
 	}
 	v, ok := m.Get("key")
 	if !ok {
@@ -78,7 +78,7 @@ func TestTTLMap_Get(t *testing.T) {
 }
 
 func TestTTLMap_Put(t *testing.T) {
-	gc := 10*time.Second
+	gc := 10 * time.Second
 	m := NewTTLMap(gc)
 	m.Put("key", "value", 10)
 	v, ok := m.dict["key"]
@@ -100,7 +100,7 @@ func TestTTLMap_Put(t *testing.T) {
 }
 
 func TestTTLMap_Len(t *testing.T) {
-	gc := 10*time.Second
+	gc := 10 * time.Second
 	m := NewTTLMap(gc)
 
 	if m.Len() != 0 {
@@ -114,7 +114,7 @@ func TestTTLMap_Len(t *testing.T) {
 }
 
 func TestTTLMap_SetPersistence(t *testing.T) {
-	gc := 1*time.Second
+	gc := 1 * time.Second
 	m := NewTTLMap(gc)
 	err := m.SetPersistence("/aaa/ttl_map_cache.data")
 	if err == nil || err.Error() != "open /aaa/ttl_map_cache.data: no such file or directory" {
@@ -158,7 +158,7 @@ func TestTTLMap_SetPersistence(t *testing.T) {
 }
 
 func TestTTLMap_Close(t *testing.T) {
-	m := NewTTLMap(1*time.Second)
+	m := NewTTLMap(1 * time.Second)
 	err := m.SetPersistence("/tmp/ttl_map_cache.data")
 	if err != nil {
 		t.Errorf("wrong error: %s", err)
@@ -170,4 +170,75 @@ func TestTTLMap_Close(t *testing.T) {
 	if err == nil || err.Error() != "map has been closed" {
 		t.Errorf("wrong error: expected %s had %s", "map has been closed", err)
 	}
+}
+
+func TestTTLMap_CloseDouble(t *testing.T) {
+	m := NewTTLMap(1 * time.Second)
+	m.Close()
+	// Second close should not panic
+	m.Close()
+}
+
+func TestTTLMap_LenAfterClose(t *testing.T) {
+	m := NewTTLMap(1 * time.Second)
+	m.Close()
+	if m.Len() != 0 {
+		t.Errorf("Len should return 0 after close")
+	}
+}
+
+func TestTTLMap_PutAfterClose(t *testing.T) {
+	m := NewTTLMap(1 * time.Second)
+	m.Close()
+	// Put on closed map should not panic
+	m.Put("key", "value", 10)
+}
+
+func TestTTLMap_GetAfterClose(t *testing.T) {
+	m := NewTTLMap(1 * time.Second)
+	m.Close()
+	v, ok := m.Get("key")
+	if ok {
+		t.Errorf("Get should return false on closed map")
+	}
+	if v != nil {
+		t.Errorf("Get should return nil on closed map")
+	}
+}
+
+func TestTTLMap_SetPersistenceAndReload(t *testing.T) {
+	filename := "/tmp/ttl_map_persist_test.data"
+	defer os.Remove(filename)
+	defer os.Remove(filename + ".lock")
+
+	m := NewTTLMap(10 * time.Second)
+	err := m.SetPersistence(filename)
+	if err != nil {
+		t.Fatalf("SetPersistence failed: %s", err)
+	}
+
+	m.Put("alpha", "beta", 60)
+	m.Put("gamma", "delta", 60)
+	err = m.syncFile()
+	if err != nil {
+		t.Fatalf("syncFile failed: %s", err)
+	}
+	m.Close()
+
+	// Reload from file
+	m2 := NewTTLMap(10 * time.Second)
+	err = m2.SetPersistence(filename)
+	if err != nil {
+		t.Fatalf("SetPersistence reload failed: %s", err)
+	}
+
+	v, ok := m2.Get("alpha")
+	if !ok || v.(string) != "beta" {
+		t.Errorf("expected alpha=beta, got %v ok=%v", v, ok)
+	}
+	v, ok = m2.Get("gamma")
+	if !ok || v.(string) != "delta" {
+		t.Errorf("expected gamma=delta, got %v ok=%v", v, ok)
+	}
+	m2.Close()
 }
