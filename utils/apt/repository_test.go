@@ -349,3 +349,180 @@ func TestRepository_ForceIndexURL(t *testing.T) {
 		t.Errorf("wrong number of packages: %d", len(packages))
 	}
 }
+
+func TestRepository_GetIndexURL(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.String(), "/Packages.bz2") || strings.HasSuffix(r.URL.String(), "/Packages.gz") {
+			w.WriteHeader(404)
+		} else if strings.HasSuffix(r.URL.String(), "/Packages") {
+			_, _ = fmt.Fprintf(w, "%s", packageFile)
+		} else {
+			_, _ = fmt.Fprintf(w, "%s", releaseFile)
+		}
+	}))
+	defer svr.Close()
+
+	repo, err := NewRepository(context.Background(), svr.URL, "stable", "")
+	if err != nil {
+		t.Fatalf("can't create repository: %s", err)
+	}
+
+	// For flat repo, indexURL should be set
+	if repo.IsFlat() {
+		indexURL := repo.GetIndexURL()
+		if indexURL == "" {
+			t.Error("GetIndexURL should not be empty for flat repo")
+		}
+	}
+}
+
+func TestRepository_ForceIndexURLMethod(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.URL.String(), "/Packages") {
+			w.WriteHeader(404)
+		} else {
+			_, _ = fmt.Fprintf(w, "%s", releaseFile)
+		}
+	}))
+	defer svr.Close()
+
+	repo, err := NewRepository(context.Background(), svr.URL, "stable", "")
+	if err != nil {
+		t.Fatalf("can't create repository: %s", err)
+	}
+
+	customURL := svr.URL + "/custom/Packages"
+	repo.ForceIndexURL(customURL)
+
+	if !repo.IsFlat() {
+		t.Error("IsFlat should be true after ForceIndexURL")
+	}
+	if repo.GetIndexURL() != customURL {
+		t.Errorf("GetIndexURL should return forced URL: expected=%s had=%s", customURL, repo.GetIndexURL())
+	}
+}
+
+func TestRepository_GetIndex(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.String(), "/Packages.bz2") || strings.HasSuffix(r.URL.String(), "/Packages.gz") {
+			w.WriteHeader(404)
+		} else if strings.HasSuffix(r.URL.String(), "/Packages") {
+			_, _ = fmt.Fprintf(w, "%s", packageFile)
+		} else {
+			_, _ = fmt.Fprintf(w, "%s", releaseFile)
+		}
+	}))
+	defer svr.Close()
+
+	repo, err := NewRepository(context.Background(), svr.URL, "stable", "")
+	if err != nil {
+		t.Fatalf("can't create repository: %s", err)
+	}
+
+	// Before loading packages, GetIndex should be nil
+	if repo.GetIndex() != nil {
+		t.Error("GetIndex should be nil before loading packages")
+	}
+
+	// Load packages
+	_, err = repo.GetPackages()
+	if err != nil {
+		t.Fatalf("GetPackages failed: %v", err)
+	}
+
+	// After loading, GetIndex should not be nil
+	if repo.GetIndex() == nil {
+		t.Error("GetIndex should not be nil after loading packages")
+	}
+}
+
+func TestRepository_SetArchitectureNoRelease(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.String(), "/Packages") {
+			_, _ = fmt.Fprintf(w, "%s", packageFile)
+		} else {
+			w.WriteHeader(404)
+		}
+	}))
+	defer svr.Close()
+
+	// Flat repo: SetArchitecture should be no-op
+	repo, err := NewRepository(context.Background(), svr.URL, "stable", "")
+	if err != nil {
+		t.Fatalf("can't create flat repository: %s", err)
+	}
+	if !repo.IsFlat() {
+		t.Fatal("expected flat repo")
+	}
+	err = repo.SetArchitecture("amd64")
+	if err != nil {
+		t.Errorf("SetArchitecture on flat repo should not error, got: %v", err)
+	}
+}
+
+func TestRepository_GetArchitecturesNil(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Everything is flat
+		if strings.HasSuffix(r.URL.String(), "/Packages") {
+			_, _ = fmt.Fprintf(w, "%s", packageFile)
+		} else {
+			w.WriteHeader(404)
+		}
+	}))
+	defer svr.Close()
+
+	repo, err := NewRepository(context.Background(), svr.URL, "stable", "")
+	if err != nil {
+		t.Fatalf("can't create repository: %s", err)
+	}
+
+	// Flat repo has no release file, GetArchitectures should return nil
+	if repo.GetArchitectures() != nil {
+		t.Error("GetArchitectures should return nil when no release file")
+	}
+}
+
+func TestRepository_ReloadPackages(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.String(), "/Packages.bz2") || strings.HasSuffix(r.URL.String(), "/Packages.gz") {
+			w.WriteHeader(404)
+		} else if strings.HasSuffix(r.URL.String(), "/Packages") {
+			_, _ = fmt.Fprintf(w, "%s", packageFile)
+		} else {
+			_, _ = fmt.Fprintf(w, "%s", releaseFile)
+		}
+	}))
+	defer svr.Close()
+
+	repo, err := NewRepository(context.Background(), svr.URL, "stable", "")
+	if err != nil {
+		t.Fatalf("can't create repository: %s", err)
+	}
+
+	err = repo.ReloadPackages()
+	if err != nil {
+		t.Errorf("ReloadPackages failed: %v", err)
+	}
+}
+
+func TestRepository_NewRepositoryWithUserAgent(t *testing.T) {
+	var gotUA string
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotUA = r.Header.Get("User-Agent")
+		if strings.Contains(r.URL.String(), "/Packages") {
+			w.WriteHeader(404)
+		} else {
+			_, _ = fmt.Fprintf(w, "%s", releaseFile)
+		}
+	}))
+	defer svr.Close()
+
+	_, err := NewRepository(context.Background(), svr.URL, "stable", "TestAgent/1.0")
+	if err != nil {
+		t.Fatalf("can't create repository: %s", err)
+	}
+
+	if gotUA != "TestAgent/1.0" {
+		t.Errorf("wrong user agent: expected=TestAgent/1.0 had=%s", gotUA)
+	}
+}
