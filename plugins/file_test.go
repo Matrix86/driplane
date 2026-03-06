@@ -6,6 +6,91 @@ import (
 	"testing"
 )
 
+func TestFilePackage_Read(t *testing.T) {
+	h := GetFile()
+
+	// Test reading a non-existent file
+	res := h.Read(path.Join(os.TempDir(), "nonexistent_read_test"))
+	if res.Status != false {
+		t.Errorf("Read nonexistent: wrong status: expected=false had=true")
+	}
+	if res.Error == nil {
+		t.Errorf("Read nonexistent: error should not be nil")
+	}
+
+	// Test reading a valid file
+	content := "read test content"
+	filename := path.Join(os.TempDir(), "read_test_file")
+	if err := os.WriteFile(filename, []byte(content), 0644); err != nil {
+		t.Fatalf("cannot create test file: %v", err)
+	}
+	defer os.Remove(filename)
+
+	res = h.Read(filename)
+	if res.Status != true {
+		t.Errorf("Read valid file: wrong status: expected=true had=false")
+	}
+	if res.Error != nil {
+		t.Errorf("Read valid file: unexpected error: %v", res.Error)
+	}
+	if res.String != content {
+		t.Errorf("Read valid file: wrong string: expected=%q had=%q", content, res.String)
+	}
+	if string(res.Binary) != content {
+		t.Errorf("Read valid file: wrong binary: expected=%q had=%q", content, string(res.Binary))
+	}
+
+	// Test reading an empty file
+	emptyFile := path.Join(os.TempDir(), "read_test_empty")
+	if err := os.WriteFile(emptyFile, []byte(""), 0644); err != nil {
+		t.Fatalf("cannot create empty test file: %v", err)
+	}
+	defer os.Remove(emptyFile)
+
+	res = h.Read(emptyFile)
+	if res.Status != true {
+		t.Errorf("Read empty file: wrong status: expected=true had=false")
+	}
+	if res.String != "" {
+		t.Errorf("Read empty file: wrong string: expected empty had=%q", res.String)
+	}
+}
+
+func TestFilePackage_Write(t *testing.T) {
+	h := GetFile()
+
+	// Test writing to a valid path
+	filename := path.Join(os.TempDir(), "write_test_file")
+	defer os.Remove(filename)
+
+	content := []byte("write test content")
+	res := h.Write(filename, content)
+	if res.Status != true {
+		t.Errorf("Write valid path: wrong status: expected=true had=false")
+	}
+	if res.Error != nil {
+		t.Errorf("Write valid path: unexpected error: %v", res.Error)
+	}
+
+	// Verify write content
+	dat, err := os.ReadFile(filename)
+	if err != nil {
+		t.Fatalf("cannot read written file: %v", err)
+	}
+	if string(dat) != string(content) {
+		t.Errorf("Write valid path: wrong content: expected=%q had=%q", string(content), string(dat))
+	}
+
+	// Test writing to an invalid path
+	res = h.Write("/nonexistent_dir_xyzzy/file", content)
+	if res.Status != false {
+		t.Errorf("Write invalid path: wrong status: expected=false had=true")
+	}
+	if res.Error == nil {
+		t.Errorf("Write invalid path: error should not be nil")
+	}
+}
+
 func TestFilePackage_Copy(t *testing.T) {
 	h := GetFile()
 

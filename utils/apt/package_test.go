@@ -1,6 +1,8 @@
 package apt
 
 import (
+	"bytes"
+	"compress/gzip"
 	"strings"
 	"testing"
 )
@@ -100,5 +102,52 @@ Author: absidue`
 	}
 	if len(p.Binaries) != 3 {
 		t.Errorf("the index should contains 3 packages")
+	}
+}
+
+func TestParsePackageGz(t *testing.T) {
+	txt := `Package: test-package
+architecture: amd64
+Version: 1.0
+Filename: ./pool/test-package_1.0_amd64.deb
+Size: 1234
+`
+
+	// Gzip the content
+	var buf bytes.Buffer
+	gw := gzip.NewWriter(&buf)
+	_, err := gw.Write([]byte(txt))
+	if err != nil {
+		t.Fatalf("gzip write failed: %v", err)
+	}
+	gw.Close()
+
+	p, err := ParsePackageIndex(&buf, "gz")
+	if err != nil {
+		t.Fatalf("error parsing gz: %s", err)
+	}
+	if len(p.Binaries) != 1 {
+		t.Errorf("expected 1 package, got %d", len(p.Binaries))
+	}
+	if p.Type != "gz" {
+		t.Errorf("expected type=gz, got %s", p.Type)
+	}
+}
+
+func TestParsePackageGzInvalid(t *testing.T) {
+	// Invalid gzip data
+	r := strings.NewReader("this is not gzip data")
+	_, err := ParsePackageIndex(r, "gz")
+	if err == nil {
+		t.Error("expected error for invalid gzip data")
+	}
+}
+
+func TestParsePackageBz2Invalid(t *testing.T) {
+	// bzip2 reader will fail on invalid data during Unmarshal read
+	r := strings.NewReader("this is not bz2 data")
+	_, err := ParsePackageIndex(r, "bz2")
+	if err == nil {
+		t.Error("expected error for invalid bz2 data")
 	}
 }
