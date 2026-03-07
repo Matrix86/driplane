@@ -40,9 +40,13 @@ jobs:
 
       - name: Create Changelog
         id: changelog
-        run: |
-          echo "## Changelog" > .github/CHANGELOG.md
-          git log --pretty=format:"* %s (%h)" ${{steps.last.outputs.tag}}..${{steps.current.outputs.tag}} >> .github/CHANGELOG.md
+        uses: jimschubert/beast-changelog-action@v1
+        with:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          CONFIG_LOCATION: .github/changelog.json
+          FROM: ${{steps.last.outputs.tag}}
+          TO: ${{steps.current.outputs.tag}}
+          OUTPUT: .github/CHANGELOG.md
 
       - name: View Changelog
         run: cat .github/CHANGELOG.md
