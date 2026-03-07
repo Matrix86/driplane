@@ -74,7 +74,7 @@ func TestMd5File(t *testing.T) {
 	}
 	tests := []Test{
 		{path.Join(os.TempDir(), "testmd5"), true, "702edca0b2181c15d457eacac39de39b", ""},
-		{path.Join(os.TempDir(), "notexist"), false, "", "open /tmp/notexist: no such file or directory"},
+		{path.Join(os.TempDir(), "notexist"), false, "", "open " + path.Join(os.TempDir(), "notexist") + ": no such file or directory"},
 	}
 
 	for _, v := range tests {

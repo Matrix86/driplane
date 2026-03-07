@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"testing"
@@ -32,12 +33,15 @@ func TestParser_ParseFile(t *testing.T) {
 	}
 
 	v1, v2, v3 := "value1", "value2", "{'k':'v'}"
+	notExistFile := path.Join(os.TempDir(), "notexist")
+	cyclicFile1 := path.Join(os.TempDir(), "test1")
+	cyclicFile2 := path.Join(os.TempDir(), "test2")
 
 	tests := []Test{
-		{"FileNotExist", path.Join(os.TempDir(), "notexist"), false, "", "", false, "", nil, "parsing '/tmp/notexist': open /tmp/notexist: no such file or directory"},
+		{"FileNotExist", notExistFile, false, "", "", false, "", nil, fmt.Sprintf("parsing '%s': open %s: no such file or directory", notExistFile, notExistFile)},
 		{"EmptyFile", path.Join(os.TempDir(), "test"), true, "", "", false, "", &AST{Dependencies: map[string]*AST{}, Rules: []*RuleNode(nil)}, ""},
 		{"UnexpectedEOF", path.Join(os.TempDir(), "test"), true, "ident =>", "", false, "", nil, "1:9: unexpected token \"<EOF>\" (expected <ident>)"},
-		{"CyclicDep", path.Join(os.TempDir(), "test1"), true, "#import \"test1\"", path.Join(os.TempDir(), "test2"), true, "#import \"test2\"", nil, "can't parse import file '/tmp/test1': cyclic dependency on /tmp/test1"},
+		{"CyclicDep", cyclicFile1, true, "#import \"test1\"", cyclicFile2, true, "#import \"test2\"", nil, fmt.Sprintf("can't parse import file '%s': cyclic dependency on %s", cyclicFile1, cyclicFile1)},
 		{
 			"ParseOk",
 			path.Join(os.TempDir(), "test"),
