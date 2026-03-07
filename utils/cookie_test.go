@@ -11,17 +11,17 @@ import (
 
 func TestParseCookieFile(t *testing.T) {
 	type Test struct {
-		Name string
+		Name            string
 		Filename        string
 		CreateFile      bool
-		FileContent string
+		FileContent     string
 		ExpectedCookies []*http.Cookie
 		ExpectedError   string
 	}
 	tests := []Test{
-		{ "FileNotExist", path.Join(os.TempDir(), "notexist"), false, "", []*http.Cookie(nil), "open /tmp/notexist: no such file or directory"},
-		{ "WrongJson",path.Join(os.TempDir(), "wrongjson"), true, "wrong", []*http.Cookie(nil), "invalid character 'w' looking for beginning of value"},
-		{ "ExportedJson", path.Join(os.TempDir(), "cookie_test_file"), true, "[\n  {\n    \"domain\": \"test.com\",\n    \"expirationDate\": 1627486224,\n    \"hostOnly\": true,\n    \"httpOnly\": false,\n    \"name\": \"testCookie\",\n    \"path\": \"/\",\n    \"sameSite\": \"unspecified\",\n    \"secure\": false,\n    \"session\": false,\n    \"storeId\": \"0\",\n    \"value\": \"testValue\",\n    \"id\": 1\n  }\n]", []*http.Cookie{&http.Cookie{
+		{"FileNotExist", path.Join(os.TempDir(), "notexist"), false, "", []*http.Cookie(nil), "open " + path.Join(os.TempDir(), "notexist") + ": no such file or directory"},
+		{"WrongJson", path.Join(os.TempDir(), "wrongjson"), true, "wrong", []*http.Cookie(nil), "invalid character 'w' looking for beginning of value"},
+		{"ExportedJson", path.Join(os.TempDir(), "cookie_test_file"), true, "[\n  {\n    \"domain\": \"test.com\",\n    \"expirationDate\": 1627486224,\n    \"hostOnly\": true,\n    \"httpOnly\": false,\n    \"name\": \"testCookie\",\n    \"path\": \"/\",\n    \"sameSite\": \"unspecified\",\n    \"secure\": false,\n    \"session\": false,\n    \"storeId\": \"0\",\n    \"value\": \"testValue\",\n    \"id\": 1\n  }\n]", []*http.Cookie{&http.Cookie{
 			Name:       "testCookie",
 			Value:      "testValue",
 			Path:       "/",
@@ -35,7 +35,7 @@ func TestParseCookieFile(t *testing.T) {
 			Raw:        "",
 			Unparsed:   nil,
 		}},
-		"open /tmp/notexist: no such file or directory"},
+			"open /tmp/notexist: no such file or directory"},
 	}
 
 	for _, v := range tests {

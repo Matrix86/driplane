@@ -1,6 +1,7 @@
 package plugins
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"testing"
@@ -102,8 +103,8 @@ func TestFilePackage_Copy(t *testing.T) {
 		ExpectedError  string
 	}
 	tests := []Test{
-		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), false, false, "stat /tmp/notexistentfile: no such file or directory"},
-		{"NotRegularFile", path.Join(os.TempDir()), false, false, "/tmp is not a regular file"},
+		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), false, false, fmt.Sprintf("stat %s: no such file or directory", path.Join(os.TempDir(), "notexistentfile"))},
+		{"NotRegularFile", path.Join(os.TempDir()), false, false, fmt.Sprintf("%s is not a regular file", path.Join(os.TempDir()))},
 		{"CopyOK", path.Join(os.TempDir(), "test1"), true, true, ""},
 	}
 
@@ -147,9 +148,9 @@ func TestFilePackage_Move(t *testing.T) {
 		ExpectedError  string
 	}
 	tests := []Test{
-		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), "", false, false, "stat /tmp/notexistentfile: no such file or directory"},
-		{"NotRegularSrcFile", path.Join(os.TempDir()), "", false, false, "/tmp is not a regular file"},
-		{"NotRegularDstFile", path.Join(os.TempDir(), "test1"), os.TempDir(), true, false, "rename /tmp/test1 /tmp: file exists"},
+		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), "", false, false, fmt.Sprintf("stat %s: no such file or directory", path.Join(os.TempDir(), "notexistentfile"))},
+		{"NotRegularSrcFile", path.Join(os.TempDir()), "", false, false, fmt.Sprintf("%s is not a regular file", path.Join(os.TempDir()))},
+		{"NotRegularDstFile", path.Join(os.TempDir(), "test1"), os.TempDir(), true, false, fmt.Sprintf("rename %s %s: file exists", path.Join(os.TempDir(), "test1"), os.TempDir())},
 		{"MoveOK", path.Join(os.TempDir(), "test2"), path.Join(os.TempDir(), "newfile"), true, true, ""},
 	}
 
@@ -192,8 +193,8 @@ func TestFilePackage_Truncate(t *testing.T) {
 		ExpectedSize   int64
 	}
 	tests := []Test{
-		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), false, false, "stat /tmp/notexistentfile: no such file or directory", 0},
-		{"NotRegularFile", path.Join(os.TempDir()), false, false, "/tmp is not a regular file", 0},
+		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), false, false, fmt.Sprintf("stat %s: no such file or directory", path.Join(os.TempDir(), "notexistentfile")), 0},
+		{"NotRegularFile", path.Join(os.TempDir()), false, false, fmt.Sprintf("%s is not a regular file", path.Join(os.TempDir())), 0},
 		{"TruncateZero", path.Join(os.TempDir(), "test1"), true, true, "", 0},
 		{"TruncateTwo", path.Join(os.TempDir(), "test1"), true, true, "", 2},
 	}
@@ -243,8 +244,8 @@ func TestFilePackage_Delete(t *testing.T) {
 		ExpectedExist  bool
 	}
 	tests := []Test{
-		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), false, false, "stat /tmp/notexistentfile: no such file or directory", false},
-		{"NotRegularFile", path.Join(os.TempDir()), false, false, "/tmp is not a regular file", false},
+		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), false, false, fmt.Sprintf("stat %s: no such file or directory", path.Join(os.TempDir(), "notexistentfile")), false},
+		{"NotRegularFile", path.Join(os.TempDir()), false, false, fmt.Sprintf("%s is not a regular file", path.Join(os.TempDir())), false},
 		{"FileRemoved", path.Join(os.TempDir(), "test1"), true, true, "", true},
 	}
 
@@ -288,8 +289,8 @@ func TestFilePackage_Exists(t *testing.T) {
 		ExpectedError  string
 	}
 	tests := []Test{
-		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), false, false, "stat /tmp/notexistentfile: no such file or directory"},
-		{"NotRegularFile", path.Join(os.TempDir()), false, false, "/tmp is not a regular file"},
+		{"FileNotFound", path.Join(os.TempDir(), "notexistentfile"), false, false, fmt.Sprintf("stat %s: no such file or directory", path.Join(os.TempDir(), "notexistentfile"))},
+		{"NotRegularFile", path.Join(os.TempDir()), false, false, fmt.Sprintf("%s is not a regular file", path.Join(os.TempDir()))},
 		{"FileExist", path.Join(os.TempDir(), "test1"), true, true, ""},
 	}
 
@@ -329,7 +330,7 @@ func TestFilePackage_AppendString(t *testing.T) {
 		ExpectedString string
 	}
 	tests := []Test{
-		{"CannotOpenFile", os.TempDir(), false, false, false, "open /tmp: is a directory", ""},
+		{"CannotOpenFile", os.TempDir(), false, false, false, fmt.Sprintf("open %s: is a directory", os.TempDir()), ""},
 		{"CreateFile", path.Join(os.TempDir(), "create"), false, false, true, "", "append ok"},
 		{"AppendFile", path.Join(os.TempDir(), "append"), true, true, true, "", "file ok append ok"},
 	}
