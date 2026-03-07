@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"syscall"
 
 	"golang.org/x/term"
 
@@ -50,7 +49,7 @@ func (a Terminal) Phone(_ context.Context) (string, error) {
 
 func (Terminal) Password(_ context.Context) (string, error) {
 	fmt.Print("Enter 2FA password: ")
-	bytePwd, err := term.ReadPassword(syscall.Stdin)
+	bytePwd, err := term.ReadPassword(int(os.Stdin.Fd()))
 	if err != nil {
 		return "", err
 	}
