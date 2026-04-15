@@ -43,13 +43,13 @@ func NewFormatFilter(p map[string]string) (Filter, error) {
 
 	if v, ok := f.params["template"]; ok {
 		if f.templateType == "html" {
-			t, err := html.New("formatFilterTemplate").Parse(v)
+			t, err := html.New("formatFilterTemplate").Funcs(sprig.FuncMap()).Parse(v)
 			if err != nil {
 				return nil, err
 			}
 			f.template = t
 		} else {
-			t, err := text.New("formatFilterTemplate").Parse(v)
+			t, err := text.New("formatFilterTemplate").Funcs(sprig.FuncMap()).Parse(v)
 			if err != nil {
 				return nil, err
 			}

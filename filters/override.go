@@ -5,9 +5,9 @@ import (
 
 	"github.com/Matrix86/driplane/data"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/evilsocket/islazy/log"
 )
-
 
 // Override is a Filter that allow to change the current Message
 // before to send it to the next Filter
@@ -28,7 +28,7 @@ func NewOverrideFilter(p map[string]string) (Filter, error) {
 	f.cbFilter = f.DoFilter
 
 	if v, ok := p["name"]; ok {
-		t, err := template.New("setFilterName").Parse(v)
+		t, err := template.New("setFilterName").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}
@@ -36,7 +36,7 @@ func NewOverrideFilter(p map[string]string) (Filter, error) {
 	}
 
 	if v, ok := p["value"]; ok {
-		t, err := template.New("setFilterValue").Parse(v)
+		t, err := template.New("setFilterValue").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}
@@ -64,7 +64,7 @@ func (f *Override) DoFilter(msg *data.Message) (bool, error) {
 }
 
 // OnEvent is called when an event occurs
-func (f *Override) OnEvent(event *data.Event){}
+func (f *Override) OnEvent(event *data.Event) {}
 
 // Set the name of the filter
 func init() {
