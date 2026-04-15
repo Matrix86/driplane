@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	text "text/template"
 
+	"github.com/Masterminds/sprig/v3"
+
 	"github.com/Matrix86/driplane/data"
 )
 
@@ -71,13 +73,13 @@ func NewFormatFilter(p map[string]string) (Filter, error) {
 			return nil, err
 		}
 		if f.templateType == "html" {
-			t, err := html.New("formatFilterTemplate").Parse(string(content))
+			t, err := html.New("formatFilterTemplate").Funcs(sprig.FuncMap()).Parse(string(content))
 			if err != nil {
 				return nil, err
 			}
 			f.template = t
 		} else {
-			t, err := text.New("formatFilterTemplate").Parse(string(content))
+			t, err := text.New("formatFilterTemplate").Funcs(sprig.FuncMap()).Parse(string(content))
 			if err != nil {
 				return nil, err
 			}
