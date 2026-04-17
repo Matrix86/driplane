@@ -517,6 +517,41 @@ func TestLLMSupportedProviders(t *testing.T) {
 	}
 }
 
+func TestLLMFilterSprigFunctions(t *testing.T) {
+	mock := &mockProvider{
+		name: "mock",
+		response: &providers.ChatCompletion{
+			Model:   "gpt-4",
+			Choices: []providers.Choice{{Message: providers.Message{Content: "ok"}}},
+		},
+	}
+
+	f, err := newTestLLMFilter(map[string]string{
+		"model":         "gpt-4",
+		"prompt":        "{{ .main | upper }}",
+		"system_prompt": "{{ .role | lower }}",
+	}, mock)
+	if err != nil {
+		t.Fatalf("constructor should accept sprig functions: %s", err)
+	}
+
+	msg := data.NewMessageWithExtra("hello", map[string]interface{}{"role": "ASSISTANT"})
+	ok, err := f.DoFilter(msg)
+	if err != nil {
+		t.Fatalf("DoFilter returned error: %s", err)
+	}
+	if !ok {
+		t.Error("DoFilter returned false")
+	}
+
+	if mock.lastParams.Messages[0].ContentString() != "assistant" {
+		t.Errorf("expected system prompt 'assistant', got '%s'", mock.lastParams.Messages[0].ContentString())
+	}
+	if mock.lastParams.Messages[1].ContentString() != "HELLO" {
+		t.Errorf("expected prompt 'HELLO', got '%s'", mock.lastParams.Messages[1].ContentString())
+	}
+}
+
 func TestLLMOnEvent(t *testing.T) {
 	mock := &mockProvider{
 		name: "mock",

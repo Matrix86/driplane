@@ -14,7 +14,7 @@ _Based on the [ledongthuc/pdf](https://github.com/ledongthuc/pdf) library._
 | Parameter    | Type     | Default | Description                                                                                                |
 |--------------|----------|---------|------------------------------------------------------------------------------------------------------------|
 | **target**   | _STRING_ | "main"  | the field of the Message that should be used for the filter (it could be the `main` or and extra field)    |
-| **filename** | _STRING_ | empty   | the filename of the PDF file to parse (supports [Golang templates](https://golang.org/pkg/text/template/)) |
+| **filename** | _STRING_ | empty   | the filename of the PDF file to parse (supports [templates](../../rules/templates)) |
  
 {{< notice info "Example" >}} 
 `... | pdf(target="{{ .extra_field }}") | ...`

@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/Matrix86/driplane/data"
 	"github.com/Matrix86/driplane/utils"
 
@@ -59,14 +60,14 @@ func NewHTTPFilter(p map[string]string) (Filter, error) {
 		f.textOnly = true
 	}
 	if v, ok := f.params["url"]; ok {
-		t, err := template.New("httpFilterUrlString").Parse(v)
+		t, err := template.New("httpFilterUrlString").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}
 		f.urlTemplate = t
 	}
 	if v, ok := f.params["download_to"]; ok {
-		t, err := template.New("httpFilterDownloadToString").Parse(v)
+		t, err := template.New("httpFilterDownloadToString").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}
@@ -88,7 +89,7 @@ func NewHTTPFilter(p map[string]string) (Filter, error) {
 			return nil, err
 		}
 		for i, v := range tmpMap {
-			t, err := template.New("httpFilterdataPost" + i).Parse(v)
+			t, err := template.New("httpFilterdataPost" + i).Funcs(sprig.FuncMap()).Parse(v)
 			if err != nil {
 				return nil, err
 			}
@@ -96,7 +97,7 @@ func NewHTTPFilter(p map[string]string) (Filter, error) {
 		}
 	}
 	if v, ok := f.params["rawData"]; ok {
-		t, err := template.New("httpFilterRawData").Parse(v)
+		t, err := template.New("httpFilterRawData").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}

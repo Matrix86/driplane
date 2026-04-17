@@ -344,6 +344,30 @@ func TestHTTPDoFilterInvalidURL(t *testing.T) {
 	}
 }
 
+func TestHTTPFilterSprigFunctions(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "ok")
+	}))
+	defer ts.Close()
+
+	filter, err := NewHTTPFilter(map[string]string{
+		"url": ts.URL + "/{{ .main | lower }}",
+	})
+	if err != nil {
+		t.Fatalf("constructor should accept sprig functions: %s", err)
+	}
+
+	f := filter.(*HTTP)
+	msg := data.NewMessage("PATH")
+	ok, err := f.DoFilter(msg)
+	if err != nil {
+		t.Fatalf("DoFilter returned error: %s", err)
+	}
+	if !ok {
+		t.Error("DoFilter should return true")
+	}
+}
+
 func TestHTTPOnEvent(t *testing.T) {
 	filter, _ := NewHTTPFilter(map[string]string{"url": "http://example.com"})
 	f := filter.(*HTTP)

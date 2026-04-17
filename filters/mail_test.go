@@ -131,6 +131,28 @@ func TestMailOnEvent(t *testing.T) {
 	f.OnEvent(&data.Event{})
 }
 
+func TestNewMailFilterSprigFunctions(t *testing.T) {
+	filter, err := NewMailFilter(map[string]string{
+		"body": "{{ .main | upper }}",
+	})
+	if err != nil {
+		t.Fatalf("constructor should accept sprig functions: %s", err)
+	}
+	f := filter.(*Mail)
+	if f.template == nil {
+		t.Fatal("template should be set")
+	}
+
+	msg := data.NewMessage("hello")
+	result, err := msg.ApplyPlaceholder(f.template)
+	if err != nil {
+		t.Fatalf("ApplyPlaceholder returned error: %s", err)
+	}
+	if result != "HELLO" {
+		t.Errorf("expected 'HELLO', got '%s'", result)
+	}
+}
+
 func TestMailFilterRegistered(t *testing.T) {
 	if _, ok := filterFactories["mailfilter"]; !ok {
 		t.Errorf("mail filter should be registered as 'mailfilter'")

@@ -4,6 +4,7 @@ import (
 	"os/exec"
 	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/Matrix86/driplane/data"
 
 	"github.com/evilsocket/islazy/log"
@@ -26,7 +27,7 @@ func NewSystemFilter(p map[string]string) (Filter, error) {
 	f.cbFilter = f.DoFilter
 
 	if v, ok := p["cmd"]; ok {
-		t, err := template.New("systemFilterCommand").Parse(v)
+		t, err := template.New("systemFilterCommand").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}

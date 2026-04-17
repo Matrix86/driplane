@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/Matrix86/driplane/data"
 	"github.com/evilsocket/islazy/log"
 
@@ -39,7 +40,7 @@ func NewMailFilter(p map[string]string) (Filter, error) {
 	f.cbFilter = f.DoFilter
 
 	if v, ok := f.params["body"]; ok {
-		t, err := template.New("MailFilterTemplate").Parse(v)
+		t, err := template.New("MailFilterTemplate").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}
@@ -130,7 +131,7 @@ func (f *Mail) DoFilter(msg *data.Message) (bool, error) {
 }
 
 // OnEvent is called when an event occurs
-func (f *Mail) OnEvent(event *data.Event){}
+func (f *Mail) OnEvent(event *data.Event) {}
 
 // Set the name of the filter
 func init() {

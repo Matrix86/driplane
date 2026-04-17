@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/Matrix86/driplane/data"
 
 	"github.com/ledongthuc/pdf"
@@ -29,7 +30,7 @@ func NewPDFFilter(p map[string]string) (Filter, error) {
 	f.cbFilter = f.DoFilter
 
 	if v, ok := p["filename"]; ok {
-		t, err := template.New("pdfFilterFilename").Parse(v)
+		t, err := template.New("pdfFilterFilename").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}

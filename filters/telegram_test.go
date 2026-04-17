@@ -191,6 +191,41 @@ func TestTelegramOnEvent(t *testing.T) {
 	f.OnEvent(&data.Event{})
 }
 
+func TestTelegramFilterSprigFunctions(t *testing.T) {
+	filter, err := NewTelegramFilter(map[string]string{
+		"action": "send_message",
+		"to":     "{{ .main | lower }}",
+		"text":   "{{ .main | upper }}",
+	})
+	if err != nil {
+		t.Fatalf("constructor should accept sprig functions: %s", err)
+	}
+	f := filter.(*Telegram)
+	if f.to == nil {
+		t.Error("'to' template should be set")
+	}
+	if f.message == nil {
+		t.Error("'message' template should be set")
+	}
+
+	msg := data.NewMessage("Hello")
+	toResult, err := msg.ApplyPlaceholder(f.to)
+	if err != nil {
+		t.Fatalf("ApplyPlaceholder on 'to' returned error: %s", err)
+	}
+	if toResult != "hello" {
+		t.Errorf("expected 'hello', got '%s'", toResult)
+	}
+
+	textResult, err := msg.ApplyPlaceholder(f.message)
+	if err != nil {
+		t.Fatalf("ApplyPlaceholder on 'message' returned error: %s", err)
+	}
+	if textResult != "HELLO" {
+		t.Errorf("expected 'HELLO', got '%s'", textResult)
+	}
+}
+
 func TestTelegramFilterRegistered(t *testing.T) {
 	if _, ok := filterFactories["telegramfilter"]; !ok {
 		t.Errorf("telegram filter should be registered as 'telegramfilter'")

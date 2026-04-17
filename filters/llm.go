@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/Matrix86/driplane/data"
 
 	anyllm "github.com/mozilla-ai/any-llm-go"
@@ -96,7 +97,7 @@ func NewLLMFilter(p map[string]string) (Filter, error) {
 
 	// prompt: Go template for the user message (required)
 	if v, ok := p["prompt"]; ok {
-		t, err := template.New("llmFilterPrompt").Parse(v)
+		t, err := template.New("llmFilterPrompt").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, fmt.Errorf("llmfilter: error parsing prompt template: %s", err)
 		}
@@ -107,7 +108,7 @@ func NewLLMFilter(p map[string]string) (Filter, error) {
 
 	// system_prompt: Go template for system message (optional)
 	if v, ok := p["system_prompt"]; ok {
-		t, err := template.New("llmFilterSystemPrompt").Parse(v)
+		t, err := template.New("llmFilterSystemPrompt").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, fmt.Errorf("llmfilter: error parsing system_prompt template: %s", err)
 		}

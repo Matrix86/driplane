@@ -71,6 +71,25 @@ func TestNewSlackFilter(t *testing.T) {
 	}
 }
 
+func TestNewSlackFilterSprigFunctions(t *testing.T) {
+	filter, err := NewSlackFilter(map[string]string{
+		"action":   "send_message",
+		"text":     "{{ .main | upper }}",
+		"to":       "{{ .main | lower }}",
+		"botToken": "token",
+	})
+	if err != nil {
+		t.Fatalf("constructor should accept sprig functions: %s", err)
+	}
+	f := filter.(*Slack)
+	if f.body == nil {
+		t.Error("body template should be set")
+	}
+	if f.to == nil {
+		t.Error("to template should be set")
+	}
+}
+
 func TestSlack_DoFilter(t *testing.T) {
 	type Test struct {
 		Name          string

@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/evilsocket/islazy/log"
 	"github.com/slack-go/slack"
 
@@ -42,7 +43,7 @@ func NewSlackFilter(p map[string]string) (Filter, error) {
 	f.cbFilter = f.DoFilter
 
 	if v, ok := f.params["text"]; ok {
-		t, err := template.New("SlackFilterTemplate").Parse(v)
+		t, err := template.New("SlackFilterTemplate").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}
@@ -55,14 +56,14 @@ func NewSlackFilter(p map[string]string) (Filter, error) {
 		f.action = v
 	}
 	if v, ok := f.params["filename"]; ok {
-		t, err := template.New("SlackFilenameFilterTemplate").Parse(v)
+		t, err := template.New("SlackFilenameFilterTemplate").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}
 		f.filename = t
 	}
 	if v, ok := f.params["url"]; ok {
-		t, err := template.New("SlackDwnUrlFilterTemplate").Parse(v)
+		t, err := template.New("SlackDwnUrlFilterTemplate").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +76,7 @@ func NewSlackFilter(p map[string]string) (Filter, error) {
 		f.botToken = v
 	}
 	if v, ok := f.params["to"]; ok {
-		t, err := template.New("SlackToFilterTemplate").Parse(v)
+		t, err := template.New("SlackToFilterTemplate").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}

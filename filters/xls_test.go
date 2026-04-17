@@ -231,6 +231,28 @@ func TestXLSOnEvent(t *testing.T) {
 	f.OnEvent(&data.Event{})
 }
 
+func TestXLSFilterSprigFunctions(t *testing.T) {
+	filter, err := NewXLSFilter(map[string]string{
+		"filename": "/tmp/{{ .main | lower }}.xlsx",
+	})
+	if err != nil {
+		t.Fatalf("constructor should accept sprig functions: %s", err)
+	}
+	f := filter.(*XLS)
+	if f.filename == nil {
+		t.Fatal("filename template should be set")
+	}
+
+	msg := data.NewMessage("REPORT")
+	result, err := msg.ApplyPlaceholder(f.filename)
+	if err != nil {
+		t.Fatalf("ApplyPlaceholder returned error: %s", err)
+	}
+	if result != "/tmp/report.xlsx" {
+		t.Errorf("expected '/tmp/report.xlsx', got '%s'", result)
+	}
+}
+
 func TestXLSFilterRegistered(t *testing.T) {
 	if _, ok := filterFactories["xlsfilter"]; !ok {
 		t.Error("xls filter should be registered as 'xlsfilter'")

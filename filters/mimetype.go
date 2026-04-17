@@ -3,8 +3,10 @@ package filters
 import (
 	"bytes"
 	"fmt"
-	"github.com/Matrix86/driplane/data"
 	"text/template"
+
+	"github.com/Masterminds/sprig/v3"
+	"github.com/Matrix86/driplane/data"
 
 	"github.com/gabriel-vasile/mimetype"
 )
@@ -28,7 +30,7 @@ func NewMimetypeFilter(p map[string]string) (Filter, error) {
 	f.cbFilter = f.DoFilter
 
 	if v, ok := p["filename"]; ok {
-		t, err := template.New("mimeFilterFilename").Parse(v)
+		t, err := template.New("mimeFilterFilename").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}

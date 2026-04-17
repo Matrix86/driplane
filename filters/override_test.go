@@ -22,6 +22,29 @@ func TestNewOverrideFilter(t *testing.T) {
 	}
 }
 
+func TestOverrideSprigFunctions(t *testing.T) {
+	filter, err := NewOverrideFilter(map[string]string{
+		"name":  "result",
+		"value": "{{ .main | upper }}",
+	})
+	if err != nil {
+		t.Fatalf("constructor should accept sprig functions: %s", err)
+	}
+	e := filter.(*Override)
+
+	m := data.NewMessage("hello")
+	ok, err := e.DoFilter(m)
+	if err != nil {
+		t.Fatalf("DoFilter returned error: %s", err)
+	}
+	if !ok {
+		t.Error("DoFilter should return true")
+	}
+	if m.GetTarget("result").(string) != "HELLO" {
+		t.Errorf("expected 'HELLO', got '%s'", m.GetTarget("result").(string))
+	}
+}
+
 func TestOverrideDoFilterAddNewField(t *testing.T) {
 	filter, err := NewOverrideFilter(map[string]string{"name": "newname", "value": "newvalue"})
 	if err != nil {

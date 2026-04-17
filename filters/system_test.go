@@ -21,6 +21,24 @@ func TestNewSystemFilter(t *testing.T) {
 	}
 }
 
+func TestNewSystemFilterSprigFunctions(t *testing.T) {
+	filter, err := NewSystemFilter(map[string]string{"cmd": "/bin/echo -n {{ .main | upper }}"})
+	if err != nil {
+		t.Fatalf("constructor should accept sprig functions: %s", err)
+	}
+	e := filter.(*System)
+
+	m := data.NewMessage("hello")
+	_, err = e.DoFilter(m)
+	if err != nil {
+		t.Fatalf("DoFilter returned error: %s", err)
+	}
+	txt := m.GetMessage().(string)
+	if txt != "HELLO" {
+		t.Errorf("expected 'HELLO', got '%s'", txt)
+	}
+}
+
 func TestSystem_DoFilter(t *testing.T) {
 	filter, err := NewSystemFilter(map[string]string{"cmd": "/bin/echo -n {{ .main }}" })
 	if err != nil {

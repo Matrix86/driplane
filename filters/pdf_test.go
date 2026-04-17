@@ -129,6 +129,28 @@ func TestPDFOnEvent(t *testing.T) {
 	f.OnEvent(&data.Event{})
 }
 
+func TestPDFFilterSprigFunctions(t *testing.T) {
+	filter, err := NewPDFFilter(map[string]string{
+		"filename": "/tmp/{{ .main | lower }}.pdf",
+	})
+	if err != nil {
+		t.Fatalf("constructor should accept sprig functions: %s", err)
+	}
+	f := filter.(*PDF)
+	if f.filename == nil {
+		t.Fatal("filename template should be set")
+	}
+
+	msg := data.NewMessage("TESTFILE")
+	result, err := msg.ApplyPlaceholder(f.filename)
+	if err != nil {
+		t.Fatalf("ApplyPlaceholder returned error: %s", err)
+	}
+	if result != "/tmp/testfile.pdf" {
+		t.Errorf("expected '/tmp/testfile.pdf', got '%s'", result)
+	}
+}
+
 func TestPDFFilterRegistered(t *testing.T) {
 	if _, ok := filterFactories["pdffilter"]; !ok {
 		t.Errorf("pdf filter should be registered as 'pdffilter'")

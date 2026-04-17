@@ -13,7 +13,7 @@ This behaviour can be handled with the parameters.
 
 | Parameter    | Type     | Default | Description                                                                                              |
 |--------------|----------|---------|----------------------------------------------------------------------------------------------------------|
-| **body**     | _STRING_ | empty   | the body of the e-mail (supports [Golang templates](https://golang.org/pkg/text/template/))              |
+| **body**     | _STRING_ | empty   | the body of the e-mail (supports [templates](../../rules/templates))              |
 | **username** | _STRING_ | empty   | username for the host authentication                                                                     |
 | **password** | _STRING_ | empty   | password for the host authentication                                                                     |
 | **host**     | _STRING_ | empty   | host server used to send the e-mail                                                                      |

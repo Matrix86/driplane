@@ -9,6 +9,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/evilsocket/islazy/log"
 	"github.com/gotd/td/telegram/downloader"
 	"github.com/gotd/td/telegram/message"
@@ -44,28 +45,28 @@ func NewTelegramFilter(p map[string]string) (Filter, error) {
 		f.action = v
 	}
 	if v, ok := f.params["to"]; ok {
-		t, err := template.New("TelegramToUserFilterTemplate").Parse(v)
+		t, err := template.New("TelegramToUserFilterTemplate").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}
 		f.to = t
 	}
 	if v, ok := f.params["to_chatid"]; ok {
-		t, err := template.New("TelegramToChatIDFilterTemplate").Parse(v)
+		t, err := template.New("TelegramToChatIDFilterTemplate").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}
 		f.toChat = t
 	}
 	if v, ok := f.params["filename"]; ok {
-		t, err := template.New("TelegramDowonloadFilterTemplate").Parse(v)
+		t, err := template.New("TelegramDowonloadFilterTemplate").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}
 		f.downloadPath = t
 	}
 	if v, ok := f.params["text"]; ok {
-		t, err := template.New("TelegramMessageFilterTemplate").Parse(v)
+		t, err := template.New("TelegramMessageFilterTemplate").Funcs(sprig.FuncMap()).Parse(v)
 		if err != nil {
 			return nil, err
 		}

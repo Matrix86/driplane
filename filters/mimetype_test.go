@@ -152,6 +152,28 @@ func TestMimetypeOnEvent(t *testing.T) {
 	f.OnEvent(&data.Event{})
 }
 
+func TestMimetypeFilterSprigFunctions(t *testing.T) {
+	filter, err := NewMimetypeFilter(map[string]string{
+		"filename": "/tmp/{{ .main | lower }}.bin",
+	})
+	if err != nil {
+		t.Fatalf("constructor should accept sprig functions: %s", err)
+	}
+	f := filter.(*Mimetype)
+	if f.filename == nil {
+		t.Fatal("filename template should be set")
+	}
+
+	msg := data.NewMessage("MYFILE")
+	result, err := msg.ApplyPlaceholder(f.filename)
+	if err != nil {
+		t.Fatalf("ApplyPlaceholder returned error: %s", err)
+	}
+	if result != "/tmp/myfile.bin" {
+		t.Errorf("expected '/tmp/myfile.bin', got '%s'", result)
+	}
+}
+
 func TestMimetypeFilterRegistered(t *testing.T) {
 	if _, ok := filterFactories["mimefilter"]; !ok {
 		t.Errorf("mime filter should be registered as 'mimefilter'")

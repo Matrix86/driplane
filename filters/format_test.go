@@ -286,6 +286,51 @@ func TestFormatOnEvent(t *testing.T) {
 	f.OnEvent(&data.Event{})
 }
 
+func TestFormatDoFilterSprigFunctions(t *testing.T) {
+	filter, err := NewFormatFilter(map[string]string{
+		"template": "{{ .main | upper | repeat 2 }}",
+	})
+	if err != nil {
+		t.Fatalf("constructor should accept sprig functions: %s", err)
+	}
+	f := filter.(*Format)
+
+	m := data.NewMessage("hi")
+	ok, err := f.DoFilter(m)
+	if err != nil {
+		t.Fatalf("DoFilter returned error: %s", err)
+	}
+	if !ok {
+		t.Error("DoFilter should return true")
+	}
+	if m.GetMessage() != "HIHI" {
+		t.Errorf("expected 'HIHI', got '%s'", m.GetMessage())
+	}
+}
+
+func TestFormatDoFilterSprigFunctionsHTML(t *testing.T) {
+	filter, err := NewFormatFilter(map[string]string{
+		"type":     "html",
+		"template": "{{ .main | lower }}",
+	})
+	if err != nil {
+		t.Fatalf("constructor should accept sprig functions for html: %s", err)
+	}
+	f := filter.(*Format)
+
+	m := data.NewMessage("WORLD")
+	ok, err := f.DoFilter(m)
+	if err != nil {
+		t.Fatalf("DoFilter returned error: %s", err)
+	}
+	if !ok {
+		t.Error("DoFilter should return true")
+	}
+	if m.GetMessage() != "world" {
+		t.Errorf("expected 'world', got '%s'", m.GetMessage())
+	}
+}
+
 func TestFormatFilterRegistered(t *testing.T) {
 	if _, ok := filterFactories["formatfilter"]; !ok {
 		t.Error("format filter should be registered as 'formatfilter'")

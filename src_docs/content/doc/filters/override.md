@@ -6,14 +6,14 @@ draft: false
 
 ## Override
 
-This filter allows you to change a field of a Message, before sending it to the next filter. Template can be used.
+This filter allows you to change a field of a Message, before sending it to the next filter. [Templates](../../rules/templates) with [Sprig functions](../../rules/templates/#sprig-functions) can be used.
 
 ### Parameters
 
 | Parameter | Type     | Default | Description                                                                                                               |
 |-----------|----------|---------|---------------------------------------------------------------------------------------------------------------------------|
-| **name**  | _STRING_ | empty   | name of the field to change (supports [Golang templates](https://golang.org/pkg/text/template/))                          |
-| **value** | _STRING_ | empty   | new value to assign to the Message's field specified (supports [Golang templates](https://golang.org/pkg/text/template/)) |
+| **name**  | _STRING_ | empty   | name of the field to change (supports [templates](../../rules/templates))                          |
+| **value** | _STRING_ | empty   | new value to assign to the Message's field specified (supports [templates](../../rules/templates)) |
 
  
 {{< notice info "Example" >}} 

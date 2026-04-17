@@ -7,13 +7,13 @@ draft: false
 ## System
 
 This filter allows you to exec a command on the host machine. The received Message can be used to create the command to launch.
-It supports [Golang templates](https://golang.org/pkg/text/template/) (only text.Template).
+It supports [templates](../../rules/templates) with [Sprig functions](../../rules/templates/#sprig-functions).
 
 ### Parameters
 
 | Parameter | Type     | Default | Description                                                                                                         |
 |-----------|----------|---------|---------------------------------------------------------------------------------------------------------------------|
-| **cmd**   | _STRING_ | empty   | command line to exec for each received Message (supports [Golang templates](https://golang.org/pkg/text/template/)) |
+| **cmd**   | _STRING_ | empty   | command line to exec for each received Message (supports [templates](../../rules/templates)) |
 
  
 {{< notice info "Example" >}} 
