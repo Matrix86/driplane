@@ -1,1 +1,0 @@
-var getParents=function(e,t){var s,n=[];for(t&&(s=t.charAt(0));e&&e!==document;e=e.parentNode)t?(s==="."&&e.classList.contains(t.substr(1))&&n.push(e),s==="#"&&e.id===t.substr(1)&&n.push(e),s==="["&&e.hasAttribute(t.substr(1,t.length-1))&&n.push(e),e.tagName.toLowerCase()===t&&n.push(e)):n.push(e);return n.length===0?null:n}

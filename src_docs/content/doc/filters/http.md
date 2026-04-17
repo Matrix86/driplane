@@ -13,8 +13,8 @@ This behaviour can be handled with the parameters.
 
 | Parameter       | Type     | Default | Description                                                                                                                                         |
 |-----------------|----------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| **url**         | _STRING_ | empty   | URL of the web page. It is possible use [templates](../../rules/templates) to use fields of the `Message`                |
-| **download_to** | _STRING_ | empty   | path of where to download the file. It is possible use [templates](../../rules/templates) to use fields of the `Message` | 
+| **url**         | _STRING_ | empty   | URL of the web page. It is possible use [templates](/doc/rules/templates) to use fields of the `Message`                |
+| **download_to** | _STRING_ | empty   | path of where to download the file. It is possible use [templates](/doc/rules/templates) to use fields of the `Message` | 
 | **text_only**   | _BOOL_   | "false" | if "true" it removes all the tags from the body response                                                                                            |
 | **method**      | _STRING_ | "GET"   | HTTP method to use on the request                                                                                                                   |
 | **headers**     | _JSON_   | empty   | Headers to use in the request                                                                                                                       |

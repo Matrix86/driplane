@@ -6,14 +6,14 @@ draft: false
 
 ## Override
 
-This filter allows you to change a field of a Message, before sending it to the next filter. [Templates](../../rules/templates) with [Sprig functions](../../rules/templates/#sprig-functions) can be used.
+This filter allows you to change a field of a Message, before sending it to the next filter. [Templates](/doc/rules/templates) with [Sprig functions](/doc/rules/templates/#sprig-functions) can be used.
 
 ### Parameters
 
 | Parameter | Type     | Default | Description                                                                                                               |
 |-----------|----------|---------|---------------------------------------------------------------------------------------------------------------------------|
-| **name**  | _STRING_ | empty   | name of the field to change (supports [templates](../../rules/templates))                          |
-| **value** | _STRING_ | empty   | new value to assign to the Message's field specified (supports [templates](../../rules/templates)) |
+| **name**  | _STRING_ | empty   | name of the field to change (supports [templates](/doc/rules/templates))                          |
+| **value** | _STRING_ | empty   | new value to assign to the Message's field specified (supports [templates](/doc/rules/templates)) |
 
  
 {{< notice info "Example" >}} 

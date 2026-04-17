@@ -126,17 +126,17 @@ The following filters accept Go templates (with Sprig functions) in one or more 
 
 | Filter | Parameters supporting templates |
 |--------|--------------------------------|
-| [Format](../../filters/format) | `template`, `file` |
-| [Override](../../filters/override) | `name`, `value` |
-| [System](../../filters/system) | `cmd` |
-| [Http](../../filters/http) | `url`, `download_to`, `data` values, `rawData` |
-| [Mail](../../filters/mail) | `body` |
-| [Slack](../../filters/slack) | `to`, `text`, `filename`, `url` |
-| [Telegram](../../filters/telegram) | `to`, `to_chatid`, `filename`, `text` |
-| [LLM](../../filters/llm) | `prompt`, `system_prompt` |
-| [Pdf](../../filters/pdf) | `filename` |
-| [XLS](../../filters/xls) | `filename` |
-| [MIME type](../../filters/mimetype) | `filename` |
+| [Format](/doc/filters/format) | `template`, `file` |
+| [Override](/doc/filters/override) | `name`, `value` |
+| [System](/doc/filters/system) | `cmd` |
+| [Http](/doc/filters/http) | `url`, `download_to`, `data` values, `rawData` |
+| [Mail](/doc/filters/mail) | `body` |
+| [Slack](/doc/filters/slack) | `to`, `text`, `filename`, `url` |
+| [Telegram](/doc/filters/telegram) | `to`, `to_chatid`, `filename`, `text` |
+| [LLM](/doc/filters/llm) | `prompt`, `system_prompt` |
+| [Pdf](/doc/filters/pdf) | `filename` |
+| [XLS](/doc/filters/xls) | `filename` |
+| [MIME type](/doc/filters/mimetype) | `filename` |
 
 ### More information
 
