@@ -7,16 +7,16 @@ draft: false
 ## Format
 
 This filter is used to format the received Message. It is based on
-[Go templates](/doc/rules/templates) and it can load templates from the `template_path`
-directory specified in the configuration file. All [Sprig functions](/doc/rules/templates/#sprig-functions) are available.
+[Go templates]({{< ref "/doc/rules/templates" >}}) and it can load templates from the `template_path`
+directory specified in the configuration file. All [Sprig functions]({{< ref "/doc/rules/templates#sprig-functions" >}}) are available.
 
 ### Parameters
 
 | Parameter    | Type     | Default | Description                                                                                      |
 |--------------|----------|---------|--------------------------------------------------------------------------------------------------|
 | **type**     | _STRING_ | "text"  | specify the type of template to use : `"text"` or `"html"`                                       |
-| **template** | _STRING_ | empty   | a template could be specified directly here, instead of load it from file (supports [templates](/doc/rules/templates))                       |
-| **file**     | _STRING_ | empty   | load the template from file (supports [templates](/doc/rules/templates))                                                                     |
+| **template** | _STRING_ | empty   | a template could be specified directly here, instead of load it from file (supports [templates]({{< ref "/doc/rules/templates" >}}))                       |
+| **file**     | _STRING_ | empty   | load the template from file (supports [templates]({{< ref "/doc/rules/templates" >}}))                                                                     |
 | **target**   | _STRING_ | "main"  | the field of the Message that should be used for the filter (it could be main or an extra field) |
 
 In the template is allowed to use all the fields of the received Message: main or extra.

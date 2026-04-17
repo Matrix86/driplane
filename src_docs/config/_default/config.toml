@@ -3,7 +3,7 @@ title = "Driplane documentation"
 theme = "zdoc"
 
 defaultContentLanguage = "en"
-defaultContentLanguageInSubdir = false
+defaultContentLanguageInSubdir = true
 hasCJKLanguage = true
 
 [author]

@@ -14,7 +14,7 @@ _Based on the [qax-os/excelize](https://github.com/qax-os/excelize) library._
 | Parameter    | Type     | Default | Description                                                                                                |
 |--------------|----------|---------|------------------------------------------------------------------------------------------------------------|
 | **target**   | _STRING_ | "main"  | the field of the Message that should be used for the filter (it could be the `main` or and extra field)    |
-| **filename** | _STRING_ | empty   | the filename of the XLS file to parse (supports [templates](/doc/rules/templates)) |
+| **filename** | _STRING_ | empty   | the filename of the XLS file to parse (supports [templates]({{< ref "/doc/rules/templates" >}})) |
  
 {{< notice info "Example" >}} 
 `... | xls(target="{{ .extra_field }}") | ...`

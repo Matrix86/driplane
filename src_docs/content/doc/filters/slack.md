@@ -24,26 +24,26 @@ Each `action` can use different parameters:
 
 | Parameter  | Type     | Default | Description                                                                                                                |
 |------------|----------|---------|----------------------------------------------------------------------------------------------------------------------------|
-| **to**     | _STRING_ | ""      | channel ID or User ID that should receive the message (supports [templates](/doc/rules/templates)) |
+| **to**     | _STRING_ | ""      | channel ID or User ID that should receive the message (supports [templates]({{< ref "/doc/rules/templates" >}})) |
 | **target** | _STRING_ | "main"  | if `text` is not used you can choose which field of `Message` to use as text                                               |
-| **text**   | _STRING_ | ""      | you can define the text of the message to send (supports [templates](/doc/rules/templates))        | 
+| **text**   | _STRING_ | ""      | you can define the text of the message to send (supports [templates]({{< ref "/doc/rules/templates" >}}))        | 
 | **blocks** | _BOOL_   | false   | if true you can use the Slack template blocks ([block builder](https://api.slack.com/tools/block-kit-builder))             | 
 
 #### action = send_file
 
 | Parameter    | Type     | Default | Description                                                                                                                |
 |--------------|----------|---------|----------------------------------------------------------------------------------------------------------------------------|
-| **to**       | _STRING_ | ""      | channel ID or User ID that should receive the message (supports [templates](/doc/rules/templates)) |
+| **to**       | _STRING_ | ""      | channel ID or User ID that should receive the message (supports [templates]({{< ref "/doc/rules/templates" >}})) |
 | **target**   | _STRING_ | "main"  | if `filename` is not specified you can choose which field of `Message` has to be used as file content to send              |
-| **filename** | _STRING_ | ""      | path of the file to send (supports [templates](/doc/rules/templates))                              |
+| **filename** | _STRING_ | ""      | path of the file to send (supports [templates]({{< ref "/doc/rules/templates" >}}))                              |
 
 #### action = download_file
 
 | Parameter    | Type     | Default      | Description                                                                                                                                                                            |
 |--------------|----------|--------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **url**      | _STRING_ | ""           | it should contain the Slack private url for the file download (supports [templates](/doc/rules/templates))                                                     |
+| **url**      | _STRING_ | ""           | it should contain the Slack private url for the file download (supports [templates]({{< ref "/doc/rules/templates" >}}))                                                     |
 | **target**   | _STRING_ | "urlprivate" | if `url` is not specified you can choose which field of `Message` contains the Slack private url                                                                                       |
-| **filename** | _STRING_ | ""           | path of where to save the downloaded file. If not specified the file content will be inserted in the `main` field (supports [templates](/doc/rules/templates)) |
+| **filename** | _STRING_ | ""           | path of where to save the downloaded file. If not specified the file content will be inserted in the `main` field (supports [templates]({{< ref "/doc/rules/templates" >}})) |
  
 #### action = user_info
 
