@@ -126,17 +126,17 @@ The following filters accept Go templates (with Sprig functions) in one or more 
 
 | Filter | Parameters supporting templates |
 |--------|--------------------------------|
-| [Format]({{< ref "/doc/filters/format" >}}) | `template`, `file` |
-| [Override]({{< ref "/doc/filters/override" >}}) | `name`, `value` |
-| [System]({{< ref "/doc/filters/system" >}}) | `cmd` |
-| [Http]({{< ref "/doc/filters/http" >}}) | `url`, `download_to`, `data` values, `rawData` |
-| [Mail]({{< ref "/doc/filters/mail" >}}) | `body` |
-| [Slack]({{< ref "/doc/filters/slack" >}}) | `to`, `text`, `filename`, `url` |
-| [Telegram]({{< ref "/doc/filters/telegram" >}}) | `to`, `to_chatid`, `filename`, `text` |
-| [LLM]({{< ref "/doc/filters/llm" >}}) | `prompt`, `system_prompt` |
-| [Pdf]({{< ref "/doc/filters/pdf" >}}) | `filename` |
-| [XLS]({{< ref "/doc/filters/xls" >}}) | `filename` |
-| [MIME type]({{< ref "/doc/filters/mimetype" >}}) | `filename` |
+| [Format](en/doc/filters/format/) | `template`, `file` |
+| [Override](en/doc/filters/override/) | `name`, `value` |
+| [System](en/doc/filters/system/) | `cmd` |
+| [Http](en/doc/filters/http/) | `url`, `download_to`, `data` values, `rawData` |
+| [Mail](en/doc/filters/mail/) | `body` |
+| [Slack](en/doc/filters/slack/) | `to`, `text`, `filename`, `url` |
+| [Telegram](en/doc/filters/telegram/) | `to`, `to_chatid`, `filename`, `text` |
+| [LLM](en/doc/filters/llm/) | `prompt`, `system_prompt` |
+| [Pdf](en/doc/filters/pdf/) | `filename` |
+| [XLS](en/doc/filters/xls/) | `filename` |
+| [MIME type](en/doc/filters/mimetype/) | `filename` |
 
 ### More information
 

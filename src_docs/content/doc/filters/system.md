@@ -7,13 +7,13 @@ draft: false
 ## System
 
 This filter allows you to exec a command on the host machine. The received Message can be used to create the command to launch.
-It supports [templates]({{< ref "/doc/rules/templates" >}}) with [Sprig functions]({{< ref "/doc/rules/templates#sprig-functions" >}}).
+It supports [templates](en/doc/rules/templates/) with [Sprig functions](en/doc/rules/templates/#sprig-functions).
 
 ### Parameters
 
 | Parameter | Type     | Default | Description                                                                                                         |
 |-----------|----------|---------|---------------------------------------------------------------------------------------------------------------------|
-| **cmd**   | _STRING_ | empty   | command line to exec for each received Message (supports [templates]({{< ref "/doc/rules/templates" >}})) |
+| **cmd**   | _STRING_ | empty   | command line to exec for each received Message (supports [templates](en/doc/rules/templates/)) |
 
  
 {{< notice info "Example" >}} 

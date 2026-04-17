@@ -8,7 +8,7 @@ draft: false
 
 This filter sends the received `Message` to a Large Language Model (LLM) and propagates the response. It uses [any-llm-go](https://github.com/mozilla-ai/any-llm-go) to support multiple LLM providers through a unified interface.
 
-Both the `prompt` and `system_prompt` parameters support [templates]({{< ref "/doc/rules/templates" >}}), allowing you to dynamically compose prompts using the `main` field and any extra fields of the incoming `Message`.
+Both the `prompt` and `system_prompt` parameters support [templates](en/doc/rules/templates/), allowing you to dynamically compose prompts using the `main` field and any extra fields of the incoming `Message`.
 
 ### Supported Providers
 
@@ -19,8 +19,8 @@ OpenAI, Anthropic, Ollama, DeepSeek, Groq, Mistral, Gemini, llama.cpp, Llamafile
 | Parameter         | Type     | Default  | Description                                                                                                                                          |
 |-------------------|----------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **model**         | _STRING_ |          | **(required)** The model name to use (e.g. `"gpt-4"`, `"claude-3-opus-20240229"`, `"llama3"`)                                                       |
-| **prompt**        | _STRING_ |          | **(required)** The user prompt sent to the LLM. Supports [templates]({{< ref "/doc/rules/templates" >}}) with `Message` fields             |
-| **system_prompt** | _STRING_ | empty    | An optional system prompt. Supports [templates]({{< ref "/doc/rules/templates" >}}) with `Message` fields                                  |
+| **prompt**        | _STRING_ |          | **(required)** The user prompt sent to the LLM. Supports [templates](en/doc/rules/templates/) with `Message` fields             |
+| **system_prompt** | _STRING_ | empty    | An optional system prompt. Supports [templates](en/doc/rules/templates/) with `Message` fields                                  |
 | **provider**      | _STRING_ | "openai" | The LLM provider to use: `openai`, `anthropic`, `ollama`, `deepseek`, `groq`, `mistral`, `gemini`, `llamacpp`, `llamafile`                           |
 | **api_key**       | _STRING_ | empty    | API key for the provider (required for cloud providers like OpenAI, Anthropic, etc.)                                                                 |
 | **api_url**       | _STRING_ | empty    | Custom base URL for the API endpoint (useful for proxies or self-hosted instances)                                                                   |
