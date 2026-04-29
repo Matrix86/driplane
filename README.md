@@ -275,14 +275,14 @@ Usage: driplane [options]
 
 ## 📚 Documentation
 
-Full documentation is available at **[https://matrix86.github.io/driplane/doc/](https://matrix86.github.io/driplane/doc/)**, including:
+Full documentation is available at **[https://matrix86.github.io/driplane/doc/](https://matrix86.github.io/driplane/en/doc/)**, including:
 
-- [Installation & Docker setup](https://matrix86.github.io/driplane/doc/installation/)
-- [Configuration reference](https://matrix86.github.io/driplane/doc/configuration/)
-- [Rule syntax guide](https://matrix86.github.io/driplane/doc/rules/syntax/)
-- [All feeders with parameters](https://matrix86.github.io/driplane/doc/feeders/)
-- [All filters with parameters](https://matrix86.github.io/driplane/doc/filters/)
-- [JavaScript plugin system](https://matrix86.github.io/driplane/doc/filters/js/basics/)
+- [Installation & Docker setup](https://matrix86.github.io/driplane/en/doc/installation/)
+- [Configuration reference](https://matrix86.github.io/driplane/en/doc/configuration/)
+- [Rule syntax guide](https://matrix86.github.io/driplane/en/doc/rules/syntax/)
+- [All feeders with parameters](https://matrix86.github.io/driplane/en/doc/feeders/)
+- [All filters with parameters](https://matrix86.github.io/driplane/en/doc/filters/)
+- [JavaScript plugin system](https://matrix86.github.io/driplane/en/doc/filters/js/basics/)
 
 ---
 
