@@ -28,11 +28,11 @@ Based on [go-telegram/bot](https://github.com/go-telegram/bot).
 | **debug** | _BOOL_ | `false` | Enable library debug logging. |
 
 {{< notice info "Polling example" >}}
-`... | <telegrambot: token="123:abc", commands="/start,/help", allowed_users="@alice,@bob"> | ...`
+`tgRule => <telegrambot: token="123:abc", commands="/start,/help", allowed_users="@alice,@bob"> | ...`
 {{< /notice >}}
 
 {{< notice info "Webhook example" >}}
-`... | <telegrambot: token="123:abc", mode="webhook", webhook_url="https://example.com/webhook", webhook_secret="sekret"> | ...`
+`tgRule => <telegrambot: token="123:abc", mode="webhook", webhook_url="https://example.com/webhook", webhook_secret="sekret"> | ...`
 {{< /notice >}}
 
 ### Output

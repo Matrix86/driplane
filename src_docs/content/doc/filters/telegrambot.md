@@ -60,25 +60,25 @@ On any Bot API error, missing required extra, or template/JSON failure the filte
 ### Examples
 
 {{< notice info "Echo `/start` command" >}}
-`tgRule => <telegrambot: token="123:abc", commands="/start"> | text(target="command", pattern="/start") | <telegrambot: text="welcome {{ .user_username }}!">`
+`tgRule => <telegrambot: token="123:abc", commands="/start"> | text(target="command", pattern="/start") | telegrambot(text="welcome {{ .user_username }}!")`
 {{< /notice >}}
 
 {{< notice info "Reply with inline keyboard" >}}
-`<telegrambot: text="Pick one", reply_markup="{\"inline_keyboard\":[[{\"text\":\"yes\",\"callback_data\":\"y\"},{\"text\":\"no\",\"callback_data\":\"n\"}]]}">`
+`telegrambot(text="Pick one", reply_markup="{\"inline_keyboard\":[[{\"text\":\"yes\",\"callback_data\":\"y\"},{\"text\":\"no\",\"callback_data\":\"n\"}]]}")`
 {{< /notice >}}
 
 {{< notice info "Answer a callback query" >}}
-`text(target="type", pattern="callback_query") | <telegrambot: action="answer_callback", text="got it">`
+`text(target="type", pattern="callback_query") | telegrambot(action="answer_callback", text="got it")`
 {{< /notice >}}
 
 {{< notice info "Send a photo from a URL" >}}
-`<telegrambot: action="send_media", media_type="photo", media="https://example.com/img.jpg", caption="hi">`
+`telegrambot(action="send_media", media_type="photo", media="https://example.com/img.jpg", caption="hi")`
 {{< /notice >}}
 
 {{< notice info "Edit a previously-sent message" >}}
-`<telegrambot: text="Working..."> | <telegrambot: action="edit_message", text="Done!", message_id="{{ .sent_message_id }}", to_chat="{{ .sent_chat_id }}">`
+`telegrambot(text="Working...") | telegrambot(action="edit_message", text="Done!", message_id="{{ .sent_message_id }}", to_chat="{{ .sent_chat_id }}")`
 {{< /notice >}}
 
 {{< notice info "Download an attachment" >}}
-`text(target="msg_hasmedia", pattern="true") | <telegrambot: action="download_file", filename="/data/{{ .chat_id }}/{{ .msg_filename }}">`
+`text(target="msg_hasmedia", pattern="true") | telegrambot(action="download_file", filename="/data/{{ .chat_id }}/{{ .msg_filename }}")`
 {{< /notice >}}
