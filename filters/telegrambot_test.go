@@ -332,6 +332,44 @@ func TestTelegramBotResolveParseMode(t *testing.T) {
 	}
 }
 
+func TestTelegramBotTemplateHTMLEscape(t *testing.T) {
+	f := newTestFilter(t, map[string]string{
+		"action":  "send_message",
+		"to_chat": "1",
+		"text":    `{{ htmlEscape .raw }}`,
+	})
+	mock := newMockBotAPI(t)
+	b, _ := newMockedBot(t, mock)
+	msg := newTestMessage(b, "x", map[string]interface{}{"raw": `<test> & "ok"`})
+	got, err := msg.ApplyPlaceholder(f.text)
+	if err != nil {
+		t.Fatalf("ApplyPlaceholder: %v", err)
+	}
+	want := `&lt;test&gt; &amp; &#34;ok&#34;`
+	if got != want {
+		t.Fatalf("htmlEscape: got %q want %q", got, want)
+	}
+}
+
+func TestTelegramBotTemplateMarkdownV2Escape(t *testing.T) {
+	f := newTestFilter(t, map[string]string{
+		"action":  "send_message",
+		"to_chat": "1",
+		"text":    `{{ mdv2Escape .raw }}`,
+	})
+	mock := newMockBotAPI(t)
+	b, _ := newMockedBot(t, mock)
+	msg := newTestMessage(b, "x", map[string]interface{}{"raw": `a_b*c [d](e) ! .`})
+	got, err := msg.ApplyPlaceholder(f.text)
+	if err != nil {
+		t.Fatalf("ApplyPlaceholder: %v", err)
+	}
+	want := `a\_b\*c \[d\]\(e\) \! \.`
+	if got != want {
+		t.Fatalf("mdv2Escape: got %q want %q", got, want)
+	}
+}
+
 func TestTelegramBotParseReplyMarkup_Empty(t *testing.T) {
 	f := newTestFilter(t, map[string]string{"action": "send_message", "text": "hi", "to_chat": "1"})
 	mock := newMockBotAPI(t)

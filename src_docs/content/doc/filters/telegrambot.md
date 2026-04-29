@@ -30,7 +30,16 @@ Based on [go-telegram/bot](https://github.com/go-telegram/bot).
 | **media_type** | _STRING_ | `document` | `send_media`: one of `photo`, `document`, `video`, `audio`, `voice`, `animation`, `sticker`. Templated. |
 | **reply_markup** | _STRING_ | empty | Raw Bot API JSON. Variant auto-detected by top-level key: `inline_keyboard` → InlineKeyboardMarkup, `keyboard` → ReplyKeyboardMarkup, `remove_keyboard` → ReplyKeyboardRemove, `force_reply` → ForceReply. Templated, then parsed. |
 
-All string parameters support [templates](../../rules/templates/).
+All string parameters support [templates](en/doc/rules/templates/).
+
+In addition to the standard sprig functions, two extra template helpers are exposed for safe text rendering:
+
+| Function | Purpose |
+|---|---|
+| `htmlEscape` | Escapes `<`, `>`, `&`, `"` so user-supplied text can be safely embedded with `parse_mode="HTML"` (the default). Required when the rendered text contains `<`, otherwise Telegram parses it as an HTML tag and rejects the message. |
+| `mdv2Escape` | Escapes the MarkdownV2 reserved set (`` _*[]()~`>#+-=|{}.! ``) for use with `parse_mode="MarkdownV2"`. |
+
+Example: `telegrambot(text="found {{ htmlEscape .main }}")`.
 
 ### Required parameters per action
 
