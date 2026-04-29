@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"html"
 	"io"
 	"net/http"
 	"os"
@@ -20,6 +21,33 @@ import (
 
 	"github.com/Matrix86/driplane/data"
 )
+
+// telegramTemplateFuncs returns sprig's funcs plus telegram-specific helpers.
+//
+// Extra funcs:
+//   - htmlEscape: escapes <, >, &, " for Telegram HTML parse_mode.
+//   - mdv2Escape: escapes the MarkdownV2 reserved set (_*[]()~`>#+-=|{}.!).
+func telegramTemplateFuncs() template.FuncMap {
+	fm := sprig.FuncMap()
+	fm["htmlEscape"] = html.EscapeString
+	fm["mdv2Escape"] = escapeMarkdownV2
+	return fm
+}
+
+// escapeMarkdownV2 escapes every reserved character defined by Telegram's
+// MarkdownV2 parse_mode. See https://core.telegram.org/bots/api#markdownv2-style
+func escapeMarkdownV2(s string) string {
+	const reserved = "_*[]()~`>#+-=|{}.!"
+	var b strings.Builder
+	b.Grow(len(s))
+	for _, r := range s {
+		if strings.ContainsRune(reserved, r) {
+			b.WriteByte('\\')
+		}
+		b.WriteRune(r)
+	}
+	return b.String()
+}
 
 // TelegramBot is a Filter to perform Bot API actions on top of the telegrambot feeder.
 type TelegramBot struct {
@@ -109,7 +137,7 @@ func (f *TelegramBot) compileTemplates() error {
 		if !ok || v == "" {
 			continue
 		}
-		tpl, err := template.New("telegrambot:" + e.key).Funcs(sprig.FuncMap()).Parse(v)
+		tpl, err := template.New("telegrambot:" + e.key).Funcs(telegramTemplateFuncs()).Parse(v)
 		if err != nil {
 			return fmt.Errorf("telegrambot: invalid template for %q: %w", e.key, err)
 		}
@@ -407,26 +435,28 @@ func (f *TelegramBot) doEditMessage(ctx context.Context, b *bot.Bot, msg *data.M
 }
 
 func (f *TelegramBot) doDeleteMessage(ctx context.Context, b *bot.Bot, msg *data.Message) bool {
-    chatID, ok := f.resolveChatID(msg)
-    if !ok { return false }
+	chatID, ok := f.resolveChatID(msg)
+	if !ok {
+		return false
+	}
 
-    msgIDStr, err := msg.ApplyPlaceholder(f.messageID)
-    if err != nil {
-        log.Error("[%s::%s] telegrambot: render message_id: %s", f.Rule(), f.Name(), err)
-        return false
-    }
-    msgID, err := strconv.Atoi(strings.TrimSpace(msgIDStr))
-    if err != nil {
-        log.Error("[%s::%s] telegrambot: parse message_id: %s", f.Rule(), f.Name(), err)
-        return false
-    }
+	msgIDStr, err := msg.ApplyPlaceholder(f.messageID)
+	if err != nil {
+		log.Error("[%s::%s] telegrambot: render message_id: %s", f.Rule(), f.Name(), err)
+		return false
+	}
+	msgID, err := strconv.Atoi(strings.TrimSpace(msgIDStr))
+	if err != nil {
+		log.Error("[%s::%s] telegrambot: parse message_id: %s", f.Rule(), f.Name(), err)
+		return false
+	}
 
-    if _, err := b.DeleteMessage(ctx, &bot.DeleteMessageParams{ChatID: chatID, MessageID: msgID}); err != nil {
-        log.Error("[%s::%s] telegrambot: deleteMessage failed: %s", f.Rule(), f.Name(), err)
-        return false
-    }
-    msg.SetTarget("delete_success", "true")
-    return true
+	if _, err := b.DeleteMessage(ctx, &bot.DeleteMessageParams{ChatID: chatID, MessageID: msgID}); err != nil {
+		log.Error("[%s::%s] telegrambot: deleteMessage failed: %s", f.Rule(), f.Name(), err)
+		return false
+	}
+	msg.SetTarget("delete_success", "true")
+	return true
 }
 
 func (f *TelegramBot) doAnswerCallback(ctx context.Context, b *bot.Bot, msg *data.Message) bool {

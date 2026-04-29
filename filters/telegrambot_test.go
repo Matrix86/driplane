@@ -332,6 +332,44 @@ func TestTelegramBotResolveParseMode(t *testing.T) {
 	}
 }
 
+func TestTelegramBotTemplateHTMLEscape(t *testing.T) {
+	f := newTestFilter(t, map[string]string{
+		"action":  "send_message",
+		"to_chat": "1",
+		"text":    `{{ htmlEscape .raw }}`,
+	})
+	mock := newMockBotAPI(t)
+	b, _ := newMockedBot(t, mock)
+	msg := newTestMessage(b, "x", map[string]interface{}{"raw": `<test> & "ok"`})
+	got, err := msg.ApplyPlaceholder(f.text)
+	if err != nil {
+		t.Fatalf("ApplyPlaceholder: %v", err)
+	}
+	want := `&lt;test&gt; &amp; &#34;ok&#34;`
+	if got != want {
+		t.Fatalf("htmlEscape: got %q want %q", got, want)
+	}
+}
+
+func TestTelegramBotTemplateMarkdownV2Escape(t *testing.T) {
+	f := newTestFilter(t, map[string]string{
+		"action":  "send_message",
+		"to_chat": "1",
+		"text":    `{{ mdv2Escape .raw }}`,
+	})
+	mock := newMockBotAPI(t)
+	b, _ := newMockedBot(t, mock)
+	msg := newTestMessage(b, "x", map[string]interface{}{"raw": `a_b*c [d](e) ! .`})
+	got, err := msg.ApplyPlaceholder(f.text)
+	if err != nil {
+		t.Fatalf("ApplyPlaceholder: %v", err)
+	}
+	want := `a\_b\*c \[d\]\(e\) \! \.`
+	if got != want {
+		t.Fatalf("mdv2Escape: got %q want %q", got, want)
+	}
+}
+
 func TestTelegramBotParseReplyMarkup_Empty(t *testing.T) {
 	f := newTestFilter(t, map[string]string{"action": "send_message", "text": "hi", "to_chat": "1"})
 	mock := newMockBotAPI(t)
@@ -636,9 +674,15 @@ func TestTelegramBotEditMessage_Success(t *testing.T) {
 		body, _ := io.ReadAll(r.Body)
 		var got map[string]interface{}
 		json.Unmarshal(body, &got)
-		if got["chat_id"].(float64) != 5 { t.Fatalf("chat_id: %v", got["chat_id"]) }
-		if got["message_id"].(float64) != 42 { t.Fatalf("message_id: %v", got["message_id"]) }
-		if got["text"] != "edited" { t.Fatalf("text: %v", got["text"]) }
+		if got["chat_id"].(float64) != 5 {
+			t.Fatalf("chat_id: %v", got["chat_id"])
+		}
+		if got["message_id"].(float64) != 42 {
+			t.Fatalf("message_id: %v", got["message_id"])
+		}
+		if got["text"] != "edited" {
+			t.Fatalf("text: %v", got["text"])
+		}
 		writeJSON(t, w, `{"ok":true,"result":{"message_id":42,"chat":{"id":5,"type":"private"},"date":1,"text":"edited"}}`)
 	})
 	b, _ := newMockedBot(t, mock)
@@ -650,10 +694,18 @@ func TestTelegramBotEditMessage_Success(t *testing.T) {
 	})
 	msg := newTestMessage(b, "x", nil)
 	ok, _ := f.DoFilter(msg)
-	if !ok { t.Fatalf("want ok=true") }
-	if msg.GetTarget("edit_success") != "true" { t.Fatalf("edit_success: %v", msg.GetTarget("edit_success")) }
-	if msg.GetTarget("edited_message_id") != "42" { t.Fatalf("edited_message_id: %v", msg.GetTarget("edited_message_id")) }
-	if msg.GetTarget("edited_chat_id") != "5" { t.Fatalf("edited_chat_id: %v", msg.GetTarget("edited_chat_id")) }
+	if !ok {
+		t.Fatalf("want ok=true")
+	}
+	if msg.GetTarget("edit_success") != "true" {
+		t.Fatalf("edit_success: %v", msg.GetTarget("edit_success"))
+	}
+	if msg.GetTarget("edited_message_id") != "42" {
+		t.Fatalf("edited_message_id: %v", msg.GetTarget("edited_message_id"))
+	}
+	if msg.GetTarget("edited_chat_id") != "5" {
+		t.Fatalf("edited_chat_id: %v", msg.GetTarget("edited_chat_id"))
+	}
 }
 
 func TestTelegramBotEditMessage_BadMessageID(t *testing.T) {
@@ -667,7 +719,9 @@ func TestTelegramBotEditMessage_BadMessageID(t *testing.T) {
 	})
 	msg := newTestMessage(b, "x", nil)
 	ok, _ := f.DoFilter(msg)
-	if ok { t.Fatalf("want ok=false on unparseable message_id") }
+	if ok {
+		t.Fatalf("want ok=false on unparseable message_id")
+	}
 }
 
 func TestTelegramBotEditMessage_APIError(t *testing.T) {
@@ -680,236 +734,300 @@ func TestTelegramBotEditMessage_APIError(t *testing.T) {
 	f := newTestFilter(t, map[string]string{"action": "edit_message", "text": "x", "to_chat": "1", "message_id": "1"})
 	msg := newTestMessage(b, "x", nil)
 	ok, _ := f.DoFilter(msg)
-	if ok { t.Fatalf("want ok=false on API error") }
+	if ok {
+		t.Fatalf("want ok=false on API error")
+	}
 }
 
 func TestTelegramBotDeleteMessage_Success(t *testing.T) {
-    mock := newMockBotAPI(t)
-    mock.handle("deleteMessage", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
-        body, _ := io.ReadAll(r.Body)
-        var got map[string]interface{}
-        json.Unmarshal(body, &got)
-        if got["chat_id"].(float64) != 5 || got["message_id"].(float64) != 9 {
-            t.Fatalf("unexpected body: %v", got)
-        }
-        writeJSON(t, w, `{"ok":true,"result":true}`)
-    })
-    b, _ := newMockedBot(t, mock)
-    f := newTestFilter(t, map[string]string{
-        "action":     "delete_message",
-        "to_chat":    "5",
-        "message_id": "9",
-    })
-    msg := newTestMessage(b, "x", nil)
-    ok, _ := f.DoFilter(msg)
-    if !ok { t.Fatalf("want ok=true") }
-    if msg.GetTarget("delete_success") != "true" { t.Fatalf("delete_success: %v", msg.GetTarget("delete_success")) }
+	mock := newMockBotAPI(t)
+	mock.handle("deleteMessage", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		var got map[string]interface{}
+		json.Unmarshal(body, &got)
+		if got["chat_id"].(float64) != 5 || got["message_id"].(float64) != 9 {
+			t.Fatalf("unexpected body: %v", got)
+		}
+		writeJSON(t, w, `{"ok":true,"result":true}`)
+	})
+	b, _ := newMockedBot(t, mock)
+	f := newTestFilter(t, map[string]string{
+		"action":     "delete_message",
+		"to_chat":    "5",
+		"message_id": "9",
+	})
+	msg := newTestMessage(b, "x", nil)
+	ok, _ := f.DoFilter(msg)
+	if !ok {
+		t.Fatalf("want ok=true")
+	}
+	if msg.GetTarget("delete_success") != "true" {
+		t.Fatalf("delete_success: %v", msg.GetTarget("delete_success"))
+	}
 }
 
 func TestTelegramBotDeleteMessage_APIError(t *testing.T) {
-    mock := newMockBotAPI(t)
-    mock.handle("deleteMessage", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(http.StatusBadRequest)
-        writeJSON(t, w, `{"ok":false,"description":"message not found","error_code":400}`)
-    })
-    b, _ := newMockedBot(t, mock)
-    f := newTestFilter(t, map[string]string{"action": "delete_message", "to_chat": "1", "message_id": "1"})
-    msg := newTestMessage(b, "x", nil)
-    ok, _ := f.DoFilter(msg)
-    if ok { t.Fatalf("want ok=false") }
+	mock := newMockBotAPI(t)
+	mock.handle("deleteMessage", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		writeJSON(t, w, `{"ok":false,"description":"message not found","error_code":400}`)
+	})
+	b, _ := newMockedBot(t, mock)
+	f := newTestFilter(t, map[string]string{"action": "delete_message", "to_chat": "1", "message_id": "1"})
+	msg := newTestMessage(b, "x", nil)
+	ok, _ := f.DoFilter(msg)
+	if ok {
+		t.Fatalf("want ok=false")
+	}
 }
 
 func TestTelegramBotAnswerCallback_FromExtra(t *testing.T) {
-    mock := newMockBotAPI(t)
-    mock.handle("answerCallbackQuery", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
-        body, _ := io.ReadAll(r.Body)
-        var got map[string]interface{}
-        json.Unmarshal(body, &got)
-        if got["callback_query_id"] != "cbq-1" || got["text"] != "ack" {
-            t.Fatalf("unexpected body: %v", got)
-        }
-        writeJSON(t, w, `{"ok":true,"result":true}`)
-    })
-    b, _ := newMockedBot(t, mock)
-    f := newTestFilter(t, map[string]string{"action": "answer_callback", "text": "ack"})
-    msg := newTestMessage(b, "x", map[string]interface{}{"callback_id": "cbq-1"})
-    ok, _ := f.DoFilter(msg)
-    if !ok { t.Fatalf("want ok=true") }
-    if msg.GetTarget("callback_answered") != "true" { t.Fatalf("callback_answered missing") }
+	mock := newMockBotAPI(t)
+	mock.handle("answerCallbackQuery", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		var got map[string]interface{}
+		json.Unmarshal(body, &got)
+		if got["callback_query_id"] != "cbq-1" || got["text"] != "ack" {
+			t.Fatalf("unexpected body: %v", got)
+		}
+		writeJSON(t, w, `{"ok":true,"result":true}`)
+	})
+	b, _ := newMockedBot(t, mock)
+	f := newTestFilter(t, map[string]string{"action": "answer_callback", "text": "ack"})
+	msg := newTestMessage(b, "x", map[string]interface{}{"callback_id": "cbq-1"})
+	ok, _ := f.DoFilter(msg)
+	if !ok {
+		t.Fatalf("want ok=true")
+	}
+	if msg.GetTarget("callback_answered") != "true" {
+		t.Fatalf("callback_answered missing")
+	}
 }
 
 func TestTelegramBotAnswerCallback_ExplicitID(t *testing.T) {
-    mock := newMockBotAPI(t)
-    mock.handle("answerCallbackQuery", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
-        body, _ := io.ReadAll(r.Body)
-        var got map[string]interface{}
-        json.Unmarshal(body, &got)
-        if got["callback_query_id"] != "explicit-id" { t.Fatalf("got: %v", got) }
-        writeJSON(t, w, `{"ok":true,"result":true}`)
-    })
-    b, _ := newMockedBot(t, mock)
-    f := newTestFilter(t, map[string]string{"action": "answer_callback", "text": "ok", "callback_id": "explicit-id"})
-    msg := newTestMessage(b, "x", map[string]interface{}{"callback_id": "from-extra"})
-    ok, _ := f.DoFilter(msg)
-    if !ok { t.Fatalf("want ok=true") }
+	mock := newMockBotAPI(t)
+	mock.handle("answerCallbackQuery", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		var got map[string]interface{}
+		json.Unmarshal(body, &got)
+		if got["callback_query_id"] != "explicit-id" {
+			t.Fatalf("got: %v", got)
+		}
+		writeJSON(t, w, `{"ok":true,"result":true}`)
+	})
+	b, _ := newMockedBot(t, mock)
+	f := newTestFilter(t, map[string]string{"action": "answer_callback", "text": "ok", "callback_id": "explicit-id"})
+	msg := newTestMessage(b, "x", map[string]interface{}{"callback_id": "from-extra"})
+	ok, _ := f.DoFilter(msg)
+	if !ok {
+		t.Fatalf("want ok=true")
+	}
 }
 
 func TestTelegramBotAnswerCallback_NoID(t *testing.T) {
-    mock := newMockBotAPI(t)
-    b, _ := newMockedBot(t, mock)
-    f := newTestFilter(t, map[string]string{"action": "answer_callback", "text": "ok"})
-    msg := newTestMessage(b, "x", nil)
-    ok, _ := f.DoFilter(msg)
-    if ok { t.Fatalf("want ok=false when no callback_id available") }
+	mock := newMockBotAPI(t)
+	b, _ := newMockedBot(t, mock)
+	f := newTestFilter(t, map[string]string{"action": "answer_callback", "text": "ok"})
+	msg := newTestMessage(b, "x", nil)
+	ok, _ := f.DoFilter(msg)
+	if ok {
+		t.Fatalf("want ok=false when no callback_id available")
+	}
 }
 
 func TestTelegramBotSendMedia_URL(t *testing.T) {
-    mock := newMockBotAPI(t)
-    mock.handle("sendDocument", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
-        body, _ := io.ReadAll(r.Body)
-        var got map[string]interface{}
-        json.Unmarshal(body, &got)
-        if got["document"] != "https://example.com/x.pdf" { t.Fatalf("document: %v", got["document"]) }
-        if got["chat_id"].(float64) != 1 { t.Fatalf("chat_id: %v", got["chat_id"]) }
-        writeJSON(t, w, `{"ok":true,"result":{"message_id":11,"chat":{"id":1,"type":"private"},"date":1}}`)
-    })
-    b, _ := newMockedBot(t, mock)
-    f := newTestFilter(t, map[string]string{"action": "send_media", "media": "https://example.com/x.pdf", "to_chat": "1"})
-    msg := newTestMessage(b, "x", nil)
-    ok, _ := f.DoFilter(msg)
-    if !ok { t.Fatalf("want ok=true") }
+	mock := newMockBotAPI(t)
+	mock.handle("sendDocument", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		var got map[string]interface{}
+		json.Unmarshal(body, &got)
+		if got["document"] != "https://example.com/x.pdf" {
+			t.Fatalf("document: %v", got["document"])
+		}
+		if got["chat_id"].(float64) != 1 {
+			t.Fatalf("chat_id: %v", got["chat_id"])
+		}
+		writeJSON(t, w, `{"ok":true,"result":{"message_id":11,"chat":{"id":1,"type":"private"},"date":1}}`)
+	})
+	b, _ := newMockedBot(t, mock)
+	f := newTestFilter(t, map[string]string{"action": "send_media", "media": "https://example.com/x.pdf", "to_chat": "1"})
+	msg := newTestMessage(b, "x", nil)
+	ok, _ := f.DoFilter(msg)
+	if !ok {
+		t.Fatalf("want ok=true")
+	}
 }
 
 func TestTelegramBotSendMedia_FileID(t *testing.T) {
-    mock := newMockBotAPI(t)
-    mock.handle("sendPhoto", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
-        body, _ := io.ReadAll(r.Body)
-        var got map[string]interface{}
-        json.Unmarshal(body, &got)
-        if got["photo"] != "abcde-fileid" { t.Fatalf("photo: %v", got["photo"]) }
-        writeJSON(t, w, `{"ok":true,"result":{"message_id":1,"chat":{"id":1,"type":"private"},"date":1}}`)
-    })
-    b, _ := newMockedBot(t, mock)
-    f := newTestFilter(t, map[string]string{
-        "action": "send_media", "media": "abcde-fileid", "media_type": "photo", "to_chat": "1",
-    })
-    msg := newTestMessage(b, "x", nil)
-    ok, _ := f.DoFilter(msg)
-    if !ok { t.Fatalf("want ok=true") }
+	mock := newMockBotAPI(t)
+	mock.handle("sendPhoto", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		var got map[string]interface{}
+		json.Unmarshal(body, &got)
+		if got["photo"] != "abcde-fileid" {
+			t.Fatalf("photo: %v", got["photo"])
+		}
+		writeJSON(t, w, `{"ok":true,"result":{"message_id":1,"chat":{"id":1,"type":"private"},"date":1}}`)
+	})
+	b, _ := newMockedBot(t, mock)
+	f := newTestFilter(t, map[string]string{
+		"action": "send_media", "media": "abcde-fileid", "media_type": "photo", "to_chat": "1",
+	})
+	msg := newTestMessage(b, "x", nil)
+	ok, _ := f.DoFilter(msg)
+	if !ok {
+		t.Fatalf("want ok=true")
+	}
 }
 
 func TestTelegramBotSendMedia_LocalUpload(t *testing.T) {
-    tmpDir := t.TempDir()
-    path := filepath.Join(tmpDir, "hello.txt")
-    if err := os.WriteFile(path, []byte("hello-bytes"), 0600); err != nil { t.Fatalf("%v", err) }
+	tmpDir := t.TempDir()
+	path := filepath.Join(tmpDir, "hello.txt")
+	if err := os.WriteFile(path, []byte("hello-bytes"), 0600); err != nil {
+		t.Fatalf("%v", err)
+	}
 
-    mock := newMockBotAPI(t)
-    mock.handleRaw("sendDocument", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
-        ct := r.Header.Get("Content-Type")
-        mediaType, params, err := mime.ParseMediaType(ct)
-        if err != nil { t.Fatalf("content-type: %v", err) }
-        if mediaType != "multipart/form-data" { t.Fatalf("expected multipart/form-data, got %s", mediaType) }
-        mr := multipart.NewReader(r.Body, params["boundary"])
-        sawFile := false
-        for {
-            part, err := mr.NextPart()
-            if err != nil { break }
-            if part.FormName() == "document" {
-                buf, _ := io.ReadAll(part)
-                if string(buf) != "hello-bytes" { t.Fatalf("unexpected file content: %q", buf) }
-                if part.FileName() != "hello.txt" { t.Fatalf("filename: %s", part.FileName()) }
-                sawFile = true
-            }
-        }
-        if !sawFile { t.Fatalf("multipart did not contain document part") }
-        writeJSON(t, w, `{"ok":true,"result":{"message_id":1,"chat":{"id":1,"type":"private"},"date":1}}`)
-    })
-    b, _ := newMockedBot(t, mock)
-    f := newTestFilter(t, map[string]string{"action": "send_media", "media": path, "to_chat": "1"})
-    msg := newTestMessage(b, "x", nil)
-    ok, _ := f.DoFilter(msg)
-    if !ok { t.Fatalf("want ok=true") }
+	mock := newMockBotAPI(t)
+	mock.handleRaw("sendDocument", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
+		ct := r.Header.Get("Content-Type")
+		mediaType, params, err := mime.ParseMediaType(ct)
+		if err != nil {
+			t.Fatalf("content-type: %v", err)
+		}
+		if mediaType != "multipart/form-data" {
+			t.Fatalf("expected multipart/form-data, got %s", mediaType)
+		}
+		mr := multipart.NewReader(r.Body, params["boundary"])
+		sawFile := false
+		for {
+			part, err := mr.NextPart()
+			if err != nil {
+				break
+			}
+			if part.FormName() == "document" {
+				buf, _ := io.ReadAll(part)
+				if string(buf) != "hello-bytes" {
+					t.Fatalf("unexpected file content: %q", buf)
+				}
+				if part.FileName() != "hello.txt" {
+					t.Fatalf("filename: %s", part.FileName())
+				}
+				sawFile = true
+			}
+		}
+		if !sawFile {
+			t.Fatalf("multipart did not contain document part")
+		}
+		writeJSON(t, w, `{"ok":true,"result":{"message_id":1,"chat":{"id":1,"type":"private"},"date":1}}`)
+	})
+	b, _ := newMockedBot(t, mock)
+	f := newTestFilter(t, map[string]string{"action": "send_media", "media": path, "to_chat": "1"})
+	msg := newTestMessage(b, "x", nil)
+	ok, _ := f.DoFilter(msg)
+	if !ok {
+		t.Fatalf("want ok=true")
+	}
 }
 
 func TestTelegramBotSendMedia_UnknownMediaType(t *testing.T) {
-    mock := newMockBotAPI(t)
-    b, _ := newMockedBot(t, mock)
-    f := newTestFilter(t, map[string]string{
-        "action": "send_media", "media": "x", "media_type": "hologram", "to_chat": "1",
-    })
-    msg := newTestMessage(b, "x", nil)
-    ok, _ := f.DoFilter(msg)
-    if ok { t.Fatalf("want ok=false for unknown media_type") }
+	mock := newMockBotAPI(t)
+	b, _ := newMockedBot(t, mock)
+	f := newTestFilter(t, map[string]string{
+		"action": "send_media", "media": "x", "media_type": "hologram", "to_chat": "1",
+	})
+	msg := newTestMessage(b, "x", nil)
+	ok, _ := f.DoFilter(msg)
+	if ok {
+		t.Fatalf("want ok=false for unknown media_type")
+	}
 }
 
 func TestTelegramBotDownloadFile_FromExtra(t *testing.T) {
-    tmpDir := t.TempDir()
-    out := filepath.Join(tmpDir, "downloads", "saved.bin")
+	tmpDir := t.TempDir()
+	out := filepath.Join(tmpDir, "downloads", "saved.bin")
 
-    mock := newMockBotAPI(t)
-    mock.handle("getFile", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
-        body, _ := io.ReadAll(r.Body)
-        var got map[string]interface{}
-        json.Unmarshal(body, &got)
-        if got["file_id"] != "FID-1" { t.Fatalf("file_id: %v", got["file_id"]) }
-        writeJSON(t, w, `{"ok":true,"result":{"file_id":"FID-1","file_unique_id":"u","file_size":11,"file_path":"docs/hello.bin"}}`)
-    })
-    mock.files["docs/hello.bin"] = []byte("hello-bytes")
-    b, _ := newMockedBot(t, mock)
+	mock := newMockBotAPI(t)
+	mock.handle("getFile", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		var got map[string]interface{}
+		json.Unmarshal(body, &got)
+		if got["file_id"] != "FID-1" {
+			t.Fatalf("file_id: %v", got["file_id"])
+		}
+		writeJSON(t, w, `{"ok":true,"result":{"file_id":"FID-1","file_unique_id":"u","file_size":11,"file_path":"docs/hello.bin"}}`)
+	})
+	mock.files["docs/hello.bin"] = []byte("hello-bytes")
+	b, _ := newMockedBot(t, mock)
 
-    f := newTestFilter(t, map[string]string{"action": "download_file", "filename": out})
-    msg := newTestMessage(b, "x", map[string]interface{}{"msg_file_id": "FID-1"})
-    ok, _ := f.DoFilter(msg)
-    if !ok { t.Fatalf("want ok=true") }
+	f := newTestFilter(t, map[string]string{"action": "download_file", "filename": out})
+	msg := newTestMessage(b, "x", map[string]interface{}{"msg_file_id": "FID-1"})
+	ok, _ := f.DoFilter(msg)
+	if !ok {
+		t.Fatalf("want ok=true")
+	}
 
-    got, err := os.ReadFile(out)
-    if err != nil { t.Fatalf("read: %v", err) }
-    if string(got) != "hello-bytes" { t.Fatalf("file content: %q", got) }
-    if msg.GetTarget("downloaded_path") != out { t.Fatalf("downloaded_path: %v", msg.GetTarget("downloaded_path")) }
+	got, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	if string(got) != "hello-bytes" {
+		t.Fatalf("file content: %q", got)
+	}
+	if msg.GetTarget("downloaded_path") != out {
+		t.Fatalf("downloaded_path: %v", msg.GetTarget("downloaded_path"))
+	}
 }
 
 func TestTelegramBotDownloadFile_ExplicitID(t *testing.T) {
-    tmpDir := t.TempDir()
-    out := filepath.Join(tmpDir, "out.bin")
+	tmpDir := t.TempDir()
+	out := filepath.Join(tmpDir, "out.bin")
 
-    mock := newMockBotAPI(t)
-    mock.handle("getFile", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
-        body, _ := io.ReadAll(r.Body)
-        var got map[string]interface{}
-        json.Unmarshal(body, &got)
-        if got["file_id"] != "explicit" { t.Fatalf("file_id: %v", got["file_id"]) }
-        writeJSON(t, w, `{"ok":true,"result":{"file_id":"explicit","file_unique_id":"u","file_size":4,"file_path":"a/b.bin"}}`)
-    })
-    mock.files["a/b.bin"] = []byte("DATA")
-    b, _ := newMockedBot(t, mock)
-    f := newTestFilter(t, map[string]string{"action": "download_file", "filename": out, "file_id": "explicit"})
-    msg := newTestMessage(b, "x", map[string]interface{}{"msg_file_id": "from-extra"})
-    ok, _ := f.DoFilter(msg)
-    if !ok { t.Fatalf("want ok=true") }
+	mock := newMockBotAPI(t)
+	mock.handle("getFile", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		var got map[string]interface{}
+		json.Unmarshal(body, &got)
+		if got["file_id"] != "explicit" {
+			t.Fatalf("file_id: %v", got["file_id"])
+		}
+		writeJSON(t, w, `{"ok":true,"result":{"file_id":"explicit","file_unique_id":"u","file_size":4,"file_path":"a/b.bin"}}`)
+	})
+	mock.files["a/b.bin"] = []byte("DATA")
+	b, _ := newMockedBot(t, mock)
+	f := newTestFilter(t, map[string]string{"action": "download_file", "filename": out, "file_id": "explicit"})
+	msg := newTestMessage(b, "x", map[string]interface{}{"msg_file_id": "from-extra"})
+	ok, _ := f.DoFilter(msg)
+	if !ok {
+		t.Fatalf("want ok=true")
+	}
 }
 
 func TestTelegramBotDownloadFile_GetFileError(t *testing.T) {
-    tmpDir := t.TempDir()
-    out := filepath.Join(tmpDir, "out.bin")
-    mock := newMockBotAPI(t)
-    mock.handle("getFile", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(http.StatusBadRequest)
-        writeJSON(t, w, `{"ok":false,"description":"file not found","error_code":400}`)
-    })
-    b, _ := newMockedBot(t, mock)
-    f := newTestFilter(t, map[string]string{"action": "download_file", "filename": out})
-    msg := newTestMessage(b, "x", map[string]interface{}{"msg_file_id": "x"})
-    ok, _ := f.DoFilter(msg)
-    if ok { t.Fatalf("want ok=false") }
+	tmpDir := t.TempDir()
+	out := filepath.Join(tmpDir, "out.bin")
+	mock := newMockBotAPI(t)
+	mock.handle("getFile", func(t *testing.T, w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		writeJSON(t, w, `{"ok":false,"description":"file not found","error_code":400}`)
+	})
+	b, _ := newMockedBot(t, mock)
+	f := newTestFilter(t, map[string]string{"action": "download_file", "filename": out})
+	msg := newTestMessage(b, "x", map[string]interface{}{"msg_file_id": "x"})
+	ok, _ := f.DoFilter(msg)
+	if ok {
+		t.Fatalf("want ok=false")
+	}
 }
 
 func TestTelegramBotDownloadFile_NoFileID(t *testing.T) {
-    tmpDir := t.TempDir()
-    out := filepath.Join(tmpDir, "out.bin")
-    mock := newMockBotAPI(t)
-    b, _ := newMockedBot(t, mock)
-    f := newTestFilter(t, map[string]string{"action": "download_file", "filename": out})
-    msg := newTestMessage(b, "x", nil)
-    ok, _ := f.DoFilter(msg)
-    if ok { t.Fatalf("want ok=false when no file_id available") }
+	tmpDir := t.TempDir()
+	out := filepath.Join(tmpDir, "out.bin")
+	mock := newMockBotAPI(t)
+	b, _ := newMockedBot(t, mock)
+	f := newTestFilter(t, map[string]string{"action": "download_file", "filename": out})
+	msg := newTestMessage(b, "x", nil)
+	ok, _ := f.DoFilter(msg)
+	if ok {
+		t.Fatalf("want ok=false when no file_id available")
+	}
 }
