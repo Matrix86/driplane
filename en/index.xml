@@ -166,7 +166,7 @@ are available for the file that imports them.&lt;/p&gt;</description></item><ite
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;All string parameters support &lt;a href="https://matrix86.github.io/rules/templates/"&gt;templates&lt;/a&gt;.&lt;/p&gt;</description></item><item><title>TelegramBot</title><link>https://matrix86.github.io/driplane/en/doc/feeders/telegrambot/</link><pubDate>Thu, 23 Apr 2026 00:00:00 +0000</pubDate><guid>https://matrix86.github.io/driplane/en/doc/feeders/telegrambot/</guid><description>&lt;h2 id="telegrambot"&gt;TelegramBot&lt;/h2&gt;
+&lt;p&gt;All string parameters support &lt;a href="https://matrix86.github.io/driplane/en/doc/rules/templates/"&gt;templates&lt;/a&gt;.&lt;/p&gt;</description></item><item><title>TelegramBot</title><link>https://matrix86.github.io/driplane/en/doc/feeders/telegrambot/</link><pubDate>Thu, 23 Apr 2026 00:00:00 +0000</pubDate><guid>https://matrix86.github.io/driplane/en/doc/feeders/telegrambot/</guid><description>&lt;h2 id="telegrambot"&gt;TelegramBot&lt;/h2&gt;
 &lt;p&gt;This feeder consumes updates from a bot registered with &lt;a href="https://t.me/BotFather" target="_blank"&gt;@BotFather&lt;/a&gt; using the &lt;a href="https://core.telegram.org/bots/api" target="_blank"&gt;Telegram Bot API&lt;/a&gt;.&lt;br /&gt;
 Unlike the &lt;code&gt;telegram&lt;/code&gt; feeder (MTProto user client), &lt;code&gt;telegrambot&lt;/code&gt; is suited for interactive bots that expose commands or inline keyboards.&lt;/p&gt;
 &lt;p&gt;Based on &lt;a href="https://github.com/go-telegram/bot" target="_blank"&gt;go-telegram/bot&lt;/a&gt;.&lt;/p&gt;

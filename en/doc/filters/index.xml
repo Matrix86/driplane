@@ -93,7 +93,7 @@
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;All string parameters support &lt;a href="https://matrix86.github.io/rules/templates/"&gt;templates&lt;/a&gt;.&lt;/p&gt;</description></item><item><title>LLM</title><link>https://matrix86.github.io/driplane/en/doc/filters/llm/</link><pubDate>Fri, 06 Mar 2026 00:00:00 +0000</pubDate><guid>https://matrix86.github.io/driplane/en/doc/filters/llm/</guid><description>&lt;h2 id="llm"&gt;LLM&lt;/h2&gt;
+&lt;p&gt;All string parameters support &lt;a href="https://matrix86.github.io/driplane/en/doc/rules/templates/"&gt;templates&lt;/a&gt;.&lt;/p&gt;</description></item><item><title>LLM</title><link>https://matrix86.github.io/driplane/en/doc/filters/llm/</link><pubDate>Fri, 06 Mar 2026 00:00:00 +0000</pubDate><guid>https://matrix86.github.io/driplane/en/doc/filters/llm/</guid><description>&lt;h2 id="llm"&gt;LLM&lt;/h2&gt;
 &lt;p&gt;This filter sends the received &lt;code&gt;Message&lt;/code&gt; to a Large Language Model (LLM) and propagates the response. It uses &lt;a href="https://github.com/mozilla-ai/any-llm-go" target="_blank"&gt;any-llm-go&lt;/a&gt; to support multiple LLM providers through a unified interface.&lt;/p&gt;
 &lt;p&gt;Both the &lt;code&gt;prompt&lt;/code&gt; and &lt;code&gt;system_prompt&lt;/code&gt; parameters support &lt;a href="https://matrix86.github.io/driplane/en/doc/rules/templates/"&gt;templates&lt;/a&gt;, allowing you to dynamically compose prompts using the &lt;code&gt;main&lt;/code&gt; field and any extra fields of the incoming &lt;code&gt;Message&lt;/code&gt;.&lt;/p&gt;
 &lt;h3 id="supported-providers"&gt;Supported Providers&lt;/h3&gt;
