@@ -328,52 +328,69 @@ func (t *TelegramBot) looksLikeCommand(text string) bool {
 }
 
 // allowed reports whether an event passes the configured allowlists.
-func (t *TelegramBot) allowed(userID int64, username string, chatID int64) bool {
-	if len(t.allowedChats) > 0 {
-		if !t.allowedChats[chatID] {
+//
+// Semantics:
+//   - When allowed_users is configured, the sender MUST be in the list. Updates
+//     without sender identity (e.g. channel posts) skip the user check.
+//   - When allowed_chats is configured, the chat must be in the list, EXCEPT
+//     for private chats from a verified allowed user — those bypass the chat
+//     list so users in allowed_users can DM the bot regardless of allowed_chats.
+func (t *TelegramBot) allowed(userID int64, username string, chatID int64, chatType models.ChatType) bool {
+	userListConfigured := len(t.allowedUsers) > 0 || len(t.allowedUsernames) > 0
+	chatListConfigured := len(t.allowedChats) > 0
+
+	if userListConfigured && (userID != 0 || username != "") {
+		userInList := (userID != 0 && t.allowedUsers[userID]) ||
+			(username != "" && t.allowedUsernames[strings.ToLower(username)])
+		if !userInList {
 			return false
 		}
 	}
-	userListConfigured := len(t.allowedUsers) > 0 || len(t.allowedUsernames) > 0
-	if !userListConfigured {
-		return true
+
+	if chatListConfigured {
+		if t.allowedChats[chatID] {
+			return true
+		}
+		if userListConfigured && chatType == models.ChatTypePrivate {
+			return true
+		}
+		return false
 	}
-	if userID == 0 && username == "" {
-		return true
-	}
-	if userID != 0 && t.allowedUsers[userID] {
-		return true
-	}
-	if username != "" && t.allowedUsernames[strings.ToLower(username)] {
-		return true
-	}
-	return false
+
+	return true
 }
 
-// extractIdentity pulls (userID, username, chatID) from an update. Any field
-// may be zero when the update has no corresponding party.
-func extractIdentity(u *models.Update) (int64, string, int64) {
+// extractIdentity pulls (userID, username, chatID, chatType) from an update.
+// Any field may be zero when the update has no corresponding party.
+func extractIdentity(u *models.Update) (int64, string, int64, models.ChatType) {
 	switch {
 	case u.Message != nil:
 		uid, name := userInfo(u.Message.From)
-		return uid, name, u.Message.Chat.ID
+		return uid, name, u.Message.Chat.ID, u.Message.Chat.Type
 	case u.EditedMessage != nil:
 		uid, name := userInfo(u.EditedMessage.From)
-		return uid, name, u.EditedMessage.Chat.ID
+		return uid, name, u.EditedMessage.Chat.ID, u.EditedMessage.Chat.Type
 	case u.ChannelPost != nil:
 		uid, name := userInfo(u.ChannelPost.From)
-		return uid, name, u.ChannelPost.Chat.ID
+		return uid, name, u.ChannelPost.Chat.ID, u.ChannelPost.Chat.Type
 	case u.EditedChannelPost != nil:
 		uid, name := userInfo(u.EditedChannelPost.From)
-		return uid, name, u.EditedChannelPost.Chat.ID
+		return uid, name, u.EditedChannelPost.Chat.ID, u.EditedChannelPost.Chat.Type
 	case u.CallbackQuery != nil:
-		return u.CallbackQuery.From.ID, u.CallbackQuery.From.Username, 0
+		chat, _ := callbackChat(u.CallbackQuery)
+		var chatID int64
+		var ct models.ChatType
+		if chat != nil {
+			chatID = chat.ID
+			ct = chat.Type
+		}
+		return u.CallbackQuery.From.ID, u.CallbackQuery.From.Username, chatID, ct
 	case u.MyChatMember != nil:
-		return u.MyChatMember.From.ID, u.MyChatMember.From.Username, u.MyChatMember.Chat.ID
+		return u.MyChatMember.From.ID, u.MyChatMember.From.Username, u.MyChatMember.Chat.ID, u.MyChatMember.Chat.Type
 	case u.ChatMember != nil:
-		return u.ChatMember.From.ID, u.ChatMember.From.Username, u.ChatMember.Chat.ID
+		return u.ChatMember.From.ID, u.ChatMember.From.Username, u.ChatMember.Chat.ID, u.ChatMember.Chat.Type
 	default:
-		return 0, "", 0
+		return 0, "", 0, ""
 	}
 }
 
@@ -382,6 +399,26 @@ func userInfo(u *models.User) (int64, string) {
 		return 0, ""
 	}
 	return u.ID, u.Username
+}
+
+// callbackChat returns the chat the inline-keyboard message lives in, plus the
+// message ID, regardless of whether the bot still has access to that message.
+// Returns (nil, 0) for inline_message_id-only callbacks (no chat context).
+func callbackChat(cq *models.CallbackQuery) (*models.Chat, int) {
+	if cq == nil {
+		return nil, 0
+	}
+	switch cq.Message.Type {
+	case models.MaybeInaccessibleMessageTypeMessage:
+		if cq.Message.Message != nil {
+			return &cq.Message.Message.Chat, cq.Message.Message.ID
+		}
+	case models.MaybeInaccessibleMessageTypeInaccessibleMessage:
+		if cq.Message.InaccessibleMessage != nil {
+			return &cq.Message.InaccessibleMessage.Chat, cq.Message.InaccessibleMessage.MessageID
+		}
+	}
+	return nil, 0
 }
 
 // splitCommand returns (command, args-remainder). Strips any @botname suffix.
@@ -524,8 +561,8 @@ func (t *TelegramBot) onUpdate(_ context.Context, _ *bot.Bot, u *models.Update) 
 		return
 	}
 
-	userID, username, chatID := extractIdentity(u)
-	if !t.allowed(userID, username, chatID) {
+	userID, username, chatID, chatType := extractIdentity(u)
+	if !t.allowed(userID, username, chatID, chatType) {
 		log.Debug("telegrambot: update rejected by allowlist (user=%d chat=%d)", userID, chatID)
 		return
 	}
@@ -585,6 +622,10 @@ func (t *TelegramBot) fillByType(extra map[string]interface{}, evType string, u 
 		extra["callback_id"] = cq.ID
 		extra["callback_data"] = cq.Data
 		extra["callback_chatinstance"] = cq.ChatInstance
+		if chat, msgID := callbackChat(cq); chat != nil {
+			fillExtraFromChat(extra, *chat)
+			extra["msg_id"] = strconv.Itoa(msgID)
+		}
 		return cq.Data
 	case "chat_member", "my_chat_member":
 		var cmu *models.ChatMemberUpdated

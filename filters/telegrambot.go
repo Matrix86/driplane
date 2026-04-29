@@ -39,6 +39,8 @@ type TelegramBot struct {
 	mediaType   *template.Template
 	replyMarkup *template.Template
 
+	showAlert bool
+
 	params map[string]string
 }
 
@@ -64,6 +66,14 @@ func NewTelegramBotFilter(p map[string]string) (Filter, error) {
 	}
 	if !validTelegramBotActions[f.action] {
 		return nil, fmt.Errorf("telegrambot: action '%s' is not valid", f.action)
+	}
+
+	if v, ok := f.params["show_alert"]; ok && v != "" {
+		b, err := strconv.ParseBool(v)
+		if err != nil {
+			return nil, fmt.Errorf("telegrambot: invalid show_alert value %q: %w", v, err)
+		}
+		f.showAlert = b
 	}
 
 	if err := f.compileTemplates(); err != nil {
@@ -228,6 +238,12 @@ func (f *TelegramBot) resolveParseMode(msg *data.Message) (models.ParseMode, boo
 
 // resolveReplyMarkup parses the reply_markup template (if set) into models.ReplyMarkup.
 // Returns (nil, true) when reply_markup is unset or renders to whitespace.
+//
+// JSON shape determines the variant:
+//   - {"inline_keyboard": [...]}     → InlineKeyboardMarkup
+//   - {"keyboard": [...]}            → ReplyKeyboardMarkup
+//   - {"remove_keyboard": true, ...} → ReplyKeyboardRemove
+//   - {"force_reply": true, ...}     → ForceReply
 func (f *TelegramBot) resolveReplyMarkup(msg *data.Message) (models.ReplyMarkup, bool) {
 	if f.replyMarkup == nil {
 		return nil, true
@@ -240,12 +256,40 @@ func (f *TelegramBot) resolveReplyMarkup(msg *data.Message) (models.ReplyMarkup,
 	if strings.TrimSpace(raw) == "" {
 		return nil, true
 	}
-	var kb models.InlineKeyboardMarkup
-	if err := json.Unmarshal([]byte(raw), &kb); err != nil {
+
+	var probe map[string]json.RawMessage
+	if err := json.Unmarshal([]byte(raw), &probe); err != nil {
 		log.Error("[%s::%s] telegrambot: invalid reply_markup JSON: %s", f.Rule(), f.Name(), err)
 		return nil, false
 	}
-	return kb, true
+
+	var out models.ReplyMarkup
+	switch {
+	case len(probe["inline_keyboard"]) > 0:
+		var kb models.InlineKeyboardMarkup
+		err = json.Unmarshal([]byte(raw), &kb)
+		out = kb
+	case len(probe["keyboard"]) > 0:
+		var kb models.ReplyKeyboardMarkup
+		err = json.Unmarshal([]byte(raw), &kb)
+		out = kb
+	case len(probe["remove_keyboard"]) > 0:
+		var kb models.ReplyKeyboardRemove
+		err = json.Unmarshal([]byte(raw), &kb)
+		out = kb
+	case len(probe["force_reply"]) > 0:
+		var kb models.ForceReply
+		err = json.Unmarshal([]byte(raw), &kb)
+		out = kb
+	default:
+		log.Error("[%s::%s] telegrambot: reply_markup must contain one of inline_keyboard/keyboard/remove_keyboard/force_reply", f.Rule(), f.Name())
+		return nil, false
+	}
+	if err != nil {
+		log.Error("[%s::%s] telegrambot: invalid reply_markup JSON: %s", f.Rule(), f.Name(), err)
+		return nil, false
+	}
+	return out, true
 }
 
 // DoFilter dispatches by action.
@@ -413,6 +457,7 @@ func (f *TelegramBot) doAnswerCallback(ctx context.Context, b *bot.Bot, msg *dat
 	if _, err := b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
 		CallbackQueryID: cbID,
 		Text:            text,
+		ShowAlert:       f.showAlert,
 	}); err != nil {
 		log.Error("[%s::%s] telegrambot: answerCallbackQuery failed: %s", f.Rule(), f.Name(), err)
 		return false

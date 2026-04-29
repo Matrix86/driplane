@@ -388,6 +388,97 @@ func TestTelegramBotParseReplyMarkup_Invalid(t *testing.T) {
 	}
 }
 
+func TestTelegramBotParseReplyMarkup_ReplyKeyboard(t *testing.T) {
+	f := newTestFilter(t, map[string]string{
+		"action":       "send_message",
+		"text":         "hi",
+		"to_chat":      "1",
+		"reply_markup": `{"keyboard":[[{"text":"Yes"},{"text":"No"}]],"resize_keyboard":true,"one_time_keyboard":true}`,
+	})
+	mock := newMockBotAPI(t)
+	b, _ := newMockedBot(t, mock)
+	msg := newTestMessage(b, "x", nil)
+	mk, ok := f.resolveReplyMarkup(msg)
+	if !ok {
+		t.Fatalf("expected ok=true for valid reply keyboard JSON")
+	}
+	kb, isKB := mk.(models.ReplyKeyboardMarkup)
+	if !isKB {
+		t.Fatalf("expected ReplyKeyboardMarkup, got %T", mk)
+	}
+	if len(kb.Keyboard) != 1 || len(kb.Keyboard[0]) != 2 {
+		t.Fatalf("unexpected keyboard shape: %#v", kb)
+	}
+	if kb.Keyboard[0][0].Text != "Yes" || kb.Keyboard[0][1].Text != "No" {
+		t.Fatalf("button text mismatch: %#v", kb.Keyboard)
+	}
+	if !kb.ResizeKeyboard || !kb.OneTimeKeyboard {
+		t.Fatalf("flags lost: resize=%v onetime=%v", kb.ResizeKeyboard, kb.OneTimeKeyboard)
+	}
+}
+
+func TestTelegramBotParseReplyMarkup_RemoveKeyboard(t *testing.T) {
+	f := newTestFilter(t, map[string]string{
+		"action":       "send_message",
+		"text":         "hi",
+		"to_chat":      "1",
+		"reply_markup": `{"remove_keyboard":true}`,
+	})
+	mock := newMockBotAPI(t)
+	b, _ := newMockedBot(t, mock)
+	msg := newTestMessage(b, "x", nil)
+	mk, ok := f.resolveReplyMarkup(msg)
+	if !ok {
+		t.Fatalf("expected ok=true for valid remove_keyboard JSON")
+	}
+	rm, isRM := mk.(models.ReplyKeyboardRemove)
+	if !isRM {
+		t.Fatalf("expected ReplyKeyboardRemove, got %T", mk)
+	}
+	if !rm.RemoveKeyboard {
+		t.Fatalf("RemoveKeyboard should be true")
+	}
+}
+
+func TestTelegramBotParseReplyMarkup_ForceReply(t *testing.T) {
+	f := newTestFilter(t, map[string]string{
+		"action":       "send_message",
+		"text":         "hi",
+		"to_chat":      "1",
+		"reply_markup": `{"force_reply":true,"input_field_placeholder":"type here"}`,
+	})
+	mock := newMockBotAPI(t)
+	b, _ := newMockedBot(t, mock)
+	msg := newTestMessage(b, "x", nil)
+	mk, ok := f.resolveReplyMarkup(msg)
+	if !ok {
+		t.Fatalf("expected ok=true for valid force_reply JSON")
+	}
+	fr, isFR := mk.(models.ForceReply)
+	if !isFR {
+		t.Fatalf("expected ForceReply, got %T", mk)
+	}
+	if !fr.ForceReply || fr.InputFieldPlaceholder != "type here" {
+		t.Fatalf("ForceReply fields wrong: %#v", fr)
+	}
+}
+
+func TestTelegramBotParseReplyMarkup_UnknownShape(t *testing.T) {
+	f := newTestFilter(t, map[string]string{
+		"action":       "send_message",
+		"text":         "hi",
+		"to_chat":      "1",
+		"reply_markup": `{"foo":"bar"}`,
+	})
+	mock := newMockBotAPI(t)
+	b, _ := newMockedBot(t, mock)
+	msg := newTestMessage(b, "x", nil)
+	_, ok := f.resolveReplyMarkup(msg)
+	if ok {
+		t.Fatalf("expected ok=false for JSON with no recognised key")
+	}
+}
+
 func TestTelegramBotSendMessage_Success(t *testing.T) {
 	mock := newMockBotAPI(t)
 	mock.handle("sendMessage", func(t *testing.T, w http.ResponseWriter, r *http.Request) {

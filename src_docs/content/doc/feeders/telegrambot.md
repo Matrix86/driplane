@@ -22,8 +22,8 @@ Based on [go-telegram/bot](https://github.com/go-telegram/bot).
 | **webhook_secret** | _STRING_ | empty | Telegram `secret_token` for incoming webhook verification. |
 | **delete_webhook_on_stop** | _BOOL_ | `false` | Unregister the webhook from Telegram on shutdown. |
 | **commands** | _STRING_ | empty | Comma-separated command list (e.g. `/start,/help`). Empty = auto-detect any `/xxx`. |
-| **allowed_users** | _STRING_ | empty | Comma-separated user IDs or `@usernames`. Empty = all. Usernames matched case-insensitively. |
-| **allowed_chats** | _STRING_ | empty | Comma-separated chat IDs. Empty = all. |
+| **allowed_users** | _STRING_ | empty | Comma-separated user IDs or `@usernames`. Empty = all. Usernames matched case-insensitively. When set, the sender MUST be in the list — non-listed users are rejected regardless of chat origin. |
+| **allowed_chats** | _STRING_ | empty | Comma-separated chat IDs. Empty = all. When `allowed_users` is also set, private DMs from listed users bypass this list (so listed users can always DM the bot). |
 | **events** | _STRING_ | all | Comma-separated subset of `message,command,callback_query,edited_message,channel_post,edited_channel_post,chat_member,my_chat_member`. |
 | **debug** | _BOOL_ | `false` | Enable library debug logging. |
 
@@ -81,6 +81,8 @@ Message fields as above. `user_*` may be absent (channel posts can lack a sender
 | callback_id | Callback query ID. |
 | callback_data | Button payload (also the `main` field). |
 | callback_chatinstance | Telegram chat instance identifier. |
+| chat_id, chat_type, chat_title, chat_username | Chat the keyboard message lives in (also populated when the original message is no longer accessible). Absent only for `inline_message_id`-only callbacks. |
+| msg_id | ID of the message that carried the inline keyboard (useful with `edit_message`). |
 
 #### Event `chat_member` / `my_chat_member`
 

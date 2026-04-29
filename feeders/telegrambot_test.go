@@ -223,7 +223,7 @@ func TestSplitCommand(t *testing.T) {
 
 func TestTelegramBotAccessAllowAll(t *testing.T) {
 	tb, _ := newTestTelegramBot(t, map[string]string{})
-	if !tb.allowed(42, "alice", 100) {
+	if !tb.allowed(42, "alice", 100, models.ChatTypeGroup) {
 		t.Errorf("empty allowlists should allow everyone")
 	}
 }
@@ -232,10 +232,10 @@ func TestTelegramBotAccessUserID(t *testing.T) {
 	tb, _ := newTestTelegramBot(t, map[string]string{
 		"telegrambot.allowed_users": "42",
 	})
-	if !tb.allowed(42, "alice", 100) {
+	if !tb.allowed(42, "alice", 100, models.ChatTypeGroup) {
 		t.Errorf("user 42 should pass")
 	}
-	if tb.allowed(43, "alice", 100) {
+	if tb.allowed(43, "alice", 100, models.ChatTypeGroup) {
 		t.Errorf("user 43 should be blocked")
 	}
 }
@@ -244,10 +244,10 @@ func TestTelegramBotAccessUsername(t *testing.T) {
 	tb, _ := newTestTelegramBot(t, map[string]string{
 		"telegrambot.allowed_users": "@alice",
 	})
-	if !tb.allowed(0, "Alice", 100) {
+	if !tb.allowed(0, "Alice", 100, models.ChatTypeGroup) {
 		t.Errorf("username Alice should match @alice case-insensitively")
 	}
-	if tb.allowed(0, "bob", 100) {
+	if tb.allowed(0, "bob", 100, models.ChatTypeGroup) {
 		t.Errorf("username bob should be blocked")
 	}
 }
@@ -256,10 +256,10 @@ func TestTelegramBotAccessChats(t *testing.T) {
 	tb, _ := newTestTelegramBot(t, map[string]string{
 		"telegrambot.allowed_chats": "-100",
 	})
-	if !tb.allowed(1, "x", -100) {
+	if !tb.allowed(1, "x", -100, models.ChatTypeGroup) {
 		t.Errorf("chat -100 should pass")
 	}
-	if tb.allowed(1, "x", 200) {
+	if tb.allowed(1, "x", 200, models.ChatTypeGroup) {
 		t.Errorf("chat 200 should be blocked")
 	}
 }
@@ -269,14 +269,40 @@ func TestTelegramBotAccessUserAndChatCombined(t *testing.T) {
 		"telegrambot.allowed_users": "42",
 		"telegrambot.allowed_chats": "-100",
 	})
-	if !tb.allowed(42, "x", -100) {
+	if !tb.allowed(42, "x", -100, models.ChatTypeGroup) {
 		t.Errorf("user 42 in chat -100 should pass")
 	}
-	if tb.allowed(42, "x", 200) {
+	if tb.allowed(42, "x", 200, models.ChatTypeGroup) {
 		t.Errorf("user 42 in chat 200 should be blocked (chat mismatch)")
 	}
-	if tb.allowed(43, "x", -100) {
+	if tb.allowed(43, "x", -100, models.ChatTypeGroup) {
 		t.Errorf("user 43 in chat -100 should be blocked (user mismatch)")
+	}
+}
+
+// Allowed user in private chat must pass even when the private chat ID is not
+// in allowed_chats. Private DMs from listed users bypass the chat allowlist.
+func TestTelegramBotAccessAllowedUserPrivateChat(t *testing.T) {
+	tb, _ := newTestTelegramBot(t, map[string]string{
+		"telegrambot.allowed_users": "42",
+		"telegrambot.allowed_chats": "-100",
+	})
+	if !tb.allowed(42, "x", 999, models.ChatTypePrivate) {
+		t.Errorf("allowed user in private chat should pass even if chat not in allowed_chats")
+	}
+	if tb.allowed(43, "x", 999, models.ChatTypePrivate) {
+		t.Errorf("non-listed user in private chat must still be rejected")
+	}
+}
+
+// Private-chat bypass must NOT trigger when allowed_users is empty (chat list
+// is the only filter, so private chat ID still has to be in allowed_chats).
+func TestTelegramBotAccessPrivateChatNoUserList(t *testing.T) {
+	tb, _ := newTestTelegramBot(t, map[string]string{
+		"telegrambot.allowed_chats": "-100",
+	})
+	if tb.allowed(42, "x", 999, models.ChatTypePrivate) {
+		t.Errorf("private chat ID not in allowed_chats must be rejected when no user list configured")
 	}
 }
 
@@ -285,10 +311,10 @@ func TestTelegramBotAccessNoUserPresent(t *testing.T) {
 		"telegrambot.allowed_users": "42",
 		"telegrambot.allowed_chats": "-100",
 	})
-	if !tb.allowed(0, "", -100) {
+	if !tb.allowed(0, "", -100, models.ChatTypeChannel) {
 		t.Errorf("no-sender event in allowed chat should pass")
 	}
-	if tb.allowed(0, "", 200) {
+	if tb.allowed(0, "", 200, models.ChatTypeChannel) {
 		t.Errorf("no-sender event in disallowed chat should be blocked")
 	}
 }
@@ -300,9 +326,9 @@ func TestTelegramBotExtractIdentityMessage(t *testing.T) {
 			Chat: models.Chat{ID: -100, Type: models.ChatTypeGroup},
 		},
 	}
-	uid, name, cid := extractIdentity(u)
-	if uid != 42 || name != "alice" || cid != -100 {
-		t.Errorf("message: got (%d,%s,%d), want (42,alice,-100)", uid, name, cid)
+	uid, name, cid, ct := extractIdentity(u)
+	if uid != 42 || name != "alice" || cid != -100 || ct != models.ChatTypeGroup {
+		t.Errorf("message: got (%d,%s,%d,%s), want (42,alice,-100,group)", uid, name, cid, ct)
 	}
 }
 
@@ -312,9 +338,41 @@ func TestTelegramBotExtractIdentityCallback(t *testing.T) {
 			From: models.User{ID: 7, Username: "bob"},
 		},
 	}
-	uid, name, cid := extractIdentity(u)
+	uid, name, cid, _ := extractIdentity(u)
 	if uid != 7 || name != "bob" || cid != 0 {
-		t.Errorf("callback: got (%d,%s,%d), want (7,bob,0)", uid, name, cid)
+		t.Errorf("callback (no message): got (%d,%s,%d), want (7,bob,0)", uid, name, cid)
+	}
+}
+
+func TestTelegramBotExtractIdentityCallbackWithMessage(t *testing.T) {
+	u := &models.Update{
+		CallbackQuery: &models.CallbackQuery{
+			From: models.User{ID: 7, Username: "bob"},
+			Message: models.MaybeInaccessibleMessage{
+				Type:    models.MaybeInaccessibleMessageTypeMessage,
+				Message: &models.Message{ID: 42, Chat: models.Chat{ID: -100, Type: models.ChatTypeSupergroup}},
+			},
+		},
+	}
+	uid, name, cid, ct := extractIdentity(u)
+	if uid != 7 || name != "bob" || cid != -100 || ct != models.ChatTypeSupergroup {
+		t.Errorf("callback w/ message: got (%d,%s,%d,%s), want (7,bob,-100,supergroup)", uid, name, cid, ct)
+	}
+}
+
+func TestTelegramBotExtractIdentityCallbackInaccessible(t *testing.T) {
+	u := &models.Update{
+		CallbackQuery: &models.CallbackQuery{
+			From: models.User{ID: 7, Username: "bob"},
+			Message: models.MaybeInaccessibleMessage{
+				Type:                models.MaybeInaccessibleMessageTypeInaccessibleMessage,
+				InaccessibleMessage: &models.InaccessibleMessage{MessageID: 99, Chat: models.Chat{ID: -200, Type: models.ChatTypeGroup}},
+			},
+		},
+	}
+	uid, _, cid, ct := extractIdentity(u)
+	if uid != 7 || cid != -200 || ct != models.ChatTypeGroup {
+		t.Errorf("callback inaccessible: got (%d,%d,%s), want (7,-200,group)", uid, cid, ct)
 	}
 }
 
@@ -324,9 +382,9 @@ func TestTelegramBotExtractIdentityChannelPost(t *testing.T) {
 			Chat: models.Chat{ID: -200, Type: models.ChatTypeChannel},
 		},
 	}
-	uid, name, cid := extractIdentity(u)
-	if uid != 0 || name != "" || cid != -200 {
-		t.Errorf("channel post: got (%d,%s,%d), want (0,,-200)", uid, name, cid)
+	uid, name, cid, ct := extractIdentity(u)
+	if uid != 0 || name != "" || cid != -200 || ct != models.ChatTypeChannel {
+		t.Errorf("channel post: got (%d,%s,%d,%s), want (0,,-200,channel)", uid, name, cid, ct)
 	}
 }
 
@@ -337,9 +395,9 @@ func TestTelegramBotExtractIdentityChatMember(t *testing.T) {
 			Chat: models.Chat{ID: -300, Type: models.ChatTypeSupergroup},
 		},
 	}
-	uid, name, cid := extractIdentity(u)
-	if uid != 9 || name != "carol" || cid != -300 {
-		t.Errorf("chat_member: got (%d,%s,%d), want (9,carol,-300)", uid, name, cid)
+	uid, name, cid, ct := extractIdentity(u)
+	if uid != 9 || name != "carol" || cid != -300 || ct != models.ChatTypeSupergroup {
+		t.Errorf("chat_member: got (%d,%s,%d,%s), want (9,carol,-300,supergroup)", uid, name, cid, ct)
 	}
 }
 

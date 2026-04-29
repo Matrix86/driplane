@@ -23,11 +23,12 @@ Based on [go-telegram/bot](https://github.com/go-telegram/bot).
 | **parse_mode** | _STRING_ | `HTML` | One of `HTML`, `Markdown`, `MarkdownV2`, or empty (plain). Templated. |
 | **message_id** | _STRING_ | empty | Required for `edit_message` and `delete_message`. Templated. |
 | **callback_id** | _STRING_ | empty | `answer_callback`: optional explicit callback query ID. Falls back to incoming `callback_id` extra. Templated. |
+| **show_alert** | _BOOL_ | `false` | `answer_callback`: when `true`, Telegram shows the answer as a modal alert dialog instead of a top-screen toast. Useful when the toast is too brief to notice. |
 | **file_id** | _STRING_ | empty | `download_file`: optional explicit file ID. Falls back to incoming `msg_file_id` extra. Templated. |
 | **filename** | _STRING_ | empty | `download_file`: output path on disk. Required. Templated. The basename of the Telegram-side `file_path` is exposed as `{{ .msg_filename }}` so it can be reused in the path. |
 | **media** | _STRING_ | empty | `send_media`: source. URL (`http(s)://...`) → Telegram fetches it; existing local path → uploaded; otherwise treated as a `file_id` to re-send. Templated. Required. |
 | **media_type** | _STRING_ | `document` | `send_media`: one of `photo`, `document`, `video`, `audio`, `voice`, `animation`, `sticker`. Templated. |
-| **reply_markup** | _STRING_ | empty | Raw Bot API JSON for `InlineKeyboardMarkup`. Templated, then parsed. |
+| **reply_markup** | _STRING_ | empty | Raw Bot API JSON. Variant auto-detected by top-level key: `inline_keyboard` → InlineKeyboardMarkup, `keyboard` → ReplyKeyboardMarkup, `remove_keyboard` → ReplyKeyboardRemove, `force_reply` → ForceReply. Templated, then parsed. |
 
 All string parameters support [templates](../../rules/templates/).
 
@@ -65,6 +66,14 @@ On any Bot API error, missing required extra, or template/JSON failure the filte
 
 {{< notice info "Reply with inline keyboard" >}}
 `telegrambot(text="Pick one", reply_markup="{\"inline_keyboard\":[[{\"text\":\"yes\",\"callback_data\":\"y\"},{\"text\":\"no\",\"callback_data\":\"n\"}]]}")`
+{{< /notice >}}
+
+{{< notice info "Reply keyboard (clickable buttons under input field)" >}}
+`telegrambot(text="Pick one", reply_markup="{\"keyboard\":[[{\"text\":\"Yes\"},{\"text\":\"No\"}]],\"resize_keyboard\":true,\"one_time_keyboard\":true}")`
+{{< /notice >}}
+
+{{< notice info "Remove a previously-sent reply keyboard" >}}
+`telegrambot(text="thanks", reply_markup="{\"remove_keyboard\":true}")`
 {{< /notice >}}
 
 {{< notice info "Answer a callback query" >}}
