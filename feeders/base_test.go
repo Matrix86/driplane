@@ -77,7 +77,8 @@ func TestBaseIsRunningDefault(t *testing.T) {
 }
 
 func TestBaseIsRunningTrue(t *testing.T) {
-	b := &Base{isRunning: true}
+	b := &Base{}
+	b.isRunning.Store(true)
 	if !b.IsRunning() {
 		t.Errorf("expected IsRunning to be true")
 	}
@@ -231,5 +232,19 @@ func TestNewFeederFactoryReturnsNil(t *testing.T) {
 	}
 	if f != nil {
 		t.Errorf("expected nil feeder when factory returns nil")
+	}
+}
+
+func TestBaseStatsOutCounter(t *testing.T) {
+	b := &Base{}
+	b.setName("testfeeder")
+	b.setRuleName("testrule")
+	b.setBus(EventBus.New())
+
+	b.Propagate(data.NewMessage("one"))
+	b.Propagate(data.NewMessage("two"))
+
+	if got := b.Stats().Out; got != 2 {
+		t.Errorf("Out: expected 2, got %d", got)
 	}
 }

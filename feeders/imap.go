@@ -221,14 +221,14 @@ func (f *Imap) Start() {
 		}
 	}()
 
-	f.isRunning = true
+	f.isRunning.Store(true)
 }
 
 // Stop handles the Feeder shutdown
 func (f *Imap) Stop() {
 	log.Debug("feeder '%s' stream stop", f.Name())
 	f.stopChan <- true
-	f.isRunning = false
+	f.isRunning.Store(false)
 }
 
 // OnEvent is called when an event occurs

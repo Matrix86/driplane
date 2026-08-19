@@ -84,9 +84,10 @@ func TestNewFilterCreation(t *testing.T) {
 		flat: map[string]string{},
 	}
 	p := &PipeRule{
-		Name:   "test_rule",
-		config: config,
-		file:   "testfile",
+		Name:    "test_rule",
+		config:  config,
+		file:    "testfile",
+		ruleset: RuleSetInstance(),
 	}
 
 	fn := &FilterNode{
@@ -108,9 +109,10 @@ func TestNewFilterWithParams(t *testing.T) {
 		flat: map[string]string{},
 	}
 	p := &PipeRule{
-		Name:   "test_rule_params",
-		config: config,
-		file:   "testfile",
+		Name:    "test_rule_params",
+		config:  config,
+		file:    "testfile",
+		ruleset: RuleSetInstance(),
 	}
 
 	extraVal := "true"
@@ -135,9 +137,10 @@ func TestNewFilterWithNumberParam(t *testing.T) {
 		flat: map[string]string{},
 	}
 	p := &PipeRule{
-		Name:   "test_rule_numpar",
-		config: config,
-		file:   "testfile",
+		Name:    "test_rule_numpar",
+		config:  config,
+		file:    "testfile",
+		ruleset: RuleSetInstance(),
 	}
 
 	num := 42.0
@@ -166,9 +169,10 @@ func TestNewFilterWithConfigOverride(t *testing.T) {
 		},
 	}
 	p := &PipeRule{
-		Name:   "test_rule_cfg",
-		config: config,
-		file:   "testfile",
+		Name:    "test_rule_cfg",
+		config:  config,
+		file:    "testfile",
+		ruleset: RuleSetInstance(),
 	}
 
 	fn := &FilterNode{
@@ -190,9 +194,10 @@ func TestNewFilterNegation(t *testing.T) {
 		flat: map[string]string{},
 	}
 	p := &PipeRule{
-		Name:   "test_rule_neg",
-		config: config,
-		file:   "testfile",
+		Name:    "test_rule_neg",
+		config:  config,
+		file:    "testfile",
+		ruleset: RuleSetInstance(),
 	}
 
 	fn := &FilterNode{
@@ -215,9 +220,10 @@ func TestNewFilterUnknownFilter(t *testing.T) {
 		flat: map[string]string{},
 	}
 	p := &PipeRule{
-		Name:   "test_rule_unknown",
-		config: config,
-		file:   "testfile",
+		Name:    "test_rule_unknown",
+		config:  config,
+		file:    "testfile",
+		ruleset: RuleSetInstance(),
 	}
 
 	fn := &FilterNode{
@@ -247,7 +253,7 @@ func TestNewPipeRuleWithFeeder(t *testing.T) {
 		flat: map[string]string{},
 	}
 
-	pr, err := NewPipeRule(node, config, "test.rule", nil)
+	pr, err := NewPipeRule(RuleSetInstance(), node, config, "test.rule", nil)
 	if err != nil {
 		t.Fatalf("NewPipeRule returned error: %s", err)
 	}
@@ -284,7 +290,7 @@ func TestNewPipeRuleWithFeederAndFilter(t *testing.T) {
 		flat: map[string]string{},
 	}
 
-	pr, err := NewPipeRule(node, config, "test2.rule", nil)
+	pr, err := NewPipeRule(RuleSetInstance(), node, config, "test2.rule", nil)
 	if err != nil {
 		t.Fatalf("NewPipeRule returned error: %s", err)
 	}
@@ -311,7 +317,7 @@ func TestNewPipeRuleWithFiltersOnly(t *testing.T) {
 		flat: map[string]string{},
 	}
 
-	pr, err := NewPipeRule(node, config, "test3.rule", nil)
+	pr, err := NewPipeRule(RuleSetInstance(), node, config, "test3.rule", nil)
 	if err != nil {
 		t.Fatalf("NewPipeRule returned error: %s", err)
 	}
@@ -344,7 +350,7 @@ func TestNewPipeRuleChainedFilters(t *testing.T) {
 		flat: map[string]string{},
 	}
 
-	pr, err := NewPipeRule(node, config, "test4.rule", nil)
+	pr, err := NewPipeRule(RuleSetInstance(), node, config, "test4.rule", nil)
 	if err != nil {
 		t.Fatalf("NewPipeRule returned error: %s", err)
 	}
@@ -366,7 +372,7 @@ func TestNewPipeRuleUnknownFeeder(t *testing.T) {
 		flat: map[string]string{},
 	}
 
-	_, err := NewPipeRule(node, config, "test5.rule", nil)
+	_, err := NewPipeRule(RuleSetInstance(), node, config, "test5.rule", nil)
 	if err == nil {
 		t.Error("expected error for unknown feeder type")
 	}
@@ -387,7 +393,7 @@ func TestNewPipeRuleUnknownFilter(t *testing.T) {
 		flat: map[string]string{},
 	}
 
-	_, err := NewPipeRule(node, config, "test6.rule", nil)
+	_, err := NewPipeRule(RuleSetInstance(), node, config, "test6.rule", nil)
 	if err == nil {
 		t.Error("expected error for unknown filter type")
 	}
@@ -409,7 +415,7 @@ func TestNewPipeRuleFeederWithNumberParam(t *testing.T) {
 		flat: map[string]string{},
 	}
 
-	pr, err := NewPipeRule(node, config, "test7.rule", nil)
+	pr, err := NewPipeRule(RuleSetInstance(), node, config, "test7.rule", nil)
 	if err != nil {
 		t.Fatalf("NewPipeRule returned error: %s", err)
 	}
@@ -438,7 +444,7 @@ func TestNewPipeRuleFeederWithConfigParams(t *testing.T) {
 		},
 	}
 
-	pr, err := NewPipeRule(node, config, "test8.rule", nil)
+	pr, err := NewPipeRule(RuleSetInstance(), node, config, "test8.rule", nil)
 	if err != nil {
 		t.Fatalf("NewPipeRule returned error: %s", err)
 	}
@@ -463,6 +469,7 @@ func TestGetRuleCallNotFound(t *testing.T) {
 		Name:         "test",
 		file:         "testfile",
 		dependencies: []string{},
+		ruleset:      RuleSetInstance(),
 	}
 	rc := &RuleCall{Name: "nonexistent_rule"}
 	_, err := p.getRuleCall(rc)
@@ -501,7 +508,7 @@ func TestAddNodeWithRuleCall(t *testing.T) {
 			},
 		},
 	}
-	pr, err := NewPipeRule(callerNode, config, "rulecall_test.rule", nil)
+	pr, err := NewPipeRule(RuleSetInstance(), callerNode, config, "rulecall_test.rule", nil)
 	if err != nil {
 		t.Fatalf("NewPipeRule with rule call returned error: %s", err)
 	}
@@ -535,10 +542,11 @@ func TestAddNodeRuleCallWithFeederError(t *testing.T) {
 	// Now try to add a rule call to a feeder rule from a context with prev set
 	// This should fail: "rule 'feeder_ref_rule' contains a feeder and cannot be here"
 	p := &PipeRule{
-		Name:   "caller_with_prev",
-		config: config,
-		file:   "rulecall_feeder_test.rule",
-		nodes:  make([]INode, 0),
+		Name:    "caller_with_prev",
+		config:  config,
+		file:    "rulecall_feeder_test.rule",
+		nodes:   make([]INode, 0),
+		ruleset: rs,
 	}
 
 	node := &Node{

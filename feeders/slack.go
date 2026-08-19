@@ -425,14 +425,14 @@ func (s *Slack) Start() {
 	log.Debug("Initialization of Slack")
 	s.getBotInfo()
 	s.startEventsEndpoint()
-	s.isRunning = true
+	s.isRunning.Store(true)
 }
 
 // Stop handles the Feeder shutdown
 func (s *Slack) Stop() {
 	log.Debug("feeder '%s' stream stop", s.Name())
 	s.stopEventsEndpoint()
-	s.isRunning = false
+	s.isRunning.Store(false)
 }
 
 // OnEvent is called when an event occurs

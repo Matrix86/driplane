@@ -139,7 +139,7 @@ func TestFileStartStopPropagation(t *testing.T) {
 	}
 
 	f.Start()
-	if !f.isRunning {
+	if !f.isRunning.Load() {
 		t.Errorf("feeder should be running after Start()")
 	}
 
@@ -169,7 +169,7 @@ func TestFileStartStopPropagation(t *testing.T) {
 	}
 
 	f.Stop()
-	if f.isRunning {
+	if f.isRunning.Load() {
 		t.Errorf("feeder should not be running after Stop()")
 	}
 }

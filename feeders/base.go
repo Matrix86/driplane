@@ -2,6 +2,9 @@ package feeders
 
 import (
 	"fmt"
+	"sort"
+	"strings"
+	"sync/atomic"
 
 	"github.com/Matrix86/driplane/data"
 	"github.com/asaskevich/EventBus"
@@ -27,6 +30,12 @@ type Feeder interface {
 	IsRunning() bool
 	GetIdentifier() string
 	OnEvent(e *data.Event)
+	Stats() Stats
+}
+
+// Stats holds the per-feeder message counters
+type Stats struct {
+	Out uint64 `json:"out"`
 }
 
 // Base is inherited from the feeders
@@ -34,12 +43,20 @@ type Base struct {
 	name      string
 	rule      string
 	id        int32
-	isRunning bool
+	isRunning atomic.Bool
 	bus       EventBus.Bus
+
+	out atomic.Uint64
+}
+
+// Stats returns a snapshot of the feeder counters
+func (f *Base) Stats() Stats {
+	return Stats{Out: f.out.Load()}
 }
 
 // Propagate sends the Message to the connected Filters
 func (f *Base) Propagate(data *data.Message) {
+	f.out.Add(1)
 	data.SetExtra("source_feeder", f.Name())
 	data.SetExtra("source_feeder_rule", f.Rule())
 	data.SetExtra("rule_name", f.Rule())
@@ -85,7 +102,25 @@ func (f *Base) Stop() {}
 
 // IsRunning returns true if the Node is up and running
 func (f *Base) IsRunning() bool {
-	return f.isRunning
+	return f.isRunning.Load()
+}
+
+// RegisteredNames returns the names of the registered feeders, without the
+// "feeder" suffix used internally, sorted alphabetically.
+func RegisteredNames() []string {
+	out := make([]string, 0, len(feederFactories))
+	for name := range feederFactories {
+		out = append(out, strings.TrimSuffix(name, "feeder"))
+	}
+	sort.Strings(out)
+	return out
+}
+
+// Exists returns true if a feeder with that name has been registered. The name
+// must be given without the "feeder" suffix, as it appears in the rules.
+func Exists(name string) bool {
+	_, ok := feederFactories[name+"feeder"]
+	return ok
 }
 
 func register(name string, f FeederFactory) {

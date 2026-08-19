@@ -174,7 +174,7 @@ func (f *Apt) Start() {
 		}
 	}()
 
-	f.isRunning = true
+	f.isRunning.Store(true)
 }
 
 // Stop handles the Feeder shutdown
@@ -183,7 +183,7 @@ func (f *Apt) Stop() {
 	f.cancel()
 	f.stopChan <- true
 	f.ticker.Stop()
-	f.isRunning = false
+	f.isRunning.Store(false)
 }
 
 // OnEvent is called when an event occurs

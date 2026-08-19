@@ -420,14 +420,14 @@ func TestRSSStartStop(t *testing.T) {
 	}
 
 	f.Start()
-	if !f.isRunning {
+	if !f.isRunning.Load() {
 		t.Errorf("feeder should be running after Start()")
 	}
 
 	time.Sleep(200 * time.Millisecond)
 
 	f.Stop()
-	if f.isRunning {
+	if f.isRunning.Load() {
 		t.Errorf("feeder should not be running after Stop()")
 	}
 }

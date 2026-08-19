@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -173,5 +175,206 @@ func TestParser_ParseFile(t *testing.T) {
 		if assert.Equal(t, v.ExpectedAST, had) == false {
 			t.Errorf("%s: wrong AST: expected=%#v had=%#v", v.Name, v.ExpectedAST, had)
 		}
+	}
+}
+
+// TestParseContentBoundsChainLength proves the fix for the stack-overflow
+// DoS: a rule chain far beyond any legitimate use is rejected with a plain
+// error instead of crashing the process, while both a legitimate chain
+// length and a legitimate quoted regexp alternation (which must not be
+// mistaken for chain links) keep working.
+func TestParseContentBoundsChainLength(t *testing.T) {
+	underLimit := "R => a()" + strings.Repeat("|a()", maxChainLinks-1) + ";\n"
+	overLimit := "R => a()" + strings.Repeat("|a()", 130000) + ";\n"
+	quotedAlternation := "R => text(regexp=\"" + strings.Repeat("a|", 2000) + "a\");\n"
+
+	parser, err := NewParser()
+	if err != nil {
+		t.Fatalf("NewParser: %s", err)
+	}
+	if _, err := parser.ParseBytes([]byte(underLimit), os.TempDir()); err != nil {
+		t.Errorf("a chain just under the limit should parse, got: %s", err)
+	}
+
+	parser2, err := NewParser()
+	if err != nil {
+		t.Fatalf("NewParser: %s", err)
+	}
+	_, err = parser2.ParseBytes([]byte(overLimit), os.TempDir())
+	if err == nil {
+		t.Fatal("a chain far over the limit should be rejected with an error, not crash the process")
+	}
+	if !strings.Contains(err.Error(), "rule chain too long") {
+		t.Errorf("unexpected error: %s", err)
+	}
+
+	parser3, err := NewParser()
+	if err != nil {
+		t.Fatalf("NewParser: %s", err)
+	}
+	if _, err := parser3.ParseBytes([]byte(quotedAlternation), os.TempDir()); err != nil {
+		t.Errorf("a regexp alternation inside a quoted parameter must not be mistaken for chain links, got: %s", err)
+	}
+}
+
+// TestCountLinksOutsideStrings asserts the exact number of links
+// countLinksOutsideStrings reports, not merely whether a rule parses or is
+// rejected -- fix round 1 shipped a version of this scan that treated any
+// quote character as a string delimiter, including one sitting inside a
+// '#' comment. Two such quotes in two different comments would then pair up
+// and swallow everything between them -- including every real '|' -- so a
+// chain of 130,000 links was silently counted as 0 and the stack-overflow
+// guard never fired. This table pins down the fix: a '#' only starts a
+// comment at the very start of a line (mirroring ruleLexer's own
+// "^[#].*$" anchoring), a comment is skipped whole without inspecting any
+// quotes inside it, a real quoted string still consumes its content
+// (including any '#' at the start of an internal line) without being
+// treated as a comment, and an unterminated string fails closed by
+// counting -- never silently discarding -- every '|' in the remainder.
+func TestCountLinksOutsideStrings(t *testing.T) {
+	long := 130000
+	longChain := "a()" + strings.Repeat("|a()", long)
+
+	tests := []struct {
+		name    string
+		content string
+		want    int
+	}{
+		{
+			name:    "plain chain, no comments or strings",
+			content: "R => a()" + strings.Repeat("|a()", 9) + ";\n",
+			want:    9,
+		},
+		{
+			name:    "quote inside a comment before a long chain",
+			content: "# \"\nR => " + longChain + ";\n",
+			want:    long,
+		},
+		{
+			name:    "quote inside a comment after a long chain",
+			content: "R => " + longChain + ";\n# \"\n",
+			want:    long,
+		},
+		{
+			name:    "quote inside comments both before and after a long chain",
+			content: "# \"\nR => " + longChain + ";\n# \"\n",
+			want:    long,
+		},
+		{
+			name:    "an innocent apostrophe in a comment before a long chain",
+			content: "# don't do this\nR => " + longChain + ";\n",
+			want:    long,
+		},
+		{
+			name: "a comment quote after a legitimate quoted string",
+			content: "R => text(regexp=\"a|b\")|echo();\n" +
+				"# it's fine\n",
+			want: 1, // only the real link between text() and echo()
+		},
+		{
+			name: "a legitimate multi-line string containing a line starting with #",
+			content: "R => text(regexp=\"line one\n" +
+				"#not a comment, still inside the string\n" +
+				"line three|line four\");\n",
+			want: 0, // the '|' is string content, not a link
+		},
+		{
+			name:    "an unterminated string followed by many links fails closed",
+			content: "R => text(regexp=\"never closed" + strings.Repeat("|a()", 50) + ";\n",
+			want:    50,
+		},
+		{
+			name:    "a real regexp alternation inside a quoted parameter",
+			content: "R => text(regexp=\"a|b|c\");\n",
+			want:    0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := countLinksOutsideStrings([]byte(tt.content)); got != tt.want {
+				t.Errorf("countLinksOutsideStrings() = %d, want %d", got, tt.want)
+			}
+		})
+	}
+}
+
+// TestParseBytesConfinesImports proves the fix for the arbitrary file read:
+// an import that resolves outside the given root is rejected, a sibling
+// import inside the root still works, and a refused import's error never
+// carries the target file's contents.
+func TestParseBytesConfinesImports(t *testing.T) {
+	root, err := os.MkdirTemp("", "rules-root")
+	if err != nil {
+		t.Fatalf("MkdirTemp: %s", err)
+	}
+	defer os.RemoveAll(root)
+
+	secret := "top-secret-content-should-never-leak-into-an-error-message"
+	outside := filepath.Join(os.TempDir(), fmt.Sprintf("outside-%d.rule", os.Getpid()))
+	if err := os.WriteFile(outside, []byte(secret), 0644); err != nil {
+		t.Fatalf("writing outside file: %s", err)
+	}
+	defer os.Remove(outside)
+
+	sibling := filepath.Join(root, "sibling.rule")
+	if err := os.WriteFile(sibling, []byte("S => echo();\n"), 0644); err != nil {
+		t.Fatalf("writing sibling file: %s", err)
+	}
+
+	rel, err := filepath.Rel(root, outside)
+	if err != nil {
+		t.Fatalf("computing relative path: %s", err)
+	}
+
+	parser, err := NewParser()
+	if err != nil {
+		t.Fatalf("NewParser: %s", err)
+	}
+	_, err = parser.ParseBytes([]byte(fmt.Sprintf("#import \"%s\"\nR => echo();\n", rel)), root)
+	if err == nil {
+		t.Fatal("an import escaping the rules root should be rejected")
+	}
+	if !strings.Contains(err.Error(), "outside") {
+		t.Errorf("expected an 'outside the rules directory' error, got: %s", err)
+	}
+	if strings.Contains(err.Error(), secret) {
+		t.Errorf("the error must not leak the refused file's contents: %s", err)
+	}
+
+	parser2, err := NewParser()
+	if err != nil {
+		t.Fatalf("NewParser: %s", err)
+	}
+	ast, err := parser2.ParseBytes([]byte("#import \"sibling.rule\"\nR => echo();\n"), root)
+	if err != nil {
+		t.Fatalf("a sibling import inside the root should work, got: %s", err)
+	}
+	if len(ast.Dependencies) != 1 {
+		t.Errorf("expected 1 dependency, got %d", len(ast.Dependencies))
+	}
+}
+
+// TestParseBytesUsesUniqueSyntheticFilename proves that importing a real
+// on-disk file that happens to share the old hardcoded placeholder name
+// ("<buffer>.rule") is not mistaken for a cyclic self-import.
+func TestParseBytesUsesUniqueSyntheticFilename(t *testing.T) {
+	root, err := os.MkdirTemp("", "rules-root-collision")
+	if err != nil {
+		t.Fatalf("MkdirTemp: %s", err)
+	}
+	defer os.RemoveAll(root)
+
+	collider := filepath.Join(root, "<buffer>.rule")
+	if err := os.WriteFile(collider, []byte("C => echo();\n"), 0644); err != nil {
+		t.Fatalf("writing collider file: %s", err)
+	}
+
+	parser, err := NewParser()
+	if err != nil {
+		t.Fatalf("NewParser: %s", err)
+	}
+	if _, err := parser.ParseBytes([]byte("#import \"<buffer>.rule\"\nR => echo();\n"), root); err != nil {
+		t.Errorf("importing a real file sharing the old placeholder name should not be mistaken for a self-import: %s", err)
 	}
 }

@@ -435,7 +435,7 @@ func TestAptStartStop(t *testing.T) {
 	}
 
 	f.Start()
-	if !f.isRunning {
+	if !f.isRunning.Load() {
 		t.Errorf("feeder should be running after Start()")
 	}
 
@@ -443,7 +443,7 @@ func TestAptStartStop(t *testing.T) {
 	time.Sleep(300 * time.Millisecond)
 
 	f.Stop()
-	if f.isRunning {
+	if f.isRunning.Load() {
 		t.Errorf("feeder should not be running after Stop()")
 	}
 }

@@ -348,7 +348,7 @@ func (t *Twitter) Start() {
 			}
 		}
 	}()
-	t.isRunning = true
+	t.isRunning.Store(true)
 }
 
 func (t *Twitter) cleanRules() {
@@ -368,12 +368,12 @@ func (t *Twitter) Stop() {
 
 	log.Debug("feeder '%s' stream stop", t.Name())
 	close(t.closeChan)
-	t.isRunning = false
+	t.isRunning.Store(false)
 }
 
 // OnEvent is called when an event occurs
 func (t *Twitter) OnEvent(event *data.Event) {
-	if event.Type == "shutdown" && t.isRunning {
+	if event.Type == "shutdown" && t.isRunning.Load() {
 		t.Stop()
 	}
 }

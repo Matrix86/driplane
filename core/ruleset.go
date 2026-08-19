@@ -24,17 +24,30 @@ type Ruleset struct {
 	lastID    int32
 }
 
+// NewRuleset creates a new empty Ruleset
+func NewRuleset() *Ruleset {
+	return &Ruleset{
+		rules:        make(map[string]*PipeRule),
+		compiledDeps: make(map[string][]string),
+		bus:          bus.New(),
+		lastID:       0,
+	}
+}
+
 // RuleSetInstance is the singleton for the Ruleset object
+//
+// Deprecated: use NewRuleset and let the Orchestrator own its Ruleset.
+// Kept for backward compatibility with existing callers and tests.
 func RuleSetInstance() *Ruleset {
 	once.Do(func() {
-		instance = &Ruleset{
-			rules:        make(map[string]*PipeRule),
-			compiledDeps: make(map[string][]string),
-			bus:          bus.New(),
-			lastID:       0,
-		}
+		instance = NewRuleset()
 	})
 	return instance
+}
+
+// Rules returns the compiled rules indexed by their identifier
+func (r *Ruleset) Rules() map[string]*PipeRule {
+	return r.rules
 }
 
 // CompileAst compiles the AST
@@ -81,7 +94,7 @@ func (r *Ruleset) AddRule(filename string, node *RuleNode, config *Configuration
 		return fmt.Errorf("Ruleset.AddRule: rule '%s' redefined previously", node.Identifier)
 	}
 
-	pr, err := NewPipeRule(node, config, filename, deps)
+	pr, err := NewPipeRule(r, node, config, filename, deps)
 	if err != nil {
 		return err
 	}

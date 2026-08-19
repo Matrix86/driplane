@@ -12,3 +12,11 @@ twitter:
   accessSecret: ""
   keywords: "#italy #coding #malware something"
   stallWarnings: "true"
+
+web:
+  # embedded web interface: it can create and modify rules, templates and js
+  # plugins, which this daemon then executes. Keep it on loopback.
+  enable: false
+  address: "127.0.0.1:8080"
+  # if empty a random token is generated at startup and printed in the log
+  token: ""

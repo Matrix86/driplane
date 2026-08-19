@@ -218,7 +218,7 @@ func (f *Web) Start() {
 		}
 	}()
 
-	f.isRunning = true
+	f.isRunning.Store(true)
 }
 
 // Stop handles the Feeder shutdown
@@ -226,7 +226,7 @@ func (f *Web) Stop() {
 	log.Debug("feeder '%s' stream stop", f.Name())
 	f.stopChan <- true
 	f.ticker.Stop()
-	f.isRunning = false
+	f.isRunning.Store(false)
 }
 
 // OnEvent is called when an event occurs

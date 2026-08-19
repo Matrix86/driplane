@@ -24,6 +24,12 @@ type PipeRule struct {
 	file         string
 	config       *Configuration
 	nodes        []INode
+	ruleset      *Ruleset
+}
+
+// Nodes returns the feeder/filter nodes composing the rule, in pipeline order
+func (p *PipeRule) Nodes() []INode {
+	return p.nodes
 }
 
 func (p *PipeRule) getLastNode() INode {
@@ -64,7 +70,7 @@ func (p *PipeRule) newFilter(fn *FilterNode) (filters.Filter, error) {
 		params[par.Name] = value
 	}
 
-	rs := RuleSetInstance()
+	rs := p.ruleset
 	f, err := filters.NewFilter(p.Name, fn.Name+"filter", params, rs.bus, rs.lastID+1, fn.Neg)
 	if err != nil {
 		return nil, err
@@ -75,7 +81,7 @@ func (p *PipeRule) newFilter(fn *FilterNode) (filters.Filter, error) {
 }
 
 func (p *PipeRule) getRuleCall(node *RuleCall) (*PipeRule, error) {
-	rs := RuleSetInstance()
+	rs := p.ruleset
 	// searching the rulecall in dependencies
 	for _, dep := range rs.compiledDeps[p.file] {
 		name := strings.Join([]string{dep, node.Name}, ":")
@@ -96,7 +102,7 @@ func (p *PipeRule) addNode(node *Node, prev string) error {
 		return nil
 	}
 
-	rs := RuleSetInstance()
+	rs := p.ruleset
 	if node.Filter != nil {
 		log.Debug("['%s'] new filter found '%s'", p.Name, node.Filter.Name)
 
@@ -156,13 +162,14 @@ func (p *PipeRule) addNode(node *Node, prev string) error {
 }
 
 // NewPipeRule creates and returns a PipeRule struct
-func NewPipeRule(node *RuleNode, config *Configuration, filename string, deps []string) (*PipeRule, error) {
+func NewPipeRule(rs *Ruleset, node *RuleNode, config *Configuration, filename string, deps []string) (*PipeRule, error) {
 	rule := &PipeRule{
 		Name:         node.Identifier,
 		config:       config,
 		dependencies: deps,
 		file:         filename,
 		nodes:        make([]INode, 0),
+		ruleset:      rs,
 	}
 
 	log.Info("Rule '@%s' found", rule.Name)
@@ -197,7 +204,7 @@ func NewPipeRule(node *RuleNode, config *Configuration, filename string, deps []
 			params[node.Feeder.Name+"."+par.Name] = value
 		}
 
-		rs := RuleSetInstance()
+		rs := rule.ruleset
 		f, err := feeders.NewFeeder(rule.Name, node.Feeder.Name+"feeder", params, rs.bus, rs.lastID+1)
 		if err != nil {
 			log.Error("piperule.NewRule: %s", err)

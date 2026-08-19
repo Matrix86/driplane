@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The initial navigation carries ?token=... in its own URL. Sub-resource
+       requests (the <link>/<script> tags below) fire while this document is
+       still parsing, before app.js can call history.replaceState to scrub
+       the query string, so without this they would each send
+       "Referer: http://host/?token=..." to this server and to any proxy
+       sitting in front of it. no-referrer drops the Referer header on every
+       request this document makes. -->
+  <meta name="referrer" content="no-referrer">
+  <title>driplane</title>
+  <link rel="stylesheet" href="vendor/codemirror.css">
+  <link rel="stylesheet" href="vendor/material-darker.css">
+  <link rel="stylesheet" href="vendor/show-hint.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <span class="brand">driplane</span>
+    <span id="state" class="state">-</span>
+    <div class="actions">
+      <button id="btn-save" title="Ctrl+S">Save</button>
+      <button id="btn-test">Test</button>
+      <button id="btn-reload">Reload</button>
+      <button id="btn-start">Start</button>
+      <button id="btn-stop">Stop</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Populated by app.js from /api/meta's "kinds" list: general.templates_path
+         and general.js_path are optional, so the server may only expose "rules".
+         The sections and their New/Delete buttons are built at runtime instead of
+         being hardcoded here. -->
+    <nav id="tree"></nav>
+
+    <section class="editor">
+      <div id="current">no file open</div>
+      <textarea id="code"></textarea>
+      <pre id="diagnostics"></pre>
+    </section>
+
+    <aside class="runtime">
+      <h2>Rules</h2>
+      <table id="rules"><tbody></tbody></table>
+      <h2>Logs</h2>
+      <pre id="logs"></pre>
+    </aside>
+  </main>
+
+  <script src="vendor/codemirror.js"></script>
+  <script src="vendor/javascript.js"></script>
+  <script src="vendor/show-hint.js"></script>
+  <script src="mode-rule.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

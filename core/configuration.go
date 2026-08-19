@@ -88,6 +88,18 @@ func (c *Configuration) Set(name string, value string) error {
 	return nil
 }
 
+// SetAll replaces the whole flattened configuration. It is mainly useful to
+// build a Configuration programmatically, e.g. in tests.
+func (c *Configuration) SetAll(values map[string]string) {
+	c.Lock()
+	defer c.Unlock()
+
+	c.flat = make(map[string]string, len(values))
+	for k, v := range values {
+		c.flat[k] = v
+	}
+}
+
 // GetConfig returns the complete configuration in a flatten way
 func (c *Configuration) GetConfig() map[string]string {
 	c.RLock()

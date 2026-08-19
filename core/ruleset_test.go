@@ -384,3 +384,32 @@ func TestCompileAstFromParsedFile(t *testing.T) {
 	}
 	_ = deps
 }
+
+func TestNewRulesetIsolatedInstances(t *testing.T) {
+	rs1 := NewRuleset()
+	rs2 := NewRuleset()
+
+	if rs1 == rs2 {
+		t.Fatal("NewRuleset should return distinct instances")
+	}
+
+	node := &RuleNode{
+		Identifier: "TestRule",
+		First: &Node{
+			Filter: &FilterNode{Name: "echo"},
+		},
+	}
+	config := &Configuration{flat: map[string]string{}}
+
+	if err := rs1.AddRule("same.rule", node, config, nil); err != nil {
+		t.Fatalf("AddRule on rs1: %s", err)
+	}
+	// the same file/rule on a different Ruleset must not come out "redefined"
+	if err := rs2.AddRule("same.rule", node, config, nil); err != nil {
+		t.Fatalf("AddRule on rs2 should not collide with rs1: %s", err)
+	}
+
+	if len(rs1.Rules()) != 1 || len(rs2.Rules()) != 1 {
+		t.Errorf("each ruleset should own exactly one rule, got %d and %d", len(rs1.Rules()), len(rs2.Rules()))
+	}
+}

@@ -9,6 +9,7 @@ import (
 	"github.com/evilsocket/islazy/log"
 
 	"github.com/Matrix86/driplane/data"
+	"github.com/asaskevich/EventBus"
 )
 
 func TestNewFilter(t *testing.T) {
@@ -20,12 +21,12 @@ func TestNewFilter(t *testing.T) {
 		Config         map[string]string
 		ID             int32
 		Negative       bool
-		ExpectedFilter Base
+		ExpectedFilter *Base
 		ExpectedError  string
 	}
 	tests := []Test{
-		{"FilterNotFound", "Rule1", "notexist", map[string]string{}, 1, false, Base{}, "filter 'notexist' doesn't exist"},
-		{"FilterFound", "Rule1", "echofilter", map[string]string{}, 1, false, Base{rule: "Rule1", name: "echofilter", id: 1}, "filter 'notexist' doesn't exist"},
+		{"FilterNotFound", "Rule1", "notexist", map[string]string{}, 1, false, &Base{}, "filter 'notexist' doesn't exist"},
+		{"FilterFound", "Rule1", "echofilter", map[string]string{}, 1, false, &Base{rule: "Rule1", name: "echofilter", id: 1}, "filter 'notexist' doesn't exist"},
 	}
 
 	for _, v := range tests {
@@ -216,5 +217,33 @@ func TestBase_Rule(t *testing.T) {
 	expected := "rulename"
 	if b.Rule() != expected {
 		t.Errorf("wrong rule: expected=%#v had=%#v", expected, b.Rule())
+	}
+}
+
+func TestBaseStatsCounters(t *testing.T) {
+	b := &Base{}
+	b.setName("testfilter")
+	b.setRuleName("testrule")
+	b.setBus(EventBus.New())
+	b.cbFilter = func(msg *data.Message) (bool, error) {
+		if msg.GetMessage() == "boom" {
+			return false, fmt.Errorf("failure")
+		}
+		return msg.GetMessage() == "match", nil
+	}
+
+	b.Pipe(data.NewMessage("match"))
+	b.Pipe(data.NewMessage("nomatch"))
+	b.Pipe(data.NewMessage("boom"))
+
+	s := b.Stats()
+	if s.In != 3 {
+		t.Errorf("In: expected 3, got %d", s.In)
+	}
+	if s.Matched != 1 {
+		t.Errorf("Matched: expected 1, got %d", s.Matched)
+	}
+	if s.Errors != 1 {
+		t.Errorf("Errors: expected 1, got %d", s.Errors)
 	}
 }

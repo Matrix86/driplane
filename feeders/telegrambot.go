@@ -211,16 +211,16 @@ func (t *TelegramBot) Start() {
 			return
 		}
 	}
-	t.isRunning = true
+	t.isRunning.Store(true)
 }
 
 // Stop tears down the bot client and any HTTP server.
 func (t *TelegramBot) Stop() {
 	log.Debug("feeder '%s' stream stop", t.Name())
-	if !t.isRunning {
+	if !t.isRunning.Load() {
 		return
 	}
-	t.isRunning = false
+	t.isRunning.Store(false)
 
 	if t.cancel != nil {
 		t.cancel()
@@ -278,7 +278,7 @@ func (t *TelegramBot) stopWebhook() {
 
 // OnEvent handles bus events.
 func (t *TelegramBot) OnEvent(e *data.Event) {
-	if e.Type == "shutdown" && t.isRunning {
+	if e.Type == "shutdown" && t.isRunning.Load() {
 		t.Stop()
 	}
 }

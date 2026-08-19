@@ -69,7 +69,7 @@ func (f *File) Start() {
 		}
 	}()
 
-	f.isRunning = true
+	f.isRunning.Store(true)
 }
 
 // Stop handles the Feeder shutdown
@@ -77,7 +77,7 @@ func (f *File) Stop() {
 	log.Debug("feeder '%s' stream stop", f.Name())
 	f.fp.Stop()
 	f.fp.Cleanup()
-	f.isRunning = false
+	f.isRunning.Store(false)
 }
 
 // OnEvent is called when an event occurs

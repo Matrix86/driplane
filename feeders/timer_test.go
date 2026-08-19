@@ -81,14 +81,14 @@ func TestTimerStartStop(t *testing.T) {
 	}
 
 	f.Start()
-	if !f.isRunning {
+	if !f.isRunning.Load() {
 		t.Errorf("feeder should be running after Start()")
 	}
 
 	time.Sleep(100 * time.Millisecond)
 
 	f.Stop()
-	if f.isRunning {
+	if f.isRunning.Load() {
 		t.Errorf("feeder should not be running after Stop()")
 	}
 }

@@ -80,7 +80,7 @@ func (f *Folder) Start() {
 	go func() {
 		err := f.watcher.Start()
 		if err != nil {
-			f.isRunning = false
+			f.isRunning.Store(false)
 			log.Error("%s: %s", f.Name(), err)
 			return
 		}
@@ -130,7 +130,7 @@ func (f *Folder) Start() {
 		}
 	}()
 
-	f.isRunning = true
+	f.isRunning.Store(true)
 }
 
 // Stop handles the Feeder shutdown
@@ -138,7 +138,7 @@ func (f *Folder) Stop() {
 	log.Debug("feeder '%s' stream stop", f.Name())
 	f.watcher.Close()
 	f.stopChan <- true
-	f.isRunning = false
+	f.isRunning.Store(false)
 }
 
 // OnEvent is called when an event occurs

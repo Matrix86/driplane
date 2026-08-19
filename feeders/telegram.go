@@ -558,7 +558,7 @@ func (t *Telegram) Start() {
 		return t.onChannelMessage(ctx, e, u.Pts, msg, false, media)
 	})
 
-	t.isRunning = true
+	t.isRunning.Store(true)
 
 	go func() {
 		// Authentication flow handles authentication process, like prompting for code and 2FA password.
@@ -613,7 +613,7 @@ func (t *Telegram) Start() {
 			})
 		}); err != nil {
 			log.Error("run: %s", err)
-			t.isRunning = false
+			t.isRunning.Store(false)
 		}
 	}()
 }
@@ -621,13 +621,13 @@ func (t *Telegram) Start() {
 // Stop handles the Feeder shutdown
 func (t *Telegram) Stop() {
 	log.Debug("feeder '%s' stream stop", t.Name())
-	t.isRunning = false
+	t.isRunning.Store(false)
 	t.cancelContext()
 }
 
 // OnEvent is called when an event occurs
 func (t *Telegram) OnEvent(event *data.Event) {
-	if event.Type == "shutdown" && t.isRunning {
+	if event.Type == "shutdown" && t.isRunning.Load() {
 		log.Debug("shutdown event received")
 		t.Stop()
 	}

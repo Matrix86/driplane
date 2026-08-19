@@ -263,13 +263,32 @@ config_changed => @ConfigFile |
 ```
 Usage: driplane [options]
 
-  -config string    Path to the configuration file
-  -rules  string    Path to the rules directory
-  -js     string    Path to the JS plugins directory
-  -debug            Enable verbose debug logging
-  -dry-run          Parse and validate rules without running them
-  -help             Show this help message
+  -config string        Path to the configuration file
+  -rules string         Path to the rules directory
+  -js string            Path to the JS plugins directory
+  -debug                Enable verbose debug logging
+  -dry-run              Parse and validate rules without running them
+  -web                  Enable the embedded web interface
+  -web-address string   Address of the embedded web interface (default 127.0.0.1:8080)
+  -help                 Show this help message
 ```
+
+---
+
+## Web interface
+
+driplane can serve an embedded web interface to write rules, templates and JS
+plugins, validate them and watch the running pipelines:
+
+```bash
+driplane -config config.yaml -web
+```
+
+It binds to `127.0.0.1:8080` and prints a URL containing a freshly generated
+token. Since the interface writes the files the daemon executes, keep it on
+loopback and put a reverse proxy in front of it if you need remote access. See
+the [documentation](https://matrix86.github.io/driplane/en/doc/webui/) for the
+details.
 
 ---
 
@@ -283,6 +302,7 @@ Full documentation is available at **[https://matrix86.github.io/driplane/doc/](
 - [All feeders with parameters](https://matrix86.github.io/driplane/en/doc/feeders/)
 - [All filters with parameters](https://matrix86.github.io/driplane/en/doc/filters/)
 - [JavaScript plugin system](https://matrix86.github.io/driplane/en/doc/filters/js/basics/)
+- [Embedded web interface](https://matrix86.github.io/driplane/en/doc/webui/)
 
 ---
 
