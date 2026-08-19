@@ -214,6 +214,14 @@ func (m *TTLMap) SetPersistence(filename string) error {
 	return nil
 }
 
+// IsClosed returns true if the map has been closed. A closed map cannot be
+// reused: its dictionary is nil and every operation on it fails.
+func (m *TTLMap) IsClosed() bool {
+	m.closeLock.Lock()
+	defer m.closeLock.Unlock()
+	return m.closing
+}
+
 // Close is closing the map
 func (m *TTLMap) Close() {
 	m.closeLock.Lock()

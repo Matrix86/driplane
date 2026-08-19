@@ -13,6 +13,7 @@ type GlobalTTLMap struct {
 var (
 	instance *GlobalTTLMap
 	once     sync.Once
+	mu       sync.Mutex
 )
 
 // GetGlobalTTLMapInstance returns the unique GlobalTTLMap (singleton)
@@ -26,10 +27,19 @@ func GetGlobalTTLMapInstance(gcdelay time.Duration) *GlobalTTLMap {
 	return instance
 }
 
-// GetNamedTTLMap return a Cache stored on the globalTTLMap with a name
+// GetNamedTTLMap return a Cache stored on the globalTTLMap with a name.
+// A stored map that has already been closed is replaced with a fresh one:
+// the "shutdown" event closes every cache, and that event is published on
+// each reload too, so after a reload the registry would otherwise keep
+// handing out an unusable map. The contents are not lost, because Close
+// flushes them to the persistence file and the new map reloads it.
 func GetNamedTTLMap(name string, gcdelay time.Duration) *TTLMap {
 	i := GetGlobalTTLMapInstance(gcdelay)
-	if v, ok := i.Caches[name]; ok {
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	if v, ok := i.Caches[name]; ok && !v.IsClosed() {
 		return v
 	}
 	i.Caches[name] = NewTTLMap(gcdelay)
