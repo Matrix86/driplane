@@ -85,7 +85,6 @@ func (f *WebRSS) scrape(firstRun bool) {
 
 	c.OnHTML("body", func(e *colly.HTMLElement) {
 		e.ForEach(f.itemSelector, func(_ int, el *colly.HTMLElement) {
-			fmt.Printf("element: %#v\n", el)
 			var link string
 			if f.linkSelector == "" || f.linkSelector == "self" {
 				link = el.Request.AbsoluteURL(el.Attr(f.linkAttr))
