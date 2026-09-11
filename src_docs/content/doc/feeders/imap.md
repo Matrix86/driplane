@@ -7,7 +7,9 @@ draft: false
 ## Imap
 
 This feeder creates a stream starting from emails received on the account read by an IMAP client. It is possible to define how often the email account should be checked.
-Every time the email inbox is parsed a Message is sent down the lane. 
+Every time the email inbox is parsed a Message is sent down the lane.
+
+Only the emails that arrived after the last check are downloaded: the feeder keeps track of the highest UID it has seen (and restarts from the beginning of the mailbox if the server changes its `UIDVALIDITY`). The mailbox is opened in read-only mode and the bodies are fetched with `BODY.PEEK[]`, so the emails are not flagged as read.
 
 ### Parameters
 
@@ -21,6 +23,8 @@ Every time the email inbox is parsed a Message is sent down the lane.
 | **freq**                 | _[DURATION](https://golang.org/pkg/time/#ParseDuration)_ | "1m"    | how often the email account should be checked                       |
 | **start_from_beginning** | _BOOL_                                                   | "true"  | if "true" it reads all the emails in the mailbox from the beginning |
 | **get_attachments**      | _BOOL_                                                   | "false" | if "true" it reads also the attachments                             |
+| **timeout**              | _[DURATION](https://golang.org/pkg/time/#ParseDuration)_ | "2m"    | maximum time waited on a single IMAP command (connection, login, fetch of a batch) |
+| **batch_size**           | _INT_                                                    | "50"    | how many emails are downloaded with a single FETCH command          |
  
 {{< notice info "Example" >}} 
 `... | <imap: host="imap.gmail.com", port="993", username="test@gmail.com", password="xxxxx", get_attachments="true", freq="30m"> ...`
