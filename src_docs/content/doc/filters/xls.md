@@ -15,9 +15,14 @@ _Based on the [qax-os/excelize](https://github.com/qax-os/excelize) library._
 |--------------|----------|---------|------------------------------------------------------------------------------------------------------------|
 | **target**   | _STRING_ | "main"  | the field of the Message that should be used for the filter (it could be the `main` or and extra field)    |
 | **filename** | _STRING_ | empty   | the filename of the XLS file to parse (supports [templates](en/doc/rules/templates/)) |
+| **password** | _STRING_ | empty   | the password used to decrypt a protected file. If the file is not protected, a warning is logged and the file is opened anyway |
  
 {{< notice info "Example" >}} 
 `... | xls(target="{{ .extra_field }}") | ...`
+{{< /notice >}}
+
+{{< notice info "Example" >}} 
+`... | xls(filename="/tmp/{{ .main }}", password="s3cr3t") | ...`
 {{< /notice >}}
 
 {{< notice warning "ATTENTION" >}} 

@@ -258,3 +258,105 @@ func TestXLSFilterRegistered(t *testing.T) {
 		t.Error("xls filter should be registered as 'xlsfilter'")
 	}
 }
+
+// createEncryptedTestXLSX creates a password protected .xlsx file and returns its path.
+func createEncryptedTestXLSX(t *testing.T, password string, rows [][]string) string {
+	t.Helper()
+	plain := createTestXLSX(t, "Sheet1", rows)
+	f, err := excelize.OpenFile(plain)
+	if err != nil {
+		t.Fatalf("failed to open test xlsx: %s", err)
+	}
+	defer f.Close()
+
+	tmp := filepath.Join(t.TempDir(), "encrypted.xlsx")
+	if err := f.SaveAs(tmp, excelize.Options{Password: password}); err != nil {
+		t.Fatalf("failed to save encrypted xlsx: %s", err)
+	}
+	return tmp
+}
+
+func TestNewXLSFilterPassword(t *testing.T) {
+	filter, err := NewXLSFilter(map[string]string{"password": "secret"})
+	if err != nil {
+		t.Fatalf("constructor returned error: %s", err)
+	}
+	if f := filter.(*XLS); f.password != "secret" {
+		t.Errorf("expected password 'secret', got '%s'", f.password)
+	}
+}
+
+func TestXLSDoFilterEncrypted(t *testing.T) {
+	rows := [][]string{{"A1", "B1"}, {"A2", "B2"}}
+	xlsPath := createEncryptedTestXLSX(t, "secret", rows)
+
+	content, err := os.ReadFile(xlsPath)
+	if err != nil {
+		t.Fatalf("failed to read test xlsx: %s", err)
+	}
+
+	tests := []struct {
+		name    string
+		params  map[string]string
+		bytes   bool
+		wantErr bool
+	}{
+		{"filename with right password", map[string]string{"filename": xlsPath, "password": "secret"}, false, false},
+		{"bytes with right password", map[string]string{"password": "secret"}, true, false},
+		{"wrong password", map[string]string{"filename": xlsPath, "password": "wrong"}, false, true},
+		{"missing password", map[string]string{"filename": xlsPath}, false, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			filter, _ := NewXLSFilter(tt.params)
+			f := filter.(*XLS)
+			bus := &FakeBus{}
+			f.bus = bus
+
+			msg := data.NewMessageWithExtra("test", map[string]interface{}{})
+			if tt.bytes {
+				msg.SetTarget("main", content)
+			}
+
+			ok, err := f.DoFilter(msg)
+			if tt.wantErr {
+				if err == nil || ok {
+					t.Fatalf("expected error, got ok=%v err=%v", ok, err)
+				}
+				return
+			}
+			if err != nil || !ok {
+				t.Fatalf("expected success, got ok=%v err=%v", ok, err)
+			}
+
+			expected := []string{"A1,B1", "A2,B2"}
+			if len(bus.Collected) != len(expected) {
+				t.Fatalf("expected %d propagated messages, got %d", len(expected), len(bus.Collected))
+			}
+			for i, m := range bus.Collected {
+				if m.GetMessage() != expected[i] {
+					t.Errorf("row %d: expected '%s', got '%s'", i, expected[i], m.GetMessage())
+				}
+			}
+		})
+	}
+}
+
+func TestXLSDoFilterPasswordOnUnprotectedFile(t *testing.T) {
+	rows := [][]string{{"A1", "B1"}}
+	xlsPath := createTestXLSX(t, "Sheet1", rows)
+
+	filter, _ := NewXLSFilter(map[string]string{"filename": xlsPath, "password": "secret"})
+	f := filter.(*XLS)
+	bus := &FakeBus{}
+	f.bus = bus
+
+	ok, err := f.DoFilter(data.NewMessage("test"))
+	if err != nil || !ok {
+		t.Fatalf("expected success, got ok=%v err=%v", ok, err)
+	}
+	if len(bus.Collected) != 1 || bus.Collected[0].GetMessage() != "A1,B1" {
+		t.Errorf("unexpected propagated messages: %v", bus.Collected)
+	}
+}
