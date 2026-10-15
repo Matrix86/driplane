@@ -6,7 +6,12 @@
 &lt;p&gt;&lt;code&gt;FEEDER&lt;/code&gt; : it is the node responsible for creating of a stream of data (it reads every changes on a file, gets tweets from Twitter, etc..)&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;code&gt;FILTER&lt;/code&gt; : it receives data from a feeder or another filter and checks some conditions on them or makes some changes on them. It sends the data to the next filter &lt;strong&gt;ONLY&lt;/strong&gt; if the condition is verified.&lt;/p&gt;</description></item><item><title>Syntax</title><link>https://matrix86.github.io/driplane/en/doc/rules/syntax/</link><pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate><guid>https://matrix86.github.io/driplane/en/doc/rules/syntax/</guid><description>&lt;h2 id="syntax"&gt;Syntax&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;FILTER&lt;/code&gt; : it receives data from a feeder or another filter and checks some conditions on them or makes some changes on them. It sends the data to the next filter &lt;strong&gt;ONLY&lt;/strong&gt; if the condition is verified.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;RULE CALL&lt;/code&gt; : every rule has a name, so you can define a rule with a preset feeder or a pipe of filters and connect them to another filter/feeder.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</description></item><item><title>Syntax</title><link>https://matrix86.github.io/driplane/en/doc/rules/syntax/</link><pubDate>Wed, 16 Sep 2020 22:38:02 +0200</pubDate><guid>https://matrix86.github.io/driplane/en/doc/rules/syntax/</guid><description>&lt;h2 id="syntax"&gt;Syntax&lt;/h2&gt;
 &lt;p&gt;The syntax of the &lt;code&gt;driplane&lt;/code&gt;&amp;rsquo;s rules is very simple. As for the BASH every filter&amp;rsquo;s output is sent to the next filter&amp;rsquo;s input concatenating the two of them with the &lt;code&gt;|&lt;/code&gt; character.&lt;br /&gt;
 All the rules have to start with a name and end with a &lt;code&gt;;&lt;/code&gt; char.&lt;/p&gt;
 &lt;h3 id="import"&gt;Import&lt;/h3&gt;
