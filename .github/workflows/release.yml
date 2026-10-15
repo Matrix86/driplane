@@ -3,6 +3,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v1.27.0). If missing, it is created on the selected branch HEAD'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -11,14 +17,35 @@ jobs:
   release:
     name: Release on GitHub
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Check out code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Prepare tag
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Invalid tag '$TAG', expected something like v1.27.0"
+            exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG already exists, releasing it"
+            git checkout -q "$TAG"
+          else
+            echo "Tag $TAG not found, creating it on $(git rev-parse --short HEAD)"
+            git tag "$TAG"
+            git push origin "refs/tags/$TAG"
+          fi
+
       - name: Set up Go
         uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
 
       - name: Find Last Tag
         id: last
@@ -63,5 +90,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: release --clean --release-notes .github/CHANGELOG.md
+          args: release --clean --parallelism 2 --release-notes .github/CHANGELOG.md
 
