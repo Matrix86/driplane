@@ -1,4 +1,4 @@
-FROM golang:alpine AS build-env
+FROM golang:1.27.2-alpine AS build-env
 
 RUN apk add --update ca-certificates
 RUN apk add --no-cache --update make
@@ -7,7 +7,7 @@ WORKDIR /go/src/app
 
 COPY . .
 
-RUN go get -d -v ./...
+RUN go mod download
 
 RUN make build
 
