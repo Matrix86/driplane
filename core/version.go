@@ -3,6 +3,6 @@ package core
 // Info on driplane
 const (
 	Name    = "driplane"
-	Version = "1.26.9"
+	Version = "1.27.0"
 	Author  = "Gianluca Braga aka Matrix86"
 )
